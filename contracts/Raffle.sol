@@ -11,34 +11,35 @@ import "hardhat/console.sol";
 contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     using Counters for Counters.Counter;
     VRFCoordinatorV2Interface COORDINATOR;
-
+    Counters.Counter public raffleCounter;
+    RequestConfig public requestConfig;
     address public owner;
-    bool public raffleLive;
+    uint256[] public stagedRaffles;
     mapping(uint256 => RaffleInstance) public raffles;
     mapping(uint256 => uint256) public requestIdToRaffleIndex;
     mapping(uint256 => Prize[]) public prizes;
-    uint256[] public stagedRaffles;
-    Counters.Counter public raffleCounter;
-    RequestConfig public requestConfig;
 
-    // 0x79d3d8832d904592c0bf9818b621522c988bb8b0c05cdc3b15aea1b6e8db0c15; // Goerli: keyhash
-    // uint32 callbackGasLimit = 100000;
-    // uint16 requestConfirmations = 3;
+    // ------------------- STRUCTS -------------------
+    enum RaffleState {
+        STAGED,
+        LIVE,
+        FINISHED
+    }
 
+    // NOTE: maybe add in min amount of entries before raffle can be closed?
     struct RaffleInstance {
         string raffleName;
-        uint256 numberOfWinners;
         address[] contestantsAddresses;
-        uint256[] winners;
+        address winner;
         uint256 startDate;
-        bool raffleDone;
         uint256 prizeWorth;
         uint256 randomSeed;
-        bool contestStaged;
-        string provenanceHash;
         address contestOwner;
         uint256 timeLength;
         uint256 fee;
+        RaffleState raffleState;
+        bool prizeClaimed;
+        Prize prize;
     }
 
     struct Prize {
@@ -53,15 +54,16 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
         bytes32 keyHash;
     }
 
-    event RaffleCreated(
-        Prize[] prizes,
-        uint8 indexed winners,
-        uint256 indexed time,
-        uint256 indexed fee
-    );
+    //------------------------------ EVENTS ----------------------------------
+    event RaffleCreated(Prize prize, uint256 indexed time, uint256 indexed fee);
     event RaffleJoined(uint256 indexed raffleId, address indexed player);
     event RaffleClosed(uint256 indexed raffleId, address[] participants);
     event RaffleWon(uint256 indexed raffleId, address indexed winner); // needs lists of winners and corresponding prizes
+    event RafflePrizeClaimed(
+        uint256 indexed raffleId,
+        address indexed winner,
+        uint256 value
+    );
 
     modifier onlyOwner() {
         require(msg.sender == owner);
@@ -87,54 +89,52 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     }
 
     function createRaffle(
-        Prize[] memory _prizes,
-        uint8 _winners,
+        Prize memory _prize,
         uint256 _timeLength,
         uint256 _fee,
         string memory _name
-    ) external onlyOwner {
+    ) external payable onlyOwner {
         raffleCounter.increment();
 
         RaffleInstance memory newRaffle = RaffleInstance({
             raffleName: _name,
-            numberOfWinners: _winners,
             contestantsAddresses: new address[](0),
-            winners: new uint256[](0),
+            winner: address(0),
             startDate: block.timestamp,
-            raffleDone: false,
-            prizeWorth: 0,
+            prizeWorth: msg.value,
             randomSeed: 0,
-            contestStaged: false,
-            provenanceHash: "",
             contestOwner: msg.sender,
             timeLength: _timeLength,
-            fee: _fee
+            fee: _fee,
+            raffleState: RaffleState.LIVE,
+            prizeClaimed: false,
+            prize: _prize
         });
-        for (uint256 i = 0; i < _prizes.length; i++) {
-            prizes[raffleCounter.current()].push(_prizes[i]);
-        }
         raffles[raffleCounter.current()] = newRaffle;
-        raffleLive = true;
-        emit RaffleCreated(_prizes, _winners, _timeLength, _fee);
+        emit RaffleCreated(_prize, _timeLength, _fee);
     }
 
-    function getCurrentRaffle() external view returns (RaffleInstance memory) {
-        return raffles[raffleCounter.current()];
+    function getRaffle(uint256 _raffleId)
+        external
+        view
+        returns (RaffleInstance memory)
+    {
+        return raffles[_raffleId];
     }
 
     // think about how to enter raffle multiple times from same user??
-    function joinRaffle() external payable {
+    function joinRaffle(uint256 _raffleId) external payable {
         require(
-            !raffles[raffleCounter.current()].raffleDone,
+            raffles[_raffleId].raffleState == RaffleState.LIVE,
             "Raffle is not live"
         );
         require(
             msg.value >= raffles[raffleCounter.current()].fee,
             "Not enough ETH to join raffle"
         );
-        // needs to add money to contract
-        raffles[raffleCounter.current()].contestantsAddresses.push(msg.sender);
-        emit RaffleJoined(raffleCounter.current(), msg.sender);
+
+        raffles[_raffleId].contestantsAddresses.push(msg.sender);
+        emit RaffleJoined(_raffleId, msg.sender);
     }
 
     function pickWinner(uint256 _raffleId) internal {
@@ -146,13 +146,34 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
             1
         );
         requestIdToRaffleIndex[requestId] = raffleCounter.current();
-        raffles[raffleCounter.current()].raffleDone = true;
-        raffleLive = false;
+        raffles[raffleCounter.current()].raffleState = RaffleState.FINISHED;
 
         emit RaffleClosed(
             _raffleId,
             raffles[raffleCounter.current()].contestantsAddresses
         );
+    }
+
+    /**
+     * @notice gets the winner of a specific raffle
+     * @param _raffleId id of the raffle
+     **/
+    function getWinners(uint256 _raffleId) external view returns (address) {
+        return raffles[_raffleId].winner;
+    }
+
+    /**
+     * @notice withdraws rewards for an account
+     * @param _randomValue random value generated by VRF
+     * @param _n amount of raffle entries
+     **/
+    function _pickRandom(uint256 _randomValue, uint256 _n)
+        internal
+        pure
+        returns (uint256)
+    {
+        uint256 v = uint256(keccak256(abi.encode(_randomValue, 0)));
+        return uint256(v % _n) + 1;
     }
 
     function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords)
@@ -161,8 +182,32 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     {
         uint256 raffleIndexFromRequestId = requestIdToRaffleIndex[requestId];
         raffles[raffleIndexFromRequestId].randomSeed = randomWords[0];
-        raffles[raffleIndexFromRequestId].contestStaged = true;
+        raffles[raffleIndexFromRequestId].raffleState = RaffleState.STAGED;
         stagedRaffles.push(raffleIndexFromRequestId);
+        uint256 winner = _pickRandom(
+            randomWords[0],
+            raffles[raffleIndexFromRequestId].contestantsAddresses.length
+        );
+        raffles[raffleIndexFromRequestId].winner = raffles[
+            raffleIndexFromRequestId
+        ].contestantsAddresses[winner];
+    }
+
+    function claimPrize(uint256 _raffleId) external {
+        require(
+            raffles[_raffleId].raffleState == RaffleState.FINISHED,
+            "Raffle is not finished"
+        );
+        require(
+            raffles[_raffleId].winner == msg.sender,
+            "You are not a winner"
+        );
+        payable(msg.sender).transfer(raffles[_raffleId].prizeWorth);
+        emit RafflePrizeClaimed(
+            _raffleId,
+            msg.sender,
+            raffles[_raffleId].prizeWorth
+        );
     }
 
     function checkUpkeep(
@@ -184,7 +229,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     function performUpkeep(
         bytes calldata /* performData */
     ) external override {
-        if (!raffleLive) {
+        if (raffles[raffleCounter.current()].raffleState != RaffleState.LIVE) {
             return;
         }
         if (
