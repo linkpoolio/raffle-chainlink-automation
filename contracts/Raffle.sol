@@ -14,7 +14,9 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     Counters.Counter public raffleCounter;
     RequestConfig public requestConfig;
     address public owner;
+    address public s_keeperRegistryAddress;
     uint256[] public stagedRaffles;
+    uint256[] private liveRaffles;
     mapping(uint256 => RaffleInstance) public raffles;
     mapping(uint256 => uint256) public requestIdToRaffleIndex;
     mapping(uint256 => Prize[]) public prizes;
@@ -58,24 +60,37 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     event RaffleCreated(Prize prize, uint256 indexed time, uint256 indexed fee);
     event RaffleJoined(uint256 indexed raffleId, address indexed player);
     event RaffleClosed(uint256 indexed raffleId, address[] participants);
+    event RaffleStaged(uint256 indexed raffleId);
     event RaffleWon(uint256 indexed raffleId, address indexed winner); // needs lists of winners and corresponding prizes
     event RafflePrizeClaimed(
         uint256 indexed raffleId,
         address indexed winner,
         uint256 value
     );
+    event KeeperRegistryAddressUpdated(address oldAddress, address newAddress);
 
     modifier onlyOwner() {
         require(msg.sender == owner);
         _;
     }
 
+    modifier onlyKeeperRegistry() {
+        if (msg.sender != s_keeperRegistryAddress) {
+            revert OnlyKeeperRegistry();
+        }
+        _;
+    }
+
+    // ------------------- ERRORS -------------------
+    error OnlyKeeperRegistry();
+
     constructor(
         address _vrfCoordinator,
         uint64 _subscriptionId,
         uint16 _requestConfirmations,
         uint32 _callbackGasLimit,
-        bytes32 _keyHash
+        bytes32 _keyHash,
+        address _keeperRegistryAddress
     ) VRFConsumerBaseV2(_vrfCoordinator) {
         COORDINATOR = VRFCoordinatorV2Interface(_vrfCoordinator);
         owner = msg.sender;
@@ -86,6 +101,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
             numWords: 1,
             keyHash: _keyHash
         });
+        setKeeperRegistryAddress(_keeperRegistryAddress);
     }
 
     function createRaffle(
@@ -94,8 +110,6 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
         uint256 _fee,
         string memory _name
     ) external payable onlyOwner {
-        raffleCounter.increment();
-
         RaffleInstance memory newRaffle = RaffleInstance({
             raffleName: _name,
             contestantsAddresses: new address[](0),
@@ -111,7 +125,9 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
             prize: _prize
         });
         raffles[raffleCounter.current()] = newRaffle;
+        liveRaffles.push(raffleCounter.current());
         emit RaffleCreated(_prize, _timeLength, _fee);
+        raffleCounter.increment();
     }
 
     function getRaffle(uint256 _raffleId)
@@ -123,13 +139,13 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     }
 
     // think about how to enter raffle multiple times from same user??
-    function joinRaffle(uint256 _raffleId) external payable {
+    function enterRaffle(uint256 _raffleId) external payable {
         require(
             raffles[_raffleId].raffleState == RaffleState.LIVE,
             "Raffle is not live"
         );
         require(
-            msg.value >= raffles[raffleCounter.current()].fee,
+            msg.value >= raffles[_raffleId].fee,
             "Not enough ETH to join raffle"
         );
 
@@ -145,13 +161,10 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
             requestConfig.callbackGasLimit,
             1
         );
-        requestIdToRaffleIndex[requestId] = raffleCounter.current();
-        raffles[raffleCounter.current()].raffleState = RaffleState.FINISHED;
+        requestIdToRaffleIndex[requestId] = _raffleId;
+        raffles[_raffleId].raffleState = RaffleState.FINISHED;
 
-        emit RaffleClosed(
-            _raffleId,
-            raffles[raffleCounter.current()].contestantsAddresses
-        );
+        emit RaffleClosed(_raffleId, raffles[_raffleId].contestantsAddresses);
     }
 
     /**
@@ -168,7 +181,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
      * @param _n amount of raffle entries
      **/
     function _pickRandom(uint256 _randomValue, uint256 _n)
-        internal
+        public
         pure
         returns (uint256)
     {
@@ -183,14 +196,20 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
         uint256 raffleIndexFromRequestId = requestIdToRaffleIndex[requestId];
         raffles[raffleIndexFromRequestId].randomSeed = randomWords[0];
         raffles[raffleIndexFromRequestId].raffleState = RaffleState.STAGED;
-        stagedRaffles.push(raffleIndexFromRequestId);
+        _updateLiveRaffles(raffleIndexFromRequestId);
         uint256 winner = _pickRandom(
             randomWords[0],
             raffles[raffleIndexFromRequestId].contestantsAddresses.length
         );
+
         raffles[raffleIndexFromRequestId].winner = raffles[
             raffleIndexFromRequestId
-        ].contestantsAddresses[winner];
+        ].contestantsAddresses[winner - 1];
+        raffles[raffleIndexFromRequestId].raffleState = RaffleState.FINISHED;
+        emit RaffleWon(
+            raffleIndexFromRequestId,
+            raffles[raffleIndexFromRequestId].winner
+        );
     }
 
     function claimPrize(uint256 _raffleId) external {
@@ -200,7 +219,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
         );
         require(
             raffles[_raffleId].winner == msg.sender,
-            "You are not a winner"
+            "You are not the winner of this raffle"
         );
         payable(msg.sender).transfer(raffles[_raffleId].prizeWorth);
         emit RafflePrizeClaimed(
@@ -221,22 +240,55 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
             bytes memory /* performData */
         )
     {
-        upkeepNeeded =
-            (block.timestamp - raffles[raffleCounter.current()].startDate) >
-            raffles[raffleCounter.current()].timeLength;
+        for (uint256 i = 0; i < liveRaffles.length; i++) {
+            if (raffles[i].raffleState == RaffleState.LIVE) {
+                upkeepNeeded =
+                    (block.timestamp - raffles[i].startDate) >
+                    raffles[i].timeLength;
+            }
+        }
     }
 
+    // onlykeeper function needed
     function performUpkeep(
         bytes calldata /* performData */
-    ) external override {
-        if (raffles[raffleCounter.current()].raffleState != RaffleState.LIVE) {
-            return;
+    ) external override onlyKeeperRegistry {
+        for (uint256 i = 0; i < liveRaffles.length; i++) {
+            if (raffles[i].raffleState == RaffleState.LIVE) {
+                if (
+                    (block.timestamp - raffles[i].startDate) >
+                    raffles[i].timeLength
+                ) {
+                    emit RaffleStaged(liveRaffles[i]);
+                    pickWinner(liveRaffles[i]);
+                }
+            }
         }
-        if (
-            (block.timestamp - raffles[raffleCounter.current()].startDate) >
-            raffles[raffleCounter.current()].timeLength
-        ) {
-            pickWinner(raffleCounter.current());
+    }
+
+    /**
+     * @notice Sets the keeper registry address.
+     */
+    function setKeeperRegistryAddress(address keeperRegistryAddress)
+        public
+        onlyOwner
+    {
+        require(keeperRegistryAddress != address(0));
+        emit KeeperRegistryAddressUpdated(
+            s_keeperRegistryAddress,
+            keeperRegistryAddress
+        );
+        s_keeperRegistryAddress = keeperRegistryAddress;
+    }
+
+    function _updateLiveRaffles(uint256 _index) internal {
+        for (uint256 i = _index; i < liveRaffles.length - 1; i++) {
+            liveRaffles[i] = liveRaffles[i + 1];
         }
+        liveRaffles.pop();
+    }
+
+    function getLiveRaffles() external view returns (uint256[] memory) {
+        return liveRaffles;
     }
 }
