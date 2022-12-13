@@ -5,9 +5,12 @@ import "@chainlink/contracts/src/v0.8/AutomationCompatible.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-
 import "hardhat/console.sol";
 
+/**
+ * @title Raffle
+ * @notice Creates a mechanism to create multiple raffles
+ */
 contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     using Counters for Counters.Counter;
     VRFCoordinatorV2Interface COORDINATOR;
@@ -58,10 +61,14 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
 
     //------------------------------ EVENTS ----------------------------------
     event RaffleCreated(Prize prize, uint256 indexed time, uint256 indexed fee);
-    event RaffleJoined(uint256 indexed raffleId, address indexed player);
+    event RaffleJoined(
+        uint256 indexed raffleId,
+        address indexed player,
+        uint256 entries
+    );
     event RaffleClosed(uint256 indexed raffleId, address[] participants);
     event RaffleStaged(uint256 indexed raffleId);
-    event RaffleWon(uint256 indexed raffleId, address indexed winner); // needs lists of winners and corresponding prizes
+    event RaffleWon(uint256 indexed raffleId, address indexed winner);
     event RafflePrizeClaimed(
         uint256 indexed raffleId,
         address indexed winner,
@@ -104,6 +111,13 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
         setKeeperRegistryAddress(_keeperRegistryAddress);
     }
 
+    /**
+     * @notice creates new raffle
+     * @param _prize prize struct
+     * @param _timeLength time length of raffle
+     * @param _fee fee to enter raffle
+     * @param _name name of raffle
+     **/
     function createRaffle(
         Prize memory _prize,
         uint256 _timeLength,
@@ -130,29 +144,32 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
         raffleCounter.increment();
     }
 
-    function getRaffle(uint256 _raffleId)
-        external
-        view
-        returns (RaffleInstance memory)
-    {
-        return raffles[_raffleId];
-    }
-
-    // think about how to enter raffle multiple times from same user??
-    function enterRaffle(uint256 _raffleId) external payable {
+    /**
+     * @notice joins raffle by ID and number of entries
+     * @param _raffleId id of raffle
+     * @param _entries number of entries
+     * @dev requires that raffle is live and that enough ETH is sent to cover fee
+     **/
+    function enterRaffle(uint256 _raffleId, uint256 _entries) external payable {
         require(
             raffles[_raffleId].raffleState == RaffleState.LIVE,
             "Raffle is not live"
         );
         require(
-            msg.value >= raffles[_raffleId].fee,
+            msg.value >= (raffles[_raffleId].fee * _entries),
             "Not enough ETH to join raffle"
         );
-
-        raffles[_raffleId].contestantsAddresses.push(msg.sender);
-        emit RaffleJoined(_raffleId, msg.sender);
+        for (uint256 i = 0; i < _entries; i++) {
+            raffles[_raffleId].contestantsAddresses.push(msg.sender);
+        }
+        emit RaffleJoined(_raffleId, msg.sender, _entries);
     }
 
+    /**
+     * @notice closes raffle and picks winner
+     * @param _raffleId id of raffle
+     * @dev requests random number from VRF and marks raffle as finished
+     **/
     function pickWinner(uint256 _raffleId) internal {
         uint256 requestId = COORDINATOR.requestRandomWords(
             requestConfig.keyHash,
@@ -170,6 +187,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     /**
      * @notice gets the winner of a specific raffle
      * @param _raffleId id of the raffle
+     * @return address of the winner
      **/
     function getWinners(uint256 _raffleId) external view returns (address) {
         return raffles[_raffleId].winner;
@@ -212,6 +230,11 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
         );
     }
 
+    /**
+     * @notice claims prize for a specific raffle
+     * @param _raffleId id of the raffle
+     * @dev requires that raffle is finished and that the caller is the winner
+     **/
     function claimPrize(uint256 _raffleId) external {
         require(
             raffles[_raffleId].raffleState == RaffleState.FINISHED,
@@ -249,7 +272,6 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
         }
     }
 
-    // onlykeeper function needed
     function performUpkeep(
         bytes calldata /* performData */
     ) external override onlyKeeperRegistry {
@@ -281,6 +303,9 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
         s_keeperRegistryAddress = keeperRegistryAddress;
     }
 
+    /**
+     * @notice Updates live raffles array when one finishes.
+     */
     function _updateLiveRaffles(uint256 _index) internal {
         for (uint256 i = _index; i < liveRaffles.length - 1; i++) {
             liveRaffles[i] = liveRaffles[i + 1];
@@ -288,7 +313,49 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
         liveRaffles.pop();
     }
 
+    /**
+     * @notice get raffle by ID
+     * @param _raffleId raffle id
+     * @return raffle instance
+     **/
+    function getRaffle(uint256 _raffleId)
+        external
+        view
+        returns (RaffleInstance memory)
+    {
+        return raffles[_raffleId];
+    }
+
+    /**
+     * @notice get all live raffles
+     * @return array of live raffle IDs
+     **/
     function getLiveRaffles() external view returns (uint256[] memory) {
         return liveRaffles;
+    }
+
+    /**
+     * @notice get amount of entries for a specific user in a specific raffle
+     * @param _user address of the user
+     * @param _raffleId id of the raffle
+     * @return uint256 amount of entries
+     **/
+    function getUserEntries(address _user, uint256 _raffleId)
+        external
+        view
+        returns (uint256)
+    {
+        uint256 userEntriesCount;
+        for (
+            uint256 i = 0;
+            i < raffles[_raffleId].contestantsAddresses.length;
+            i++
+        ) {
+            if (raffles[_raffleId].contestantsAddresses[i] == _user) {
+                userEntriesCount++;
+            }
+        }
+
+        return userEntriesCount;
     }
 }
