@@ -9,8 +9,7 @@ async function main() {
   const COORDINATOR = "0x3d2341ADb2D31f1c5530cDC622016af293177AE0";
   const subscriptionID =
     "0x0000000000000000000000000000000000000000000000000000000000000000";
-
-  // const lockedAmount = ethers.utils.parseEther("1");
+  const keeperRegistry = "0x0000000000000000000000000000000000000000";
 
   const Raffle = await ethers.getContractFactory("Raffle");
   const raffle = await Raffle.deploy(
@@ -18,7 +17,8 @@ async function main() {
     subscriptionID,
     requestConfirmations,
     callbackGasLimit,
-    keyHash
+    keyHash,
+    keeperRegistry
   );
 
   await raffle.deployed();
@@ -26,14 +26,12 @@ async function main() {
   console.log(`Raffle deployed to ${raffle.address}`);
   const prizeStruct = { prizeName: "N64" };
   await raffle.createRaffle(
-    [prizeStruct],
-    1,
+    prizeStruct,
     60,
     ethers.utils.parseEther("1"),
-    "first one"
+    ethers.utils.formatBytes32String("---your name here---"),
+    { value: ethers.utils.parseEther("1") }
   );
-  const prize = await raffle.prizes(1, 0);
-  console.log(prize);
 }
 
 main().catch((error) => {
