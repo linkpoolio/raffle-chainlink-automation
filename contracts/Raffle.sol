@@ -33,7 +33,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
 
     // NOTE: maybe add in min amount of entries before raffle can be closed?
     struct RaffleInstance {
-        string raffleName;
+        bytes32 raffleName;
         address[] contestantsAddresses;
         address winner;
         uint256 startDate;
@@ -122,7 +122,7 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
         Prize memory _prize,
         uint256 _timeLength,
         uint256 _fee,
-        string memory _name
+        bytes32 _name
     ) external payable onlyOwner {
         RaffleInstance memory newRaffle = RaffleInstance({
             raffleName: _name,

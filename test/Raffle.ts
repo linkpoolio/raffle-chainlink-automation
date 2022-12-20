@@ -52,6 +52,15 @@ describe("Raffle", function () {
       owner.address,
     ]);
     await vrfCoordinatorV2Mock.addConsumer(subscriptionId, raffle.address);
+    const prizeStruct = { prizeName: "N64" };
+    const name = ethers.utils.formatBytes32String("first one");
+    await raffle.createRaffle(
+      prizeStruct,
+      60,
+      ethers.utils.parseEther("1"),
+      name,
+      { value: ethers.utils.parseEther("1") }
+    );
   });
 
   describe("Deployment", function () {
@@ -64,71 +73,30 @@ describe("Raffle", function () {
 
   describe("Raffle actions", function () {
     it("Should create new raffle", async function () {
-      const prizeStruct = { prizeName: "N64" };
-      await raffle.createRaffle(
-        prizeStruct,
-        60,
-        ethers.utils.parseEther("1"),
-        "first one",
-        { value: ethers.utils.parseEther("1") }
-      );
       const r = await raffle.getRaffle(0);
       expect(r.prize.prizeName).to.equal("N64");
+      const returnName = ethers.utils
+        .toUtf8String(r.raffleName)
+        .replace(/\0.*$/, "");
+      expect(returnName).to.equal("first one");
     });
     it("Should be able to join a live raffle", async function () {
-      const prizeStruct = { prizeName: "N64" };
-      await raffle.createRaffle(
-        prizeStruct,
-        60,
-        ethers.utils.parseEther("1"),
-        "first one",
-        { value: ethers.utils.parseEther("1") }
-      );
       await expect(
         raffle.enterRaffle(0, 2, { value: ethers.utils.parseEther("2") })
       ).not.to.be.reverted;
     });
     it("Should be able to join a live when entries dont match fees", async function () {
-      const prizeStruct = { prizeName: "N64" };
-      await raffle.createRaffle(
-        prizeStruct,
-        60,
-        ethers.utils.parseEther("1"),
-        "first one",
-        { value: ethers.utils.parseEther("1") }
-      );
       await expect(
         raffle.enterRaffle(0, 2, { value: ethers.utils.parseEther("1.8") })
       ).to.be.reverted;
     });
 
     it("Should not be able to join a raffle with insuffecient funds", async function () {
-      const prizeStruct = { prizeName: "N64" };
-      await raffle.createRaffle(
-        prizeStruct,
-        60,
-        ethers.utils.parseEther("1"),
-        "first one",
-        { value: ethers.utils.parseEther("1") }
-      );
       await expect(
         raffle.enterRaffle(0, 1, { value: ethers.utils.parseEther("0.8") })
       ).to.be.revertedWith("Not enough ETH to join raffle");
     });
-    it("Should not be able to join a raffle when live status is false", async function () {
-      await expect(
-        raffle.enterRaffle(0, 1, { value: ethers.utils.parseEther("1") })
-      ).to.be.revertedWith("Raffle is not live");
-    });
     it("Should return amount of user entries to a raffle", async function () {
-      const prizeStruct = { prizeName: "N64" };
-      await raffle.createRaffle(
-        prizeStruct,
-        60,
-        ethers.utils.parseEther("1"),
-        "first one",
-        { value: ethers.utils.parseEther("1") }
-      );
       await raffle.enterRaffle(0, 1, { value: ethers.utils.parseEther("1") });
       await raffle
         .connect(acct2)
@@ -158,27 +126,11 @@ describe("Raffle", function () {
       );
     });
     it("emits RaffleStaged event on perform upkeep", async () => {
-      const prizeStruct = { prizeName: "N64" };
-      await raffle.createRaffle(
-        prizeStruct,
-        60,
-        ethers.utils.parseEther("1"),
-        "first",
-        { value: ethers.utils.parseEther("1") }
-      );
       await network.provider.send("evm_increaseTime", [100000000]);
       await network.provider.request({ method: "evm_mine", params: [] });
       await expect(raffle.performUpkeep("0x")).to.emit(raffle, "RaffleStaged");
     });
     it("emits RaffleClosed event on perform upkeep", async () => {
-      const prizeStruct = { prizeName: "N64" };
-      await raffle.createRaffle(
-        prizeStruct,
-        60,
-        ethers.utils.parseEther("1"),
-        "first",
-        { value: ethers.utils.parseEther("1") }
-      );
       await network.provider.send("evm_increaseTime", [100000000]);
       await network.provider.request({ method: "evm_mine", params: [] });
       await expect(raffle.performUpkeep("0x")).to.emit(raffle, "RaffleClosed");
@@ -195,14 +147,6 @@ describe("Raffle", function () {
       ).to.be.revertedWith("nonexistent request");
     });
     it("runs vrf after raffle is staged and picks winner", async () => {
-      const prizeStruct = { prizeName: "N64" };
-      await raffle.createRaffle(
-        prizeStruct,
-        60,
-        ethers.utils.parseEther("1"),
-        "first",
-        { value: ethers.utils.parseEther("1") }
-      );
       await raffle.enterRaffle(0, 1, { value: ethers.utils.parseEther("1") });
       await network.provider.send("evm_increaseTime", [100000000]);
       await network.provider.request({ method: "evm_mine", params: [] });
@@ -213,14 +157,6 @@ describe("Raffle", function () {
       await expect(tx).to.emit(raffle, "RaffleWon");
     });
     it("updates live raffles array", async () => {
-      const prizeStruct = { prizeName: "N64" };
-      await raffle.createRaffle(
-        prizeStruct,
-        60,
-        ethers.utils.parseEther("1"),
-        "first",
-        { value: ethers.utils.parseEther("1") }
-      );
       await raffle.enterRaffle(0, 1, { value: ethers.utils.parseEther("1") });
       await network.provider.send("evm_increaseTime", [100000000]);
       await network.provider.request({ method: "evm_mine", params: [] });
@@ -235,14 +171,6 @@ describe("Raffle", function () {
 
   describe("claim prizes", function () {
     it("able to claim prize after raffle is done", async () => {
-      const prizeStruct = { prizeName: "N64" };
-      await raffle.createRaffle(
-        prizeStruct,
-        60,
-        ethers.utils.parseEther("1"),
-        "first",
-        { value: ethers.utils.parseEther("1") }
-      );
       await raffle.enterRaffle(0, 1, { value: ethers.utils.parseEther("1") });
       await network.provider.send("evm_increaseTime", [100000000]);
       await network.provider.request({ method: "evm_mine", params: [] });
@@ -253,40 +181,32 @@ describe("Raffle", function () {
       await expect(raffle.claimPrize(0)).to.emit(raffle, "RafflePrizeClaimed");
     });
     it("not able to claim prize if raffle is not finished", async () => {
-      const prizeStruct = { prizeName: "N64" };
-      await raffle.createRaffle(
-        prizeStruct,
-        60,
-        ethers.utils.parseEther("1"),
-        "first",
-        { value: ethers.utils.parseEther("1") }
-      );
       await raffle.enterRaffle(0, 1, { value: ethers.utils.parseEther("1") });
       await expect(raffle.claimPrize(0)).to.be.revertedWith(
         "Raffle is not finished"
       );
     });
     it("not able to claim prize if not winner", async () => {
-      it("able to claim prize after raffle is done", async () => {
-        const prizeStruct = { prizeName: "N64" };
-        await raffle.createRaffle(
-          prizeStruct,
-          60,
-          ethers.utils.parseEther("1"),
-          "first",
-          { value: ethers.utils.parseEther("1") }
-        );
-        await raffle.enterRaffle(0, 1, { value: ethers.utils.parseEther("1") });
-        await network.provider.send("evm_increaseTime", [100000000]);
-        await network.provider.request({ method: "evm_mine", params: [] });
-        let tx = await raffle.performUpkeep("0x");
-        await tx.wait(1);
-        tx = await vrfCoordinatorV2Mock.fulfillRandomWords(1, raffle.address);
-        await tx.wait(1);
-        await expect(raffle.conect(acct2).claimPrize(0)).to.be.revertedWith(
-          "You are not the winner of this raffle"
-        );
-      });
+      await raffle.enterRaffle(0, 1, { value: ethers.utils.parseEther("1") });
+      await network.provider.send("evm_increaseTime", [100000000]);
+      await network.provider.request({ method: "evm_mine", params: [] });
+      let tx = await raffle.performUpkeep("0x");
+      await tx.wait(1);
+      tx = await vrfCoordinatorV2Mock.fulfillRandomWords(1, raffle.address);
+      await tx.wait(1);
+      await expect(raffle.connect(acct2).claimPrize(0)).to.be.revertedWith(
+        "You are not the winner of this raffle"
+      );
+    });
+    it("able to claim prize after raffle is done", async () => {
+      await raffle.enterRaffle(0, 1, { value: ethers.utils.parseEther("1") });
+      await network.provider.send("evm_increaseTime", [100000000]);
+      await network.provider.request({ method: "evm_mine", params: [] });
+      let tx = await raffle.performUpkeep("0x");
+      await tx.wait(1);
+      tx = await vrfCoordinatorV2Mock.fulfillRandomWords(1, raffle.address);
+      await tx.wait(1);
+      await expect(raffle.claimPrize(0)).to.emit(raffle, "RafflePrizeClaimed");
     });
   });
 });
