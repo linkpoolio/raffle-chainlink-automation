@@ -14,7 +14,6 @@ describe("Raffle", function () {
   let keyHash: string,
     callbackGasLimit: number,
     requestConfirmations: number,
-    COORDINATOR: string,
     subscriptionId: any,
     raffle: any,
     vrfCoordinatorV2Mock: any,
@@ -33,7 +32,6 @@ describe("Raffle", function () {
       "0x79d3d8832d904592c0bf9818b621522c988bb8b0c05cdc3b15aea1b6e8db0c15";
     callbackGasLimit = 10000000;
     requestConfirmations = 3;
-    COORDINATOR = "0x3d2341ADb2D31f1c5530cDC622016af293177AE0";
     vrfCoordinatorV2Mock = await deploy("VRFCoordinatorV2Mock", [
       BASE_FEE,
       GAS_PRICE_LINK,
