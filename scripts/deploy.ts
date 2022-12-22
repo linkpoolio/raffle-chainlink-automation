@@ -1,5 +1,6 @@
 import { ethers } from "hardhat";
 import { Raffle__factory } from "../typechain-types";
+import { deploy } from "../test/utils/helpers";
 
 async function main() {
   const keyHash =
@@ -7,31 +8,29 @@ async function main() {
   const callbackGasLimit = 100000;
   const requestConfirmations = 3;
   const COORDINATOR = "0x3d2341ADb2D31f1c5530cDC622016af293177AE0";
-  const subscriptionID =
-    "0x0000000000000000000000000000000000000000000000000000000000000000";
-  const keeperRegistry = "0x0000000000000000000000000000000000000000";
+  const subscriptionID = "1";
+  const keeperRegistry = "0x3d2341ADb2D31f1c5530cDC622016af293177AE0";
 
-  const Raffle = await ethers.getContractFactory("Raffle");
-  const raffle = await Raffle.deploy(
+  const raffle = await deploy("Raffle", [
     COORDINATOR,
     subscriptionID,
     requestConfirmations,
     callbackGasLimit,
     keyHash,
-    keeperRegistry
-  );
+    keeperRegistry,
+  ]);
 
   await raffle.deployed();
 
   console.log(`Raffle deployed to ${raffle.address}`);
-  const prizeStruct = { prizeName: "N64" };
-  await raffle.createRaffle(
-    prizeStruct,
-    60,
-    ethers.utils.parseEther("1"),
-    ethers.utils.formatBytes32String("---your name here---"),
-    { value: ethers.utils.parseEther("1") }
-  );
+  // const prizeStruct = { prizeName: "N64" };
+  // await raffle.createRaffle(
+  //   prizeStruct,
+  //   60,
+  //   ethers.utils.parseEther("1"),
+  //   ethers.utils.formatBytes32String("---your name here---"),
+  //   { value: ethers.utils.parseEther("1") }
+  // );
 }
 
 main().catch((error) => {
