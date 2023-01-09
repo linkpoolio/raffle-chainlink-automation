@@ -2,7 +2,7 @@
   "name": "raffle",
   "version": "1.0.0",
   "main": "index.js",
-  "author": "jongregis <jon.gregis@gmail.com>",
+  "author": "LinkPool",
   "license": "MIT",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^2.0.0",
