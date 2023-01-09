@@ -29,9 +29,9 @@ const config: Config = {
     format: "json",
   },
   networks: {
-    ganache: {
-      url: GANACHE_RPC_URL,
-    },
+    // ganache: {
+    //   url: GANACHE_RPC_URL,
+    // },
     hardhat: {
       // // comment out forking to run tests on a local chain
       // forking: {
