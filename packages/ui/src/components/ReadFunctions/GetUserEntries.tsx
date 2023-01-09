@@ -1,23 +1,25 @@
 import { useState } from "react";
 import { getContract } from "sdk/src/lib/utils";
 import Raffle from "sdk/src/abi/contracts/Raffle.sol/Raffle.json";
-import { getWinners } from "sdk/src/ReadFunctions/getWinners";
+import { getUserEntries } from "sdk/src/ReadFunctions/getUserEntries";
 import "../../styles/main.css";
 
-function GetWinners() {
+function GetUserEntries() {
   const [contractAddress, setContractAddress] = useState("");
   const [errorMessage, setErroMessage] = useState("");
 
-  const [winners, setWinners] = useState("");
+  const [userEntries, setUserEntries] = useState("");
+  const [user, setUser] = useState("");
+  const [raffleId, setRaffleId] = useState("");
 
-  async function handleGetWinners() {
-    setWinners("");
+  async function handleGetRaffle() {
+    setUserEntries("");
     setErroMessage("");
     try {
       const contract = getContract(contractAddress, Raffle);
-      getWinners(contract)
+      getUserEntries(contract, user, raffleId)
         .then((res) => {
-          setWinners(res.join(", "));
+          setUserEntries(res.toString());
         })
         .catch((error: any) => {
           setErroMessage(error.message);
@@ -30,7 +32,7 @@ function GetWinners() {
   return (
     <div className="container">
       <div className="row">
-        <h2>Get Winners</h2>
+        <h2>Get User Entries</h2>
       </div>
       <div className="row">
         <input
@@ -41,10 +43,26 @@ function GetWinners() {
         />
       </div>
       <div className="row">
-        <button onClick={handleGetWinners}>Get Winners</button>
+        <input
+          type="string"
+          value={user}
+          placeholder="user (address)"
+          onChange={(e) => setUser(e.target.value)}
+        />
       </div>
       <div className="row">
-        <p>Winners: {winners}</p>
+        <input
+          type="number"
+          value={raffleId}
+          placeholder="raffleId (uint256)"
+          onChange={(e) => setRaffleId(e.target.value)}
+        />
+      </div>
+      <div className="row">
+        <button onClick={handleGetRaffle}>Get User Entries</button>
+      </div>
+      <div className="row">
+        <p>User Entries: {userEntries}</p>
       </div>
       <div className="row">
         <p>
@@ -55,4 +73,4 @@ function GetWinners() {
   );
 }
 
-export default GetWinners;
+export default GetUserEntries;

@@ -1,8 +1,8 @@
-# Circuit Breaker | Chainlink Automation
+# Raffle | Chainlink Automation
 
 ## I. About
 
-The Circuit Breaker contract is a highly configurable proof of concept that can be used with any OCR price feed. It is capable of emitting events or calling custom functions based on predefined conditions, and it comes with an interactive UI that allows users to easily configure and manage the contract.
+The Raffle contract is a highly configurable proof of concept for a Raffle using Chainlink Automation. It is capable of creating and resolving raffles on demand.
 
 ## II. Pre-requisites
 

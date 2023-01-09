@@ -1,23 +1,23 @@
 import { useState } from "react";
 import { getContract } from "sdk/src/lib/utils";
 import Raffle from "sdk/src/abi/contracts/Raffle.sol/Raffle.json";
-import { getWinners } from "sdk/src/ReadFunctions/getWinners";
+import { getLiveRaffles } from "sdk/src/ReadFunctions/getLiveRaffles";
 import "../../styles/main.css";
 
-function GetWinners() {
+function GetLiveRaffles() {
   const [contractAddress, setContractAddress] = useState("");
   const [errorMessage, setErroMessage] = useState("");
 
-  const [winners, setWinners] = useState("");
+  const [liveRaffles, setLiveRaffles] = useState("");
 
-  async function handleGetWinners() {
-    setWinners("");
+  async function handleGetLiveRaffles() {
+    setLiveRaffles("");
     setErroMessage("");
     try {
       const contract = getContract(contractAddress, Raffle);
-      getWinners(contract)
+      getLiveRaffles(contract)
         .then((res) => {
-          setWinners(res.join(", "));
+          setLiveRaffles(res.join(", "));
         })
         .catch((error: any) => {
           setErroMessage(error.message);
@@ -30,7 +30,7 @@ function GetWinners() {
   return (
     <div className="container">
       <div className="row">
-        <h2>Get Winners</h2>
+        <h2>Get Live Raffles</h2>
       </div>
       <div className="row">
         <input
@@ -41,10 +41,10 @@ function GetWinners() {
         />
       </div>
       <div className="row">
-        <button onClick={handleGetWinners}>Get Winners</button>
+        <button onClick={handleGetLiveRaffles}>Get Live Raffles</button>
       </div>
       <div className="row">
-        <p>Winners: {winners}</p>
+        <p>Live Raffles: {liveRaffles}</p>
       </div>
       <div className="row">
         <p>
@@ -55,4 +55,4 @@ function GetWinners() {
   );
 }
 
-export default GetWinners;
+export default GetLiveRaffles;

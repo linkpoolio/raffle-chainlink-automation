@@ -1,14 +1,14 @@
-interface RaffleState {
+export interface RaffleState {
   STAGED: string;
   LIVE: string;
   FINISHED: string;
 }
 
-interface Prize {
+export interface Prize {
   prizeName: string;
 }
 
-interface Raffle {
+export interface Raffle {
   raffleName: string;
   contestantsAddresses: string[];
   winner: string;
@@ -23,7 +23,7 @@ interface Raffle {
   prize: Prize;
 }
 
-const parseRaffleId = (raffleId: string): number => {
+export const parseRaffleId = (raffleId: string): number => {
   const raffleIdNumber = Number(raffleId);
   if (isNaN(raffleIdNumber)) {
     throw new Error(`The parameter raffleId: ${raffleId} is not a number`);
@@ -36,11 +36,13 @@ export const getRaffle = async (
   raffleId: string
 ): Promise<Raffle> => {
   try {
-    const raffle = await contract.getRaffle(parseRaffleId(raffleId));
+    const parsedRaffleId = parseRaffleId(raffleId);
+    const raffle = await contract.getRaffle(parsedRaffleId);
     return raffle;
   } catch (error: any) {
+    console.error(error);
     throw new Error(
-      `Error getting the lotto with raffleId: ${raffleId}. Reason: ${error.message}`
+      `Error getting the lotto with raffleId: ${raffleId} for contract ${contract.constructor.name}. Reason: ${error.message}`
     );
   }
 };

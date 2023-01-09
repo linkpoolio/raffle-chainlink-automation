@@ -1,27 +1,22 @@
 import { useState } from "react";
 import { getContract } from "sdk/src/lib/utils";
 import Raffle from "sdk/src/abi/contracts/Raffle.sol/Raffle.json";
-import { getWinners } from "sdk/src/ReadFunctions/getWinners";
+import { claimPrize } from "sdk/src/WriteFunctions/claimPrize";
 import "../../styles/main.css";
 
-function GetWinners() {
+function ClaimPrize() {
   const [contractAddress, setContractAddress] = useState("");
   const [errorMessage, setErroMessage] = useState("");
 
-  const [winners, setWinners] = useState("");
+  const [raffleId, setRaffleId] = useState("");
 
-  async function handleGetWinners() {
-    setWinners("");
+  async function handleClaimPrize() {
     setErroMessage("");
     try {
       const contract = getContract(contractAddress, Raffle);
-      getWinners(contract)
-        .then((res) => {
-          setWinners(res.join(", "));
-        })
-        .catch((error: any) => {
-          setErroMessage(error.message);
-        });
+      claimPrize(contract, raffleId).catch((error: any) => {
+        setErroMessage(error.message);
+      });
     } catch (error: any) {
       setErroMessage(error.message);
     }
@@ -30,7 +25,7 @@ function GetWinners() {
   return (
     <div className="container">
       <div className="row">
-        <h2>Get Winners</h2>
+        <h2>Claim Prize</h2>
       </div>
       <div className="row">
         <input
@@ -41,10 +36,15 @@ function GetWinners() {
         />
       </div>
       <div className="row">
-        <button onClick={handleGetWinners}>Get Winners</button>
+        <input
+          type="number"
+          value={raffleId}
+          placeholder="raffleId (uint256)"
+          onChange={(e) => setRaffleId(e.target.value)}
+        />
       </div>
       <div className="row">
-        <p>Winners: {winners}</p>
+        <button onClick={handleClaimPrize}>Claim Prize</button>
       </div>
       <div className="row">
         <p>
@@ -55,4 +55,4 @@ function GetWinners() {
   );
 }
 
-export default GetWinners;
+export default ClaimPrize;

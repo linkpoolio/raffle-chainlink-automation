@@ -8,12 +8,14 @@ const parseRaffleId = (raffleId: string): number => {
 
 export const claimPrize = async (contract: any, raffleId: string) => {
   try {
-    await contract.claimPrize(parseRaffleId(raffleId));
+    const parsedRaffleId = parseRaffleId(raffleId);
+    await contract.claimPrize(parsedRaffleId);
   } catch (error: any) {
+    console.error(error);
     throw new Error(
-      `Error claiming prize with parameters raffleId: ${raffleId}. Reason: ${
-        error.message + JSON.stringify(error.data?.data?.stack)
-      }}`
+      `Error claiming prize with parameters raffleId: ${raffleId} for contract ${
+        contract.constructor.name
+      }. Reason: ${error.message + JSON.stringify(error.data?.data?.stack)}`
     );
   }
 };

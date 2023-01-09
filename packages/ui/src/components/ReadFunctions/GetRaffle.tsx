@@ -1,22 +1,28 @@
 import { useState } from "react";
 import { getContract } from "sdk/src/lib/utils";
-import Lotto from "sdk/src/abi/contracts/Lotto.sol/Lotto.json";
-import { enterLotto } from "sdk/src/WriteFunctions/enterLotto";
+import Raffle from "sdk/src/abi/contracts/Raffle.sol/Raffle.json";
+import { getRaffle } from "sdk/src/ReadFunctions/getRaffle";
+import "../../styles/main.css";
 
-function EnterLotto() {
+function GetRaffle() {
   const [contractAddress, setContractAddress] = useState("");
-  const [numbers, setNumbers] = useState("");
-  const [fee, setFee] = useState("");
-
   const [errorMessage, setErroMessage] = useState("");
 
-  async function handleEnterLotto() {
+  const [raffle, setRaffle] = useState("");
+  const [raffleId, setRaffleId] = useState("");
+
+  async function handleGetRaffle() {
+    setRaffle("");
     setErroMessage("");
     try {
-      const contract = getContract(contractAddress, Lotto);
-      enterLotto(contract, numbers, fee).catch((error: any) => {
-        setErroMessage(error.message);
-      });
+      const contract = getContract(contractAddress, Raffle);
+      getRaffle(contract, raffleId)
+        .then((res) => {
+          setRaffle(JSON.stringify(res));
+        })
+        .catch((error: any) => {
+          setErroMessage(error.message);
+        });
     } catch (error: any) {
       setErroMessage(error.message);
     }
@@ -25,7 +31,7 @@ function EnterLotto() {
   return (
     <div className="container">
       <div className="row">
-        <h2>Enter Lotto</h2>
+        <h2>Get Raffle</h2>
       </div>
       <div className="row">
         <input
@@ -37,22 +43,17 @@ function EnterLotto() {
       </div>
       <div className="row">
         <input
-          type="string"
-          value={numbers}
-          placeholder="numbers (uint8[])"
-          onChange={(e) => setNumbers(e.target.value)}
-        />
-      </div>
-      <div className="row">
-        <input
           type="number"
-          value={fee}
-          placeholder="fee (uint256)"
-          onChange={(e) => setFee(e.target.value)}
+          value={raffleId}
+          placeholder="raffleId (uint256)"
+          onChange={(e) => setRaffleId(e.target.value)}
         />
       </div>
       <div className="row">
-        <button onClick={handleEnterLotto}>Enter Lotto</button>
+        <button onClick={handleGetRaffle}>Get Raffle</button>
+      </div>
+      <div className="row">
+        <p>Raffle: {raffle}</p>
       </div>
       <div className="row">
         <p>
@@ -63,4 +64,4 @@ function EnterLotto() {
   );
 }
 
-export default EnterLotto;
+export default GetRaffle;

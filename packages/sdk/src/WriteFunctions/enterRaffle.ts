@@ -29,14 +29,18 @@ export const enterRaffle = async (
   fee: string
 ) => {
   try {
-    await contract.enterRaffle(parseRaffleId(raffleId), parseEntries(entries), {
-      value: parseFee(fee),
+    const parsedRaffleId = parseRaffleId(raffleId);
+    const parsedEntries = parseEntries(entries);
+    const parsedFee = parseFee(fee);
+    await contract.enterRaffle(parsedRaffleId, parsedEntries, {
+      value: parsedFee,
     });
   } catch (error: any) {
+    console.error(error);
     throw new Error(
-      `Error entering raffle with parameters raffleId: ${raffleId}, entries: ${entries}, fee: ${fee}. Reason: ${
-        error.message + JSON.stringify(error.data?.data?.stack)
-      }`
+      `Error entering raffle with parameters raffleId: ${raffleId}, entries: ${entries}, fee: ${fee} for contract ${
+        contract.constructor.name
+      }. Reason: ${error.message + JSON.stringify(error.data?.data?.stack)}`
     );
   }
 };
