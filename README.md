@@ -22,7 +22,7 @@ The Raffle contract is a highly configurable proof of concept for a Raffle using
 ### 1. Clone repo
 
 ```
-$ git clone git@github.com:linkpoolio/circuit-breaker-chainlink-automation.git
+$ git clone git@github.com:linkpoolio/raffle-chainlink-automation.git
 ```
 
 ### 2. Setup .env file
