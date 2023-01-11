@@ -6,8 +6,6 @@ import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-// import "hardhat/console.sol";
-
 /**
  * @title Raffle
  * @notice Creates a mechanism to create multiple raffles
