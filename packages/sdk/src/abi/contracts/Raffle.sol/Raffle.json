@@ -103,6 +103,11 @@
             "internalType": "string",
             "name": "prizeName",
             "type": "string"
+          },
+          {
+            "internalType": "bool",
+            "name": "claimed",
+            "type": "bool"
           }
         ],
         "indexed": false,
@@ -253,6 +258,11 @@
             "internalType": "string",
             "name": "prizeName",
             "type": "string"
+          },
+          {
+            "internalType": "bool",
+            "name": "claimed",
+            "type": "bool"
           }
         ],
         "internalType": "struct Raffle.Prize",
@@ -273,6 +283,11 @@
         "internalType": "bytes32",
         "name": "name",
         "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "feeToken",
+        "type": "address"
       }
     ],
     "name": "createRaffle",
@@ -374,21 +389,31 @@
             "type": "uint8"
           },
           {
-            "internalType": "bool",
-            "name": "prizeClaimed",
-            "type": "bool"
-          },
-          {
             "components": [
               {
                 "internalType": "string",
                 "name": "prizeName",
                 "type": "string"
+              },
+              {
+                "internalType": "bool",
+                "name": "claimed",
+                "type": "bool"
               }
             ],
             "internalType": "struct Raffle.Prize",
             "name": "prize",
             "type": "tuple"
+          },
+          {
+            "internalType": "bool",
+            "name": "feeToken",
+            "type": "bool"
+          },
+          {
+            "internalType": "address",
+            "name": "feeTokenAddress",
+            "type": "address"
           }
         ],
         "internalType": "struct Raffle.RaffleInstance",
@@ -500,6 +525,11 @@
         "internalType": "string",
         "name": "prizeName",
         "type": "string"
+      },
+      {
+        "internalType": "bool",
+        "name": "claimed",
+        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -574,21 +604,31 @@
         "type": "uint8"
       },
       {
-        "internalType": "bool",
-        "name": "prizeClaimed",
-        "type": "bool"
-      },
-      {
         "components": [
           {
             "internalType": "string",
             "name": "prizeName",
             "type": "string"
+          },
+          {
+            "internalType": "bool",
+            "name": "claimed",
+            "type": "bool"
           }
         ],
         "internalType": "struct Raffle.Prize",
         "name": "prize",
         "type": "tuple"
+      },
+      {
+        "internalType": "bool",
+        "name": "feeToken",
+        "type": "bool"
+      },
+      {
+        "internalType": "address",
+        "name": "feeTokenAddress",
+        "type": "address"
       }
     ],
     "stateMutability": "view",
