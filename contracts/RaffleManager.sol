@@ -12,7 +12,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
  * @title Raffle
  * @notice Creates a mechanism to create multiple raffles
  */
-contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
+contract RaffleManager is VRFConsumerBaseV2, AutomationCompatibleInterface {
     using SafeERC20 for IERC20;
     using Counters for Counters.Counter;
 
