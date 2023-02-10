@@ -2,27 +2,33 @@
 pragma solidity ^0.8.17;
 
 import "@chainlink/contracts/src/v0.8/AutomationCompatible.sol";
-import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+import {VRFV2WrapperConsumerBase} from "@chainlink/contracts/src/v0.8/VRFV2WrapperConsumerBase.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/interfaces/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
+import {ERC677ReceiverInterface} from "@chainlink/contracts/src/v0.8/interfaces/ERC677ReceiverInterface.sol";
+import {VRFV2WrapperInterface} from "@chainlink/contracts/src/v0.8/interfaces/VRFV2WrapperInterface.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 /**
- * @title Raffle
- * @notice Creates a mechanism to create multiple raffles
+ * @title Raffle Manager
+ * @notice Creates a mechanism for users to create and participate in raffles
  */
-contract RaffleManager is VRFConsumerBaseV2, AutomationCompatibleInterface {
+contract RaffleManager is VRFV2WrapperConsumerBase, AutomationCompatibleInterface, ERC677ReceiverInterface {
     using SafeERC20 for IERC20;
     using Counters for Counters.Counter;
+    using EnumerableSet for EnumerableSet.UintSet;
 
-    VRFCoordinatorV2Interface COORDINATOR;
     Counters.Counter public raffleCounter;
     RequestConfig public requestConfig;
+    VRFV2WrapperInterface public vrfWrapper;
     address public owner;
     address public keeperRegistryAddress;
+    address public linkTokenAddress;
     uint256[] public stagedRaffles;
-    uint256[] private liveRaffles;
+    EnumerableSet.UintSet private liveRaffles;
     mapping(uint256 => RaffleInstance) public raffles;
     mapping(uint256 => uint256) public requestIdToRaffleIndex;
     mapping(uint256 => Prize[]) public prizes;
@@ -33,22 +39,41 @@ contract RaffleManager is VRFConsumerBaseV2, AutomationCompatibleInterface {
         LIVE,
         FINISHED
     }
+    enum RaffleType {
+        DYNAMIC,
+        STATIC
+    }
 
-    // NOTE: maybe add in min amount of entries before raffle can be closed?
     struct RaffleInstance {
+        RaffleBase base;
+        address owner;
         bytes32 raffleName;
         address[] contestantsAddresses;
         address winner;
-        uint256 startDate;
         uint256 prizeWorth;
-        uint256 randomSeed;
-        address contestOwner;
+        RequestStatus requestStatus;
         uint256 timeLength;
         uint256 fee;
         RaffleState raffleState;
         Prize prize;
+        bool paymentNeeded;
+        bytes32 merkleRoot;
+        uint256 linkTotal;
+    }
+
+    struct RaffleBase {
+        RaffleType raffleType;
+        bool automation;
         bool feeToken;
         address feeTokenAddress;
+        uint256 startDate;
+    }
+
+    struct RequestStatus {
+        uint256 requestId;
+        uint256 paid;
+        bool fulfilled;
+        uint256[] randomWords;
     }
 
     struct Prize {
@@ -57,7 +82,6 @@ contract RaffleManager is VRFConsumerBaseV2, AutomationCompatibleInterface {
     }
 
     struct RequestConfig {
-        uint64 subscriptionId;
         uint32 callbackGasLimit;
         uint16 requestConfirmations;
         uint32 numWords;
@@ -89,17 +113,17 @@ contract RaffleManager is VRFConsumerBaseV2, AutomationCompatibleInterface {
     error OnlyKeeperRegistry();
 
     constructor(
-        address vrfCoordinator,
-        uint64 subscriptionId,
+        address wrapperAddress,
         uint16 requestConfirmations,
         uint32 callbackGasLimit,
         bytes32 keyHash,
-        address keeperAddress
-    ) VRFConsumerBaseV2(vrfCoordinator) {
-        COORDINATOR = VRFCoordinatorV2Interface(vrfCoordinator);
+        address keeperAddress,
+        address linkAddress
+    ) VRFV2WrapperConsumerBase(linkAddress, wrapperAddress) {
         owner = msg.sender;
+        vrfWrapper = VRFV2WrapperInterface(wrapperAddress);
+        linkTokenAddress = linkAddress;
         requestConfig = RequestConfig({
-            subscriptionId: subscriptionId,
             callbackGasLimit: callbackGasLimit,
             requestConfirmations: requestConfirmations,
             numWords: 1,
@@ -117,34 +141,53 @@ contract RaffleManager is VRFConsumerBaseV2, AutomationCompatibleInterface {
      * @param feeToken address of token to use for fee. If 0x0, Gas token will be used
      *
      */
-    function createRaffle(Prize memory prize, uint256 timeLength, uint256 fee, bytes32 name, address feeToken)
-        external
-        payable
-        onlyOwner
-    {
+    function createRaffle(
+        Prize memory prize,
+        uint256 timeLength,
+        uint256 fee,
+        bytes32 name,
+        address feeToken,
+        bytes32 merkleRoot,
+        bool automation
+    ) external payable {
         bool _feeToken = false;
         address _feeTokenAddress = address(0);
+        bool _paymentNeeded = true;
+        RaffleType _raffleType = RaffleType.DYNAMIC;
+        if (fee == 0) {
+            _paymentNeeded = false;
+        }
         if (feeToken != address(0)) {
             _feeToken = true;
             _feeTokenAddress = feeToken;
         }
+        if (merkleRoot == bytes32(0)) {
+            _raffleType = RaffleType.STATIC;
+        }
         RaffleInstance memory newRaffle = RaffleInstance({
+            base: RaffleBase({
+                raffleType: _raffleType,
+                automation: automation,
+                feeToken: _feeToken,
+                feeTokenAddress: _feeTokenAddress,
+                startDate: block.timestamp
+            }),
+            owner: msg.sender,
             raffleName: name,
             contestantsAddresses: new address[](0),
             winner: address(0),
-            startDate: block.timestamp,
             prizeWorth: msg.value,
-            randomSeed: 0,
-            contestOwner: msg.sender,
             timeLength: timeLength,
             fee: fee,
             raffleState: RaffleState.LIVE,
             prize: prize,
-            feeToken: _feeToken,
-            feeTokenAddress: _feeTokenAddress
+            paymentNeeded: _paymentNeeded,
+            merkleRoot: merkleRoot,
+            linkTotal: 0,
+            requestStatus: RequestStatus({requestId: 0, paid: 0, fulfilled: false, randomWords: new uint256[](0)})
         });
         raffles[raffleCounter.current()] = newRaffle;
-        liveRaffles.push(raffleCounter.current());
+        liveRaffles.add(raffleCounter.current());
         emit RaffleCreated(prize, timeLength, fee);
         raffleCounter.increment();
     }
@@ -158,8 +201,8 @@ contract RaffleManager is VRFConsumerBaseV2, AutomationCompatibleInterface {
      */
     function enterRaffle(uint256 raffleId, uint256 entries) external payable {
         require(raffles[raffleId].raffleState == RaffleState.LIVE, "Raffle is not live");
-        if (raffles[raffleId].feeToken) {
-            IERC20(raffles[raffleId].feeTokenAddress).safeTransferFrom(
+        if (raffles[raffleId].base.feeToken) {
+            IERC20(raffles[raffleId].base.feeTokenAddress).safeTransferFrom(
                 msg.sender, address(this), (raffles[raffleId].fee * entries)
             );
         } else {
@@ -177,16 +220,10 @@ contract RaffleManager is VRFConsumerBaseV2, AutomationCompatibleInterface {
      * @dev requests random number from VRF and marks raffle as finished
      *
      */
-    function pickWinner(uint256 raffleId) internal {
-        uint256 requestId = COORDINATOR.requestRandomWords(
-            requestConfig.keyHash,
-            requestConfig.subscriptionId,
-            requestConfig.requestConfirmations,
-            requestConfig.callbackGasLimit,
-            1
-        );
-        requestIdToRaffleIndex[requestId] = raffleId;
+    function _pickWinner(uint256 raffleId, uint256 value) internal {
+        raffles[raffleId].linkTotal += value;
         raffles[raffleId].raffleState = RaffleState.FINISHED;
+        _requestRandomWords(raffleId);
 
         emit RaffleClosed(raffleId, raffles[raffleId].contestantsAddresses);
     }
@@ -212,10 +249,24 @@ contract RaffleManager is VRFConsumerBaseV2, AutomationCompatibleInterface {
         return uint256(v % amount) + 1;
     }
 
+    function _requestRandomWords(uint256 raffleId) internal returns (uint256 requestId) {
+        requestId = requestRandomness(
+            requestConfig.callbackGasLimit, requestConfig.requestConfirmations, requestConfig.numWords
+        );
+        requestIdToRaffleIndex[requestId] = raffleId;
+        raffles[raffleId].requestStatus = RequestStatus({
+            requestId: requestId,
+            paid: vrfWrapper.calculateRequestPrice(requestConfig.callbackGasLimit),
+            randomWords: new uint256[](0),
+            fulfilled: false
+        });
+
+        return requestId;
+    }
+
     function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal override {
         uint256 raffleIndexFromRequestId = requestIdToRaffleIndex[requestId];
-        raffles[raffleIndexFromRequestId].randomSeed = randomWords[0];
-        raffles[raffleIndexFromRequestId].raffleState = RaffleState.STAGED;
+        raffles[raffleIndexFromRequestId].requestStatus.randomWords = randomWords;
         _updateLiveRaffles(raffleIndexFromRequestId);
         uint256 winner = _pickRandom(randomWords[0], raffles[raffleIndexFromRequestId].contestantsAddresses.length);
 
@@ -234,8 +285,8 @@ contract RaffleManager is VRFConsumerBaseV2, AutomationCompatibleInterface {
         require(raffles[raffleId].raffleState == RaffleState.FINISHED, "Raffle is not finished");
         require(raffles[raffleId].winner == msg.sender, "You are not the winner of this raffle");
         require(!raffles[raffleId].prize.claimed, "Prize has already been claimed");
-        if (raffles[raffleId].feeToken) {
-            IERC20(raffles[raffleId].feeTokenAddress).safeTransfer(msg.sender, raffles[raffleId].prizeWorth);
+        if (raffles[raffleId].base.feeToken) {
+            IERC20(raffles[raffleId].base.feeTokenAddress).safeTransfer(msg.sender, raffles[raffleId].prizeWorth);
             raffles[raffleId].prize.claimed = true;
         } else {
             payable(msg.sender).transfer(raffles[raffleId].prizeWorth);
@@ -244,25 +295,26 @@ contract RaffleManager is VRFConsumerBaseV2, AutomationCompatibleInterface {
         emit RafflePrizeClaimed(raffleId, msg.sender, raffles[raffleId].prizeWorth);
     }
 
-    function checkUpkeep(bytes calldata /* checkData */ )
+    function checkUpkeep(bytes calldata checkData)
         external
         view
         override
         returns (bool upkeepNeeded, bytes memory /* performData */ )
     {
-        for (uint256 i = 0; i < liveRaffles.length; i++) {
+        uint256 raffleId = abi.decode(checkData, (uint256));
+        for (uint256 i = 0; i < liveRaffles.length(); i++) {
             if (raffles[i].raffleState == RaffleState.LIVE) {
-                upkeepNeeded = (block.timestamp - raffles[i].startDate) > raffles[i].timeLength;
+                upkeepNeeded = (block.timestamp - raffles[i].base.startDate) > raffles[i].timeLength;
             }
         }
     }
 
     function performUpkeep(bytes calldata /* performData */ ) external override onlyKeeperRegistry {
-        for (uint256 i = 0; i < liveRaffles.length; i++) {
+        for (uint256 i = 0; i < liveRaffles.length(); i++) {
             if (raffles[i].raffleState == RaffleState.LIVE) {
-                if ((block.timestamp - raffles[i].startDate) > raffles[i].timeLength) {
-                    emit RaffleStaged(liveRaffles[i]);
-                    pickWinner(liveRaffles[i]);
+                if ((block.timestamp - raffles[i].base.startDate) > raffles[i].timeLength) {
+                    emit RaffleStaged(liveRaffles.at(i));
+                    // _pickWinner(liveRaffles[i]);
                 }
             }
         }
@@ -281,10 +333,7 @@ contract RaffleManager is VRFConsumerBaseV2, AutomationCompatibleInterface {
      * @notice Updates live raffles array when one finishes.
      */
     function _updateLiveRaffles(uint256 _index) internal {
-        for (uint256 i = _index; i < liveRaffles.length - 1; i++) {
-            liveRaffles[i] = liveRaffles[i + 1];
-        }
-        liveRaffles.pop();
+        liveRaffles.remove(_index);
     }
 
     /**
@@ -298,12 +347,33 @@ contract RaffleManager is VRFConsumerBaseV2, AutomationCompatibleInterface {
     }
 
     /**
-     * @notice get all live raffles
-     * @return array of live raffle IDs
+     * @notice get all raffles
+     * @return RaffleInstance[] of all raffles
      *
      */
-    function getLiveRaffles() external view returns (uint256[] memory) {
-        return liveRaffles;
+    function getAllRaffles() external view returns (RaffleInstance[] memory) {
+        RaffleInstance[] memory _raffles = new RaffleInstance[](raffleCounter.current());
+        for (uint256 i = 0; i < raffleCounter.current(); i++) {
+            _raffles[i] = raffles[i];
+        }
+        return _raffles;
+    }
+
+    /**
+     * @notice get all owner raffles
+     * @return RaffleInstance[] of all owner raffles
+     *
+     */
+    function getOwnerRaffles() external view returns (RaffleInstance[] memory) {
+        RaffleInstance[] memory _raffles = new RaffleInstance[](raffleCounter.current());
+        uint256 _index = 0;
+        for (uint256 i = 0; i < raffleCounter.current(); i++) {
+            if (raffles[i].owner == msg.sender) {
+                _raffles[_index] = raffles[i];
+                _index++;
+            }
+        }
+        return _raffles;
     }
 
     /**
@@ -322,5 +392,33 @@ contract RaffleManager is VRFConsumerBaseV2, AutomationCompatibleInterface {
         }
 
         return userEntriesCount;
+    }
+
+    /**
+     * @notice update admin of a specific raffle
+     * @param raffleId id of the raffle
+     * @param newAdmin address of the new admin
+     *
+     */
+    function updateRaffleOwner(uint256 raffleId, address newAdmin) external {
+        require(raffles[raffleId].owner == msg.sender, "Only owner can changes owner");
+        raffles[raffleId].owner = newAdmin;
+    }
+
+    function withdrawLink() public onlyOwner {
+        LinkTokenInterface link = LinkTokenInterface(linkTokenAddress);
+        require(link.transfer(msg.sender, link.balanceOf(address(this))), "Unable to transfer");
+    }
+
+    /**
+     * @notice picks random raffle winner
+     * @dev Uses Chainlink VRF direct funding to generate random number paid by raffle owner.
+     *
+     */
+    function onTokenTransfer(address sender, uint256 value, bytes calldata raffleId) external {
+        uint256 _raffle = abi.decode(raffleId, (uint256));
+        require(sender == raffles[_raffle].owner, "Only owner can pick winner");
+        require(value >= requestConfig.callbackGasLimit, "Not enough LINK sent to pay for gas");
+        _pickWinner(_raffle, value);
     }
 }

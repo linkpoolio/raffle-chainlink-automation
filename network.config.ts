@@ -11,9 +11,9 @@ export const networkConfig: { [key: number]: any } = {
   },
   1: {
     name: "mainnet",
-    vrfCoordinatorV2: "0x271682DEB8C4E0901D1a1550aD2e64D568E69909",
+    linkAddress: "0x514910771AF9Ca656af840dff83E8264EcF986CA",
+    wrapperAddress: "0x271682DEB8C4E0901D1a1550aD2e64D568E69909",
     keepersRegistry: "0x02777053d6764996e594c3E88AF1D58D5363a2e6",
-    subscriptionId: 1, // add subscription id
     requestConfirmations: 3,
     callbackGasLimit: 10000000,
     keyHash:
@@ -21,9 +21,9 @@ export const networkConfig: { [key: number]: any } = {
   },
   5: {
     name: "goerli",
-    vrfCoordinatorV2: "0x2Ca8E0C643bDe4C2E08ab1fA0da3401AdAD7734D",
+    linkAddress: "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
+    wrapperAddress: "0x708701a1DfF4f478de54383E49a627eD4852C816",
     keepersRegistry: "0x02777053d6764996e594c3E88AF1D58D5363a2e6",
-    subscriptionId: 1, // add subscription id
     requestConfirmations: 3,
     callbackGasLimit: 10000000,
     keyHash:
