@@ -1,4 +1,9 @@
 -include .env
+
+# setup
+install:
+	forge install Openzeppelin/openzeppelin-contracts foundry-rs/forge-std smartcontractkit/chainlink
+
 deploy:
 	npx hardhat run --network ${NETWORK} scripts/deploy.ts
 
