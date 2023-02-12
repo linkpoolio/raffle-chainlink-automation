@@ -1,8 +1,8 @@
-# Raffle | Chainlink Automation
+# Raffle Manager | Chainlink Automation
 
 ## I. About
 
-The Raffle contract is a highly configurable proof of concept for a Raffle using Chainlink Automation. It is capable of creating and resolving raffles on demand.
+The Raffle contract is a highly configurable proof of concept for a Raffle using Chainlink Automation and VRF. It is capable of creating and resolving raffles on demand utilizing the VRF Direct Funding method and Automations to allow users full control of their own raffle.
 
 ## II. Pre-requisites
 
@@ -10,50 +10,70 @@ The Raffle contract is a highly configurable proof of concept for a Raffle using
 
 - Install any wallet to your browser (Metamask, etc.)
 
-### 2. Setup Ganache
+### 2. Setup Foundry
 
-- Install ganache client locally
-- Run ganache
-- Confirm test eth on ganache account
-- Set metamask to ganache network
+- Install foundry
+
+  - Installation instructions [https://book.getfoundry.sh/getting-started/installation](https://book.getfoundry.sh/getting-started/installation)
+
+  - ```bash
+    curl -L https://foundry.paradigm.xyz | bash
+    ```
+
+- Run anvil
+
+  - ```bash
+    anvil
+    ```
 
 ## III. Local Setup
 
 ### 1. Clone repo
 
-```
-$ git clone git@github.com:linkpoolio/raffle-chainlink-automation.git
+```bash
+
+git clone git@github.com:linkpoolio/raffle-chainlink-automation.git
+
 ```
 
 ### 2. Setup .env file
 
-```
+```bash
+
 # from /root
-$ echo "NETWORK=ganache" >> .env
-$ echo "RPC_URL=\"http://127.0.0.1:7545\"" >> .env
+
+echo "NETWORK=mainnet" >> .env
+echo "RPC_URL=<YOUR_RPC>" >> .env
+
 ```
 
 ### 3. Install dependencies.
 
-```
-# from /root
-$ pnpm install
+```bash
+make install
+
 ```
 
 ### 4. Deploy contract
 
-```
+```bash
+
 # from /root
-$ make deploy
+
+make deploy
+
 ```
 
 ## IV. Run the App
 
 ### 1. Run storybook
 
-```
+```bash
+
 # from /root/ui
-$ pnpm storybook
+
+pnpm storybook
+
 ```
 
 ### 2. View app
@@ -66,12 +86,12 @@ $ pnpm storybook
 
 ```bash
 # from root
-$ make test-contracts
+make test-contracts
 ```
 
 ### 2. Check test coverage
 
 ```bash
 # from root
-$ make coverage
+make coverage
 ```
