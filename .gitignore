@@ -9,6 +9,5 @@ package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
-#Hardhat files
-cache
-artifacts
+# Foundry
+out/
