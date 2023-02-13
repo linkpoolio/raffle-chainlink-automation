@@ -6,7 +6,6 @@ typechain
 typechain-types
 .envrc
 package-lock.json
-yarn.lock
 pnpm-lock.yaml
 
 #Hardhat files
