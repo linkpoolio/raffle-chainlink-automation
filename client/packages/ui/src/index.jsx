@@ -1,15 +1,20 @@
 import React from 'react'
 import { render } from 'react-dom'
 import { createBrowserHistory } from 'history'
-
 import { Providers } from '@ui/config/Providers'
+// import { ColorModeScript } from '@chakra-ui/react'
+import { ChakraProvider } from '@chakra-ui/react'
+
 import { App } from '@ui/App'
+import theme from './styles/theme'
 
 const history = createBrowserHistory()
 
 render(
-  <Providers history={history}>
-    <App />
-  </Providers>,
+  <ChakraProvider theme={theme}>
+    <Providers history={history}>
+      <App />
+    </Providers>
+  </ChakraProvider>,
   document.getElementById('root')
 )
