@@ -5,7 +5,7 @@ install:
 	forge install Openzeppelin/openzeppelin-contracts foundry-rs/forge-std smartcontractkit/chainlink
 
 deploy:
-	npx hardhat run --network ${NETWORK} scripts/deploy.ts
+	forge script script/RaffleManager.s.sol:RaffleManagerScript --rpc-url ${GOERLI_RPC_URL} --etherscan-api-key ${ETHERSCAN_KEY} --broadcast --verify -vvvv
 
 # tests
 test-contracts-all:
