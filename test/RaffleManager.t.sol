@@ -15,6 +15,11 @@ contract RaffleManagerTest is Test {
     address admin;
     address raffleAdmin;
     address user1;
+    bytes32 merkleRoot;
+    address addrA = address(0x0000000000000000000000000000000000000001);
+    address addrB = address(0x0000000000000000000000000000000000000002);
+    bytes32[] proofA = new bytes32[](2);
+    bytes32[] proofB = new bytes32[](2);
 
     event RaffleCreated(bytes prize, uint256 indexed time, uint256 indexed fee, address feeToken, bool permissioned);
     event RaffleJoined(uint256 indexed raffleId, bytes32 indexed player, uint256 entries);
@@ -28,6 +33,11 @@ contract RaffleManagerTest is Test {
         callbackGasLimit = 100000;
         keeperAddress = address(0x2);
         linkAddress = address(0x3);
+        merkleRoot = 0x344510bd0c324c3912b13373e89df42d1b50450e9764a454b2aa6e2968a4578a;
+        proofA[0] = 0xd52688a8f926c816ca1e079067caba944f158e764817b83fc43594370ca9cf62;
+        proofA[1] = 0x5b70e80538acdabd6137353b0f9d8d149f4dba91e8be2e7946e409bfdbe685b9;
+        proofB[0] = 0x1468288056310c82aa4c01a7e12a10f8111a0560e72b700555479031b86c357d;
+        proofB[1] = 0x5b70e80538acdabd6137353b0f9d8d149f4dba91e8be2e7946e409bfdbe685b9;
         vm.prank(admin);
         raffleManager =
             new RaffleManager(wrapperAddress, requestConfirmations, callbackGasLimit, keeperAddress, linkAddress);
@@ -44,6 +54,24 @@ contract RaffleManagerTest is Test {
             name: bytes32("Big Mac Contest"),
             feeToken: address(0),
             merkleRoot: bytes32(""),
+            automation: false,
+            participants: new bytes32[](0),
+            totalWinners: 1,
+            entriesPerUser: 1
+        });
+    }
+
+    function merkleFixture() public {
+        vm.expectEmit(true, true, true, true);
+        emit RaffleCreated(bytes("BigMac"), 30, 0, address(0), true);
+        vm.prank(raffleAdmin);
+        raffleManager.createRaffle({
+            prize: bytes("BigMac"),
+            timeLength: 30,
+            fee: 0,
+            name: bytes32("Big Mac Contest"),
+            feeToken: address(0),
+            merkleRoot: merkleRoot,
             automation: false,
             participants: new bytes32[](0),
             totalWinners: 1,
@@ -145,5 +173,29 @@ contract RaffleManagerTest is Test {
         vm.prank(user1);
         vm.expectRevert("Cannot enter static raffle");
         raffleManager.enterRaffle(0, 1, new bytes32[](0));
+    }
+
+    function test_enterRaffle_VerifyProof() public {
+        merkleFixture();
+
+        vm.prank(addrA);
+        raffleManager.enterRaffle(0, 1, proofA);
+    }
+
+    function testRevert_enterRaffle_VerifyFail(address randomAddress) public {
+        vm.assume(randomAddress != addrA);
+        merkleFixture();
+        vm.expectRevert("Not authorized");
+        vm.prank(randomAddress);
+        raffleManager.enterRaffle(0, 1, proofA);
+    }
+
+    function testRevert_enterRaffle_TooManyEntries(uint8 entries) public {
+        vm.assume(entries > 1);
+        merkleFixture();
+
+        vm.expectRevert("Too many entries");
+        vm.prank(addrA);
+        raffleManager.enterRaffle(0, entries, proofA);
     }
 }

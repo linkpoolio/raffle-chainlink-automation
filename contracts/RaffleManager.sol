@@ -65,6 +65,7 @@ contract RaffleManager is VRFV2WrapperConsumerBase, AutomationCompatibleInterfac
 
     struct RaffleBase {
         RaffleType raffleType;
+        uint256 id;
         bool automation;
         bool feeToken;
         address feeTokenAddress;
@@ -139,7 +140,7 @@ contract RaffleManager is VRFV2WrapperConsumerBase, AutomationCompatibleInterfac
 
     /**
      * @notice creates new raffle
-     * @param prize prize struct
+     * @param prize bytes string of name of prize
      * @param timeLength time length of raffle in seconds
      * @param fee fee to enter raffle in wei
      * @param name name of raffle
@@ -165,6 +166,7 @@ contract RaffleManager is VRFV2WrapperConsumerBase, AutomationCompatibleInterfac
         RaffleInstance memory newRaffle = RaffleInstance({
             base: RaffleBase({
                 raffleType: participants.length > 0 ? RaffleType.STATIC : RaffleType.DYNAMIC,
+                id: raffleCounter.current(),
                 automation: automation,
                 feeToken: feeToken != address(0) ? true : false,
                 feeTokenAddress: feeToken,
