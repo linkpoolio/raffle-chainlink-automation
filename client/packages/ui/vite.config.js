@@ -31,7 +31,7 @@ export default defineConfig({
   plugins: [reactRefresh()],
   root: './src',
   server: {
-    port: 3005,
+    port: 3005
   },
   resolve: {
     alias: {
