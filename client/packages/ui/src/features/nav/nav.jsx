@@ -1,10 +1,11 @@
 import React from 'react'
 import { Flex, Link, Heading } from '@chakra-ui/react'
-import styles from '../styles/layout.module.css'
-import { useIsMounted } from '../hooks/app-hooks'
-import { StandardMenu } from './standard-menu'
-import { Wallet } from './wallet'
-export default function Navbar({ width }) {
+import styles from '@ui/styles/layout.module.css'
+
+import { useIsMounted } from '@ui/hooks'
+import { Wallet } from '@ui/components/wallet'
+
+export const Nav = ({ width }) => {
   const isMounted = useIsMounted()
   return (
     <Flex
@@ -27,7 +28,6 @@ export default function Navbar({ width }) {
         {isMounted ? null : null}
         <Wallet width={width} />
       </Flex>
-      {<StandardMenu width={width} />}
     </Flex>
   )
 }
