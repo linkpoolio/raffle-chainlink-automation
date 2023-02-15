@@ -1,6 +1,4 @@
 import React from 'react'
-import { shortenAddress } from '../utils'
-import { ConnectButton } from './connect-button'
 import { TriangleDownIcon } from '@chakra-ui/icons'
 import {
   Avatar,
@@ -23,6 +21,9 @@ import {
   useEnsName,
   useNetwork
 } from 'wagmi'
+
+import { shortenAddress } from '@ui/utils'
+import { ConnectButton } from './'
 
 export const Wallet = ({ width }) => {
   const { address, isConnected } = useAccount()

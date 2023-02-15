@@ -1,41 +1,20 @@
 import React from 'react'
 import { Switch, Route, Redirect } from 'react-router-dom'
-import NavBar from './components/navbar'
+import { Routes } from '@ui/Routes'
+import { Nav } from '@ui/features/nav'
+import { RaffleList, RaffleDetail } from '@ui/features/raffle'
 
-// const client = createClient({
-//   autoConnect: true,
-//   connectors: [
-//     new MetaMaskConnector({ chains }),
-//     new CoinbaseWalletConnector({
-//       chains,
-//       options: {
-//         appName: 'wagmi'
-//       }
-//     }),
-//     new WalletConnectConnector({
-//       chains,
-//       options: {
-//         qrcode: true
-//       }
-//     }),
-//     new InjectedConnector({
-//       chains,
-//       options: {
-//         name: 'Injected',
-//         shimDisconnect: true
-//       }
-//     })
-//   ],
-//   provider,
-//   webSocketProvider
-// })
-
-export function App() {
+export const App = () => {
   return (
     <>
-      <NavBar />
+      <Nav />
       <Switch>
-        <Route exact path="/"></Route>
+        <Route exact path={Routes.RaffleList}>
+          <RaffleList />
+        </Route>
+        <Route exact path={Routes.RaffleDetail}>
+          <RaffleDetail />
+        </Route>
         <Redirect to="/" />
       </Switch>
     </>
