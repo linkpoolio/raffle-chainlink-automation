@@ -6,3 +6,4 @@ build/**
 scripts/*
 public/**
 .DS_Store
+**/*.snap

@@ -31,10 +31,14 @@ jobs:
         working-directory: client/packages/ui
         run: yarn prettier
 
+      - name: Run typescript check
+        working-directory: client/packages/ui
+        run: yarn tsc
+
       - name: Build
         working-directory: client/packages/ui
         run: yarn build
 
-      # - name: Test
-      #   working-directory: client/packages/ui
-      #   run: yarn test
+      - name: Test
+        working-directory: client/packages/ui
+        run: yarn test

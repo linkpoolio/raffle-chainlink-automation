@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  ui:
+    build:
+      context: .
+      dockerfile: ui.dockerfile
+    ports:
+      - "3005:80"
+    volumes:
+      - ./client/:/app
+      - /app/node_modules
+    environment:
+      DOCKER_BUILDKIT: 1

@@ -1,5 +1,6 @@
 import React from 'react'
 import { Router } from 'react-router-dom'
+
 import { Web3WalletProvider } from './'
 
 export const Providers = ({ children, history }) => (
