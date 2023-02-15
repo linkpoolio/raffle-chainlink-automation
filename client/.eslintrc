@@ -4,12 +4,15 @@
   "extends": [
     "eslint:recommended",
     "plugin:react/recommended",
-    "prettier",
-    "plugin:testing-library/react"
+    "prettier"
   ],
   "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
+    },
     "react": {
-      "pragma": "React",
       "version": "detect"
     }
   },
@@ -19,6 +22,7 @@
     "jest": true,
     "es6": true
   },
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "sourceType": "module",
     "ecmaVersion": 12,
@@ -63,20 +67,19 @@
         "allowEmptyCatch": true
       }
     ],
-    "testing-library/prefer-screen-queries": "off"
+    "testing-library/prefer-screen-queries": "off",
+    "@typescript-eslint/camelcase": "off",
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/explicit-member-accessibility": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/indent": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-var-requires": "off",
+    "@typescript-eslint/ban-ts-comment": "off",
+    "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/no-non-null-assertion": "off"
   },
   "globals": {
-    "dataLayer": "writable",
-    "envAlgoliaAppId": "readonly",
-    "envAlgoliaApiKey": "readonly",
-    "envCoreApiUrl": "readonly",
-    "envApiKey": "readonly",
-    "envApiSecret": "readonly",
-    "envImgixUrl": "readonly",
-    "envMaintenanceMode": "readonly",
-    "envAlert": "readonly",
-    "envTestingMode":  "readonly",
-    "envAllowedChainIds":  "readonly",
-    "envMerkleApiUrl": "readonly"
+    "dataLayer": "writable"
   }
 }
