@@ -12,12 +12,14 @@ import {ERC677ReceiverInterface} from "@chainlink/contracts/src/v0.8/interfaces/
 import {VRFV2WrapperInterface} from "@chainlink/contracts/src/v0.8/interfaces/VRFV2WrapperInterface.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import {IRaffleManager} from "./interfaces/IRaffleManager.sol";
 
 /**
  * @title Raffle Manager
  * @notice Creates a mechanism for users to create and participate in raffles
  */
 contract RaffleManager is
+    IRaffleManager,
     VRFV2WrapperConsumerBase,
     AutomationCompatibleInterface,
     ERC677ReceiverInterface
@@ -64,7 +66,6 @@ contract RaffleManager is
         Prize prize;
         bool paymentNeeded;
         bytes32 merkleRoot;
-        uint256 linkTotal;
     }
 
     struct RaffleBase {
@@ -85,6 +86,7 @@ contract RaffleManager is
         uint256 paid;
         bool fulfilled;
         uint256[] randomWords;
+        uint256 totalLink;
     }
 
     struct Prize {
@@ -184,6 +186,7 @@ contract RaffleManager is
         uint8 totalWinners,
         uint8 entriesPerUser
     ) external payable {
+        raffleCounter.increment();
         RaffleInstance memory newRaffle = RaffleInstance({
             base: RaffleBase({
                 raffleType: participants.length > 0
@@ -215,12 +218,12 @@ contract RaffleManager is
             }),
             paymentNeeded: fee == 0 ? false : true,
             merkleRoot: merkleRoot,
-            linkTotal: 0,
             requestStatus: RequestStatus({
                 requestId: 0,
                 paid: 0,
                 fulfilled: false,
-                randomWords: new uint256[](0)
+                randomWords: new uint256[](0),
+                totalLink: 0
             })
         });
         raffles[raffleCounter.current()] = newRaffle;
@@ -232,7 +235,6 @@ contract RaffleManager is
             feeToken,
             merkleRoot != bytes32(0) ? true : false
         );
-        raffleCounter.increment();
     }
 
     /**
@@ -301,9 +303,9 @@ contract RaffleManager is
      *
      */
     function _pickWinner(uint256 raffleId, uint256 value) internal {
-        raffles[raffleId].linkTotal += value;
+        raffles[raffleId].requestStatus.totalLink += value;
         raffles[raffleId].raffleState = RaffleState.FINISHED;
-        _requestRandomWords(raffleId);
+        _requestRandomWords(raffleId, value);
 
         emit RaffleClosed(raffleId, raffles[raffleId].contestantsAddresses);
     }
@@ -346,7 +348,7 @@ contract RaffleManager is
         return winners;
     }
 
-    function _requestRandomWords(uint256 raffleId)
+    function _requestRandomWords(uint256 raffleId, uint256 value)
         internal
         returns (uint256 requestId)
     {
@@ -362,7 +364,8 @@ contract RaffleManager is
                 requestConfig.callbackGasLimit
             ),
             randomWords: new uint256[](0),
-            fulfilled: false
+            fulfilled: false,
+            totalLink: value
         });
 
         return requestId;
@@ -611,13 +614,17 @@ contract RaffleManager is
         raffles[raffleId].owner = newAdmin;
     }
 
-    // TODO: still needs to be worked on
-    function withdrawLink() public onlyOwner {
+    /**
+     * @notice withdraw unspent LINK from raffle
+     * @param raffleId id of the raffle
+     * @dev must be owner of raffle to withdraw LINK from raffle instance
+     */
+    function withdrawLink(uint256 raffleId) external onlyRaffleOwner(raffleId) {
         LinkTokenInterface link = LinkTokenInterface(linkTokenAddress);
-        require(
-            link.transfer(msg.sender, link.balanceOf(address(this))),
-            "Unable to transfer"
-        );
+        uint256 claimable = raffles[raffleId].requestStatus.totalLink -
+            raffles[raffleId].requestStatus.paid;
+        require(claimable > 0, "Nothing to claim");
+        require(link.transfer(msg.sender, claimable), "Unable to transfer");
     }
 
     /**
@@ -632,10 +639,6 @@ contract RaffleManager is
     ) external {
         uint256 _raffle = abi.decode(raffleId, (uint256));
         require(sender == raffles[_raffle].owner, "Only owner can pick winner");
-        require(
-            value >= requestConfig.callbackGasLimit,
-            "Not enough LINK sent to pay for gas"
-        );
         _pickWinner(_raffle, value);
     }
 }
