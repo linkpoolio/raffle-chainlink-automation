@@ -1,13 +1,13 @@
 import React from 'react'
 import { Switch, Route, Redirect } from 'react-router-dom'
+
 import { Routes } from '@ui/Routes'
-import { Nav } from '@ui/features/nav'
-import { RaffleDetail } from '@ui/features/raffleDetail'
-import { RaffleList } from '@ui/features/raffleList'
+import { NavigationBar } from '@ui/features/navigationBar'
+import { RaffleList, RaffleDetail } from '@ui/features/raffle'
 
 export const App = () => (
-  <div>
-    <Nav />
+  <>
+    <NavigationBar />
     <Switch>
       <Route exact path={Routes.RaffleList}>
         <RaffleList />
@@ -18,5 +18,5 @@ export const App = () => (
       />
       <Redirect to="/" />
     </Switch>
-  </div>
+  </>
 )

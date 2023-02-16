@@ -1,15 +1,14 @@
 import React from 'react'
-import { render } from 'react-dom'
-import { createBrowserHistory } from 'history'
+import { createRoot } from 'react-dom/client'
 
 import { Providers } from '@ui/providers'
 import { App } from '@ui/App'
 
-const history = createBrowserHistory()
+const container = document.getElementById('root')
+const root = createRoot(container)
 
-render(
-  <Providers history={history}>
+root.render(
+  <Providers>
     <App />
-  </Providers>,
-  document.getElementById('root')
+  </Providers>
 )

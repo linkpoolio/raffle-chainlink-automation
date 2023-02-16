@@ -1,10 +1,24 @@
 import React from 'react'
 import { Router } from 'react-router-dom'
+import { createBrowserHistory } from 'history'
+import {
+  ConnectKitProvider,
+  ConnectKitButton,
+  getDefaultClient
+} from 'connectkit'
+import { WagmiConfig, createClient } from 'wagmi'
 
+import { client } from '@ui/config/client'
 import { Web3WalletProvider } from './'
 
-export const Providers = ({ children, history }) => (
+const history = createBrowserHistory()
+
+export const Providers = ({ children }) => (
   <Router history={history}>
-    <Web3WalletProvider>{children}</Web3WalletProvider>
+    <WagmiConfig client={client}>
+      <ConnectKitProvider>
+        <Web3WalletProvider>{children}</Web3WalletProvider>
+      </ConnectKitProvider>
+    </WagmiConfig>
   </Router>
 )
