@@ -13,6 +13,7 @@ import {VRFV2WrapperInterface} from "@chainlink/contracts/src/v0.8/interfaces/VR
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import {IRaffleManager} from "./interfaces/IRaffleManager.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 /**
  * @title Raffle Manager
@@ -22,7 +23,8 @@ contract RaffleManager is
     IRaffleManager,
     VRFV2WrapperConsumerBase,
     AutomationCompatibleInterface,
-    ERC677ReceiverInterface
+    ERC677ReceiverInterface,
+    ReentrancyGuard
 {
     using SafeERC20 for IERC20;
     using Counters for Counters.Counter;
@@ -87,6 +89,7 @@ contract RaffleManager is
         bool fulfilled;
         uint256[] randomWords;
         uint256 totalLink;
+        bool withdrawn;
     }
 
     struct Prize {
@@ -122,6 +125,11 @@ contract RaffleManager is
         uint256 value
     );
     event KeeperRegistryAddressUpdated(address oldAddress, address newAddress);
+    event RaffleOwnerUpdated(
+        uint256 indexed raffleId,
+        address oldOwner,
+        address newOwner
+    );
 
     modifier onlyOwner() {
         require(msg.sender == owner);
@@ -186,7 +194,6 @@ contract RaffleManager is
         uint8 totalWinners,
         uint8 entriesPerUser
     ) external payable {
-        raffleCounter.increment();
         RaffleInstance memory newRaffle = RaffleInstance({
             base: RaffleBase({
                 raffleType: participants.length > 0
@@ -223,11 +230,13 @@ contract RaffleManager is
                 paid: 0,
                 fulfilled: false,
                 randomWords: new uint256[](0),
-                totalLink: 0
+                totalLink: 0,
+                withdrawn: false
             })
         });
         raffles[raffleCounter.current()] = newRaffle;
         liveRaffles.add(raffleCounter.current());
+        raffleCounter.increment();
         emit RaffleCreated(
             prize,
             timeLength,
@@ -365,7 +374,8 @@ contract RaffleManager is
             ),
             randomWords: new uint256[](0),
             fulfilled: false,
-            totalLink: value
+            totalLink: value,
+            withdrawn: false
         });
 
         return requestId;
@@ -379,6 +389,7 @@ contract RaffleManager is
         raffles[raffleIndexFromRequestId]
             .requestStatus
             .randomWords = randomWords;
+        raffles[raffleIndexFromRequestId].requestStatus.fulfilled = true;
         _updateLiveRaffles(raffleIndexFromRequestId);
         uint256[] memory winners = _pickRandom(
             randomWords[0],
@@ -405,7 +416,7 @@ contract RaffleManager is
      * @dev requires that raffle is finished and that the caller is the winner
      *
      */
-    function claimPrize(uint256 raffleId) external {
+    function claimPrize(uint256 raffleId) external nonReentrant {
         require(
             raffles[raffleId].raffleState == RaffleState.FINISHED,
             "Raffle is not finished"
@@ -431,11 +442,16 @@ contract RaffleManager is
         if (raffles[raffleId].base.feeToken) {
             IERC20(raffles[raffleId].base.feeTokenAddress).safeTransfer(
                 msg.sender,
-                raffles[raffleId].prizeWorth
+                (raffles[raffleId].prizeWorth /
+                    raffles[raffleId].base.totalWinners)
             );
             raffles[raffleId].prize.claimedPrizes.push(_claimer);
-        } else {
-            payable(msg.sender).transfer(raffles[raffleId].prizeWorth);
+        } else if (raffles[raffleId].fee > 0) {
+            // transfer total prize div by total winners
+            payable(msg.sender).transfer(
+                raffles[raffleId].prizeWorth /
+                    raffles[raffleId].base.totalWinners
+            );
             raffles[raffleId].prize.claimedPrizes.push(_claimer);
         }
         emit RafflePrizeClaimed(
@@ -559,18 +575,27 @@ contract RaffleManager is
 
     /**
      * @notice get all owner raffles
+     * @param raffleOwner address of the raffle owner
      * @return RaffleInstance[] of all owner raffles
      *
      */
-    function getOwnerRaffles() external view returns (RaffleInstance[] memory) {
-        RaffleInstance[] memory _raffles = new RaffleInstance[](
-            raffleCounter.current()
-        );
+    function getOwnerRaffles(address raffleOwner)
+        external
+        view
+        returns (RaffleInstance[] memory)
+    {
         uint256 _index = 0;
         for (uint256 i = 0; i < raffleCounter.current(); i++) {
-            if (raffles[i].owner == msg.sender) {
-                _raffles[_index] = raffles[i];
+            if (raffles[i].owner == raffleOwner) {
                 _index++;
+            }
+        }
+        RaffleInstance[] memory _raffles = new RaffleInstance[](_index);
+        uint256 _index2 = 0;
+        for (uint256 i = 0; i < raffleCounter.current(); i++) {
+            if (raffles[i].owner == raffleOwner) {
+                _raffles[_index2] = raffles[i];
+                _index2++;
             }
         }
         return _raffles;
@@ -579,11 +604,16 @@ contract RaffleManager is
     /**
      * @notice get amount of entries for a user in a specific raffle
      * @param raffleId id of the raffle
+     * @param user address of the user
      * @return uint256 amount of entries
      * @dev user is the msg.sender
      *
      */
-    function getUserEntries(uint256 raffleId) external view returns (uint256) {
+    function getUserEntries(uint256 raffleId, address user)
+        external
+        view
+        returns (uint256)
+    {
         uint256 userEntriesCount = 0;
         for (
             uint256 i = 0;
@@ -592,7 +622,7 @@ contract RaffleManager is
         ) {
             if (
                 raffles[raffleId].contestantsAddresses[i] ==
-                keccak256(abi.encodePacked(msg.sender))
+                keccak256(abi.encodePacked(user))
             ) {
                 userEntriesCount++;
             }
@@ -612,6 +642,7 @@ contract RaffleManager is
         onlyRaffleOwner(raffleId)
     {
         raffles[raffleId].owner = newAdmin;
+        emit RaffleOwnerUpdated(raffleId, msg.sender, newAdmin);
     }
 
     /**
@@ -619,11 +650,20 @@ contract RaffleManager is
      * @param raffleId id of the raffle
      * @dev must be owner of raffle to withdraw LINK from raffle instance
      */
-    function withdrawLink(uint256 raffleId) external onlyRaffleOwner(raffleId) {
+    function withdrawLink(uint256 raffleId)
+        external
+        onlyRaffleOwner(raffleId)
+        nonReentrant
+    {
+        require(
+            !raffles[raffleId].requestStatus.withdrawn,
+            "Already withdrawn"
+        );
         LinkTokenInterface link = LinkTokenInterface(linkTokenAddress);
         uint256 claimable = raffles[raffleId].requestStatus.totalLink -
             raffles[raffleId].requestStatus.paid;
         require(claimable > 0, "Nothing to claim");
+        raffles[raffleId].requestStatus.withdrawn = true;
         require(link.transfer(msg.sender, claimable), "Unable to transfer");
     }
 

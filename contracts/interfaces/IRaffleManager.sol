@@ -32,9 +32,4 @@ interface IRaffleManager {
 
     function setProvenanceHash(uint256 raffleId, bytes memory provenanceHash)
         external;
-
-    function getRaffle(uint256 raffleId)
-        external
-        view
-        returns (RaffleInstance memory);
 }

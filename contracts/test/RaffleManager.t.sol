@@ -37,6 +37,11 @@ contract RaffleManagerTest is Test {
         bytes32 indexed player,
         uint256 entries
     );
+    event RaffleOwnerUpdated(
+        uint256 indexed raffleId,
+        address oldOwner,
+        address newOwner
+    );
 
     function setUp() public {
         admin = makeAddr("admin");
@@ -180,7 +185,7 @@ contract RaffleManagerTest is Test {
         public
     {
         successFixture();
-        RaffleManager.RaffleInstance memory raffle = raffleManager.getRaffle(1);
+        RaffleManager.RaffleInstance memory raffle = raffleManager.getRaffle(0);
         assertEq(raffle.raffleName, bytes32("Big Mac Contest"));
         assertFalse(raffle.base.permissioned);
         assertEq(
@@ -205,7 +210,7 @@ contract RaffleManagerTest is Test {
             totalWinners: 1,
             entriesPerUser: 1
         });
-        RaffleManager.RaffleInstance memory raffle = raffleManager.getRaffle(1);
+        RaffleManager.RaffleInstance memory raffle = raffleManager.getRaffle(0);
         assertEq(raffle.raffleName, bytes32("Big Mac Contest"));
         assertFalse(raffle.base.permissioned);
         assertEq(
@@ -228,7 +233,7 @@ contract RaffleManagerTest is Test {
             totalWinners: 1,
             entriesPerUser: 1
         });
-        RaffleManager.RaffleInstance memory raffle = raffleManager.getRaffle(1);
+        RaffleManager.RaffleInstance memory raffle = raffleManager.getRaffle(0);
         assertEq(raffle.raffleName, bytes32("Big Mac Contest"));
         assert(raffle.base.permissioned);
         assertEq(
@@ -243,10 +248,10 @@ contract RaffleManagerTest is Test {
     {
         successFixture();
         vm.expectEmit(true, true, true, true);
-        emit RaffleJoined(1, keccak256(abi.encodePacked(user1)), 1);
+        emit RaffleJoined(0, keccak256(abi.encodePacked(user1)), 1);
         vm.prank(user1);
-        raffleManager.enterRaffle(1, 1, new bytes32[](0));
-        bytes32 contestant = raffleManager.getRaffle(1).contestantsAddresses[0];
+        raffleManager.enterRaffle(0, 1, new bytes32[](0));
+        bytes32 contestant = raffleManager.getRaffle(0).contestantsAddresses[0];
         assert(contestant == keccak256(abi.encodePacked(user1)));
     }
 
@@ -261,14 +266,14 @@ contract RaffleManagerTest is Test {
         staticRaffleFixture();
         vm.prank(user1);
         vm.expectRevert("Cannot enter static raffle");
-        raffleManager.enterRaffle(1, 1, new bytes32[](0));
+        raffleManager.enterRaffle(0, 1, new bytes32[](0));
     }
 
     function test_enterRaffle_VerifyProof() public {
         merkleFixture();
 
         vm.prank(addrA);
-        raffleManager.enterRaffle(1, 1, proofA);
+        raffleManager.enterRaffle(0, 1, proofA);
     }
 
     function testRevert_enterRaffle_VerifyFail(address randomAddress) public {
@@ -276,7 +281,7 @@ contract RaffleManagerTest is Test {
         merkleFixture();
         vm.expectRevert("Not authorized");
         vm.prank(randomAddress);
-        raffleManager.enterRaffle(1, 1, proofA);
+        raffleManager.enterRaffle(0, 1, proofA);
     }
 
     function testRevert_enterRaffle_TooManyEntries(uint8 entries) public {
@@ -285,7 +290,7 @@ contract RaffleManagerTest is Test {
 
         vm.expectRevert("Too many entries");
         vm.prank(addrA);
-        raffleManager.enterRaffle(1, entries, proofA);
+        raffleManager.enterRaffle(0, entries, proofA);
     }
 
     function test_enterRaffle_CustomToken() public {
@@ -294,7 +299,7 @@ contract RaffleManagerTest is Test {
         customToken.transfer(user1, 100 ether);
         vm.startPrank(user1);
         customToken.approve(address(raffleManager), 1 ether);
-        raffleManager.enterRaffle(1, 1, new bytes32[](0));
+        raffleManager.enterRaffle(0, 1, new bytes32[](0));
         vm.stopPrank();
     }
 
@@ -303,7 +308,7 @@ contract RaffleManagerTest is Test {
         vm.startPrank(user1);
         customToken.approve(address(raffleManager), 1 ether);
         vm.expectRevert("ERC20: transfer amount exceeds balance");
-        raffleManager.enterRaffle(1, 1, new bytes32[](0));
+        raffleManager.enterRaffle(0, 1, new bytes32[](0));
         vm.stopPrank();
     }
 
@@ -311,7 +316,7 @@ contract RaffleManagerTest is Test {
         gasTokenRaffleFixture();
         vm.deal(user1, 1 ether);
         vm.startPrank(user1);
-        raffleManager.enterRaffle{value: 1 ether}(1, 1, new bytes32[](0));
+        raffleManager.enterRaffle{value: 1 ether}(0, 1, new bytes32[](0));
         vm.stopPrank();
     }
 
@@ -320,7 +325,7 @@ contract RaffleManagerTest is Test {
         vm.deal(user1, 0.1 ether);
         vm.startPrank(user1);
         vm.expectRevert("Not enough ETH to join raffle");
-        raffleManager.enterRaffle{value: 0.1 ether}(1, 1, new bytes32[](0));
+        raffleManager.enterRaffle{value: 0.1 ether}(0, 1, new bytes32[](0));
         vm.stopPrank();
     }
 
@@ -333,8 +338,40 @@ contract RaffleManagerTest is Test {
         customLINK.transferAndCall(
             address(raffleManager),
             0.1 ether,
-            bytes(abi.encode(1))
+            bytes(abi.encode(0))
         );
         vm.stopPrank();
+    }
+
+    function test_updateRaffleOwner_CanUpdateRaffleOwner() public {
+        staticRaffleFixture();
+        vm.expectEmit(true, true, true, true);
+        emit RaffleOwnerUpdated(0, raffleAdmin, user1);
+        vm.prank(raffleAdmin);
+        raffleManager.updateRaffleOwner(0, user1);
+        assert(raffleManager.getRaffle(0).owner == user1);
+    }
+
+    function testRevert_updateRaffleOwner_NotOwner() public {
+        staticRaffleFixture();
+        vm.prank(admin);
+        vm.expectRevert();
+        raffleManager.updateRaffleOwner(0, user1);
+    }
+
+    function test_getUserEntries_ReturnTotalUserEntries() public {
+        merkleFixture();
+        vm.prank(addrA);
+        raffleManager.enterRaffle(0, 1, proofA);
+        vm.prank(addrB);
+        raffleManager.enterRaffle(0, 1, proofB);
+        assertEq(raffleManager.getUserEntries(0, addrA), 1);
+        assertEq(raffleManager.getUserEntries(0, addrB), 1);
+    }
+
+    function test_getOwnerRaffles_ReturnTotalByOwner() public {
+        merkleFixture();
+        merkleFixture();
+        assertEq(raffleManager.getOwnerRaffles(raffleAdmin).length, 2);
     }
 }
