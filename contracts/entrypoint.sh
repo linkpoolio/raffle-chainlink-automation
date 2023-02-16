@@ -3,6 +3,6 @@
 . ~/.bashrc
 foundryup
 anvil > anvil.log &
-sleep 5
+make install
 make deploy-local &
 tail -f anvil.log
