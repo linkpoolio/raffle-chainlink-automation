@@ -3,9 +3,9 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
-import "../contracts/RaffleManager.sol";
-import {ERC20Mock} from "../contracts/mock/ERC20Mock.sol";
-import {ERC677Mock} from "../contracts/mock/ERC677Mock.sol";
+import "../src/RaffleManager.sol";
+import {ERC20Mock} from "../src/mock/ERC20Mock.sol";
+import {ERC677Mock} from "../src/mock/ERC677Mock.sol";
 
 contract RaffleManagerTest is Test {
     RaffleManager raffleManager;
