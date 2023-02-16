@@ -3,6 +3,9 @@ import reactRefresh from '@vitejs/plugin-react-refresh'
 import path from 'path'
 
 // https://vitejs.dev/config/
+const prefix = 'UI'
+const contractAddress =
+    process.env[`${prefix}_CONTRACT_ADDRESS`] || ''
 
 export default defineConfig({
   build: {
@@ -28,6 +31,10 @@ export default defineConfig({
       }
     }
   },
+  define: {
+    envContractAddress: JSON.stringify(contractAddress),
+  },
+  envPrefix: `${prefix}_`,
   plugins: [reactRefresh()],
   root: './src',
   server: {

@@ -1,5 +1,3 @@
-ARG APP_ENV=dev
-
 FROM node:14 as builder
 
 # Add Build Assets

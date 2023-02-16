@@ -2,7 +2,6 @@
 
 # Yarn 3
 .yarn/*
-# TODO: convert ignnores to exceptions once we enable pnp mode for yarn
 .yarn/cache
 .yarn/patches
 .yarn/plugins
