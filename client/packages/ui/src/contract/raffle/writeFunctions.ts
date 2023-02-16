@@ -1,6 +1,12 @@
-import { writeContract, prepareWriteContract } from '@wagmi/core'
+import { useContractWrite, usePrepareContractWrite } from 'wagmi'
 import { RAFFLE_MANAGER_CONTRACT_ADDRESS } from './const'
-import type { providers } from 'ethers'
+import type {
+  ClaimPrizeParams,
+  FulfillRandomWordsParams,
+  EnterRaffleParams,
+  CreateRaffleParams,
+  TransactionResponse
+} from './types'
 import RaffleManager from './abi/RaffleManager.json'
 
 export const createRaffle = async (
@@ -19,7 +25,7 @@ export const createRaffle = async (
       totalWinners,
       entriesPerUser
     } = params
-    const config = await prepareWriteContract({
+    const { config } = usePrepareContractWrite({
       address: RAFFLE_MANAGER_CONTRACT_ADDRESS,
       abi: RaffleManager,
       functionName: 'createRaffle',
@@ -36,8 +42,8 @@ export const createRaffle = async (
         entriesPerUser
       ]
     })
-    const response = await writeContract(config)
-    return response
+    const { data, isLoading, isSuccess } = useContractWrite(config)
+    return { data, isLoading, isSuccess }
   } catch (error: any) {
     throw new Error(`Error creating raffle: ${error.message}`)
   }
@@ -48,14 +54,14 @@ export const enterRaffle = async (
 ): Promise<TransactionResponse> => {
   try {
     const { raffleId, entries, proof } = params
-    const config = await prepareWriteContract({
+    const { config } = usePrepareContractWrite({
       address: RAFFLE_MANAGER_CONTRACT_ADDRESS,
       abi: RaffleManager,
       functionName: 'enterRaffle',
       args: [raffleId, entries, proof]
     })
-    const response = await writeContract(config)
-    return response
+    const { data, isLoading, isSuccess } = useContractWrite(config)
+    return { data, isLoading, isSuccess }
   } catch (error: any) {
     throw new Error(`Error entering raffle: ${error.message}`)
   }
@@ -66,14 +72,14 @@ export const fulfillRandomWords = async (
 ): Promise<TransactionResponse> => {
   try {
     const { requestId, randomWords } = params
-    const config = await prepareWriteContract({
+    const { config } = usePrepareContractWrite({
       address: RAFFLE_MANAGER_CONTRACT_ADDRESS,
       abi: RaffleManager,
       functionName: 'fulfillRandomWords',
       args: [requestId, randomWords]
     })
-    const response = await writeContract(config)
-    return response
+    const { data, isLoading, isSuccess } = useContractWrite(config)
+    return { data, isLoading, isSuccess }
   } catch (error: any) {
     throw new Error(`Error fulfilling random words: ${error.message}`)
   }
@@ -84,48 +90,15 @@ export const claimPrize = async (
 ): Promise<TransactionResponse> => {
   try {
     const { raffleId } = params
-    const config = await prepareWriteContract({
+    const { config } = usePrepareContractWrite({
       address: RAFFLE_MANAGER_CONTRACT_ADDRESS,
       abi: RaffleManager,
       functionName: 'claimPrize',
       args: [raffleId]
     })
-    const response = await writeContract(config)
-    return response
+    const { data, isLoading, isSuccess } = useContractWrite(config)
+    return { data, isLoading, isSuccess }
   } catch (error: any) {
     throw new Error(`Error claiming prize: ${error.message}`)
   }
-}
-
-export interface ClaimPrizeParams {
-  raffleId: number
-}
-
-export interface FulfillRandomWordsParams {
-  requestId: string
-  randomWords: string[]
-}
-
-export interface EnterRaffleParams {
-  raffleId: number
-  entries: number
-  proof: string[]
-}
-
-export interface CreateRaffleParams {
-  prize: string // name of prize in hexadicimal
-  timeLength: number // time length
-  fee: number // fee
-  name: string // name of raffle in hexadicimal
-  feeToken: string // fee token
-  merkleRoot: string // merkle root bytes32 hexadicimal
-  automation: boolean // automation boolean
-  participants: string[] // participants array of bytes32 hexadicimal
-  totalWinners: number
-  entriesPerUser: number
-}
-
-export interface TransactionResponse {
-  hash: string
-  wait: (confirmations?: number) => Promise<providers.TransactionReceipt>
 }

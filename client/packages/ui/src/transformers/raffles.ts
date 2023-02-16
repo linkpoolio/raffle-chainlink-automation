@@ -85,12 +85,6 @@ export interface Prize {
   claimedPrizes: Array<string> // bytes32[]
 }
 
-export interface RequestConfig {
-  callbackGasLimit: number // uint32
-  requestConfirmations: number // uint16
-  numWords: number // uint32
-}
-
 export interface RaffleInstance {
   base: RaffleBase
   owner: string // address
