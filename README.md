@@ -1,4 +1,4 @@
-# Raffle Manager | Chainlink Automation
+# Raffle Manager (Chainlink Automation)
 
 ## I. About
 
@@ -6,92 +6,138 @@ The Raffle contract is a highly configurable proof of concept for a Raffle using
 
 ## II. Pre-requisites
 
-### 1. Setup Wallet
-
-- Install any wallet to your browser (Metamask, etc.)
-
-### 2. Setup Foundry
-
-- Install foundry
-
-  - Installation instructions [https://book.getfoundry.sh/getting-started/installation](https://book.getfoundry.sh/getting-started/installation)
-
-  - ```bash
-    curl -L https://foundry.paradigm.xyz | bash
-    ```
-
-- Run anvil
-
-  - ```bash
-    anvil
-    ```
-
-## III. Local Setup
-
 ### 1. Clone repo
 
 ```bash
-
-git clone git@github.com:linkpoolio/raffle-chainlink-automation.git
-
+$ git clone git@github.com:linkpoolio/raffle-chainlink-automation.git
 ```
 
-### 2. Setup .env file
+### 2. Create etherscan API key
+
+- [Create Account](https://docs.etherscan.io/getting-started/creating-an-account)
+- [Create API Key](https://docs.etherscan.io/getting-started/viewing-api-usage-statistics)
+
+### 3. Setup contracts environment variables
 
 ```bash
+# Specify network
+export NETWORK="hardhat"
 
-# from /root
+# Network RPCs
+export MAINNET_RPC_URL=
+export GOERLI_RPC_URL=
+export BINANCE_MAINNET_RPC_URL=
+export POLYGON_MAINNET_RPC_URL=
 
-echo "NETWORK=mainnet" >> .env
-echo "RPC_URL=<YOUR_RPC>" >> .env
+# Etherscan
+export ETHERSCAN_KEY=
 
+# From anvil
+export LOCAL_RPC_URL="http://localhost:8545"
+export PRIVATE_KEY="" # Get from anvil after running for the first time, see below
+
+# UI
+export UI_CONTRACT_ADDRESS="" # Get from anvil after deploying contract
 ```
 
-### 3. Install dependencies.
+### 4. Setup Wallet
+
+Install any wallet to your browser (currently supports Metamask)
+
+## III. Local Setup
+
+## Option 1: Docker
+
+### 1. Start docker
 
 ```bash
-make install
+# <root>
+$ docker compose up
+```
 
+### 2. View UI
+
+- Open browser at [localhost:3005](localhost:3005)
+
+## Option 2: Manual Setup
+
+### 1. Setup Foundry
+
+([Installation instructions](https://book.getfoundry.sh/getting-started/installation)
+
+```bash
+# Download foundry
+$ curl -L https://foundry.paradigm.xyz | bash
+
+# Install foundry
+$ foundry up
+
+# (Mac only) Install anvil (prereq: Homebrew)
+$ brew install libusb
+  ```
+
+### 2. (optional) Install contract dependencies if changes have been made to contracts
+
+```bash
+# <root>/contracts
+$ make install
+```
+
+### 3. Run anvil
+```bash
+# <root>/contracts
+$ anvil
 ```
 
 ### 4. Deploy contract
 
-```bash
-
-# from /root
-
-make deploy
-
-```
-
-## IV. Run the App
-
-### 1. Run storybook
+Note: each time anvil is restarted, the contract will need to be re-deployed but will have the same contract address assuming no contract changes
 
 ```bash
+# <root>/contracts
 
-# from /root/ui
+# If deploying locally
+$ make deploy-local
 
-pnpm storybook
-
+# Or if deploying to goerli:
+$ make deploy 
 ```
 
-### 2. View app
+### 5. Install UI dependencies
 
-- Open browser at [localhost:9009](localhost:9009)
+```bash
+# <root>/client
+$ nvm use
+$ yarn
+```
 
-## V. Testing
+### 6. Run UI
+
+```bash
+# <root>/client/packages/ui
+$ yarn start
+```
+
+### 7. View UI
+
+- Open browser at [localhost:3005](localhost:3005)
+
+## IV. Testing
 
 ### 1. Test Contracts
 
 ```bash
-# from root
+# <root>/contracts
 make test-contracts
+make coverage
 ```
 
-### 2. Check test coverage
+### 2. Test UI
 
 ```bash
-# from root
-make coverage
+# <root>/client/packages/ui
+$ yarn test
+$ yarn tsc
+$ yarn lint
+$ yarn prettier
 ```

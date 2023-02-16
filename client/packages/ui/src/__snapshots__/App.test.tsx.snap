@@ -1,9 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`App matches snapshot 1`] = `
-<div
-  data-testid="app"
->
+<div>
   <a
     href="/"
   >

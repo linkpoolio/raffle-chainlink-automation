@@ -5,7 +5,7 @@ import { Nav } from '@ui/features/nav'
 import { RaffleList, RaffleDetail } from '@ui/features/raffle'
 
 export const App = () => (
-  <div data-testid="app">
+  <div>
     <Nav />
     <Switch>
       <Route exact path={Routes.RaffleList}>
