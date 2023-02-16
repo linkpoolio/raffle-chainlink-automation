@@ -1,6 +1,6 @@
 name: test
 
-on: workflow_dispatch
+on: [push]
 
 env:
   FOUNDRY_PROFILE: ci
@@ -21,6 +21,12 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
+
+      - name: Run Make Install
+        run: |
+          make install
+        id: install
+        working-directory: contracts
 
       - name: Run Forge build
         run: |

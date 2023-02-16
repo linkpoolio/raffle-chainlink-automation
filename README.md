@@ -76,7 +76,7 @@ $ foundry up
 $ brew install libusb
   ```
 
-### 2. (optional) Install contract dependencies if changes have been made to contracts
+### 2. Install contract dependencies if changes have been made to contracts
 
 ```bash
 # <root>/contracts
