@@ -1,17 +1,10 @@
 import { useContractWrite, usePrepareContractWrite } from 'wagmi'
 import { RAFFLE_MANAGER_CONTRACT_ADDRESS } from './const'
-import type {
-  ClaimPrizeParams,
-  FulfillRandomWordsParams,
-  EnterRaffleParams,
-  CreateRaffleParams,
-  TransactionResponse
-} from './types'
 import RaffleManager from './abi/RaffleManager.json'
 
-export const createRaffle = async (
-  params: CreateRaffleParams
-): Promise<TransactionResponse> => {
+// ******** WRITE FUNCTIONS ********
+
+export const createRaffle = (params: CreateRaffleParams) => {
   try {
     const {
       prize,
@@ -49,9 +42,7 @@ export const createRaffle = async (
   }
 }
 
-export const enterRaffle = async (
-  params: EnterRaffleParams
-): Promise<TransactionResponse> => {
+export const enterRaffle = (params: EnterRaffleParams) => {
   try {
     const { raffleId, entries, proof } = params
     const { config } = usePrepareContractWrite({
@@ -67,9 +58,7 @@ export const enterRaffle = async (
   }
 }
 
-export const fulfillRandomWords = async (
-  params: FulfillRandomWordsParams
-): Promise<TransactionResponse> => {
+export const fulfillRandomWords = (params: FulfillRandomWordsParams) => {
   try {
     const { requestId, randomWords } = params
     const { config } = usePrepareContractWrite({
@@ -85,9 +74,7 @@ export const fulfillRandomWords = async (
   }
 }
 
-export const claimPrize = async (
-  params: ClaimPrizeParams
-): Promise<TransactionResponse> => {
+export const claimPrize = (params: ClaimPrizeParams) => {
   try {
     const { raffleId } = params
     const { config } = usePrepareContractWrite({
@@ -101,4 +88,34 @@ export const claimPrize = async (
   } catch (error: any) {
     throw new Error(`Error claiming prize: ${error.message}`)
   }
+}
+
+// ******** TYPES ********
+
+export interface ClaimPrizeParams {
+  raffleId: number
+}
+
+export interface FulfillRandomWordsParams {
+  requestId: string
+  randomWords: string[]
+}
+
+export interface EnterRaffleParams {
+  raffleId: number
+  entries: number
+  proof: string[]
+}
+
+export interface CreateRaffleParams {
+  prize: string // name of prize in hexadicimal
+  timeLength: number // time length
+  fee: number // fee
+  name: string // name of raffle in hexadicimal
+  feeToken: string // fee token
+  merkleRoot: string // merkle root bytes32 hexadicimal
+  automation: boolean // automation boolean
+  participants: string[] // participants array of bytes32 hexadicimal
+  totalWinners: number
+  entriesPerUser: number
 }
