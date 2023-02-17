@@ -1,36 +1,34 @@
 import React from 'react'
-import { Router } from 'react-router-dom'
-import { createBrowserHistory } from 'history'
-// import { createRoot } from 'react-dom/client'
-// import { act } from '@testing-library/react'
+import { createRoot } from 'react-dom/client'
+import { act } from '@testing-library/react'
 import renderer from 'react-test-renderer'
 
 import { App } from '@ui/App'
+import { Providers } from '@ui/providers'
+import { NavigationBar } from '@ui/features/navigationBar'
 
 const getComponent = () => {
-  const history = createBrowserHistory()
-
   const component = (
-    <Router history={history}>
+    <Providers>
+      <NavigationBar />
       <App />
-    </Router>
+    </Providers>
   )
 
   return component
 }
 
 describe('App', () => {
-  // TODO: debug why this isnt working
-  // it('renders the App.', () => {
-  //   const container = document.createElement('div')
-  //   document.body.appendChild(container)
+  it('renders the App.', () => {
+    const container = document.createElement('div')
+    document.body.appendChild(container)
 
-  //   const root = createRoot(container)
+    const root = createRoot(container)
 
-  //   act(() => root.render(getComponent()))
+    act(() => root.render(getComponent()))
 
-  //   expect(document.body.textContent).toBeTruthy()
-  // })
+    expect(document.body.textContent).toBeTruthy()
+  })
 
   it('matches snapshot', () => {
     const tree = renderer.create(getComponent()).toJSON()
