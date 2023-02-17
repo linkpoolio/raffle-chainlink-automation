@@ -1,14 +1,4 @@
 export const networkConfig: { [key: number]: any } = {
-  5: {
-    name: "local",
-    linkAddress: "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
-    wrapperAddress: "0x708701a1DfF4f478de54383E49a627eD4852C816",
-    keepersRegistry: "0x02777053d6764996e594c3E88AF1D58D5363a2e6",
-    requestConfirmations: 3,
-    callbackGasLimit: 10000000,
-    keyHash:
-      "0x79d3d8832d904592c0bf9818b621522c988bb8b0c05cdc3b15aea1b6e8db0c15", // 150 gwei
-  },
   1: {
     name: "mainnet",
     linkAddress: "0x514910771AF9Ca656af840dff83E8264EcF986CA",
