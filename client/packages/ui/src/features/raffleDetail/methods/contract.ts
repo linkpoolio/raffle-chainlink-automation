@@ -1,17 +1,18 @@
-import { mockRaffle as raffle, mockState } from '../mock' // TODO: remove
+import { getMockRaffle, mockState } from '../mock' // TODO: remove
 const status = mockState.participantStatus // TODO: remove
 
 const timeout = (ms) => new Promise((resolve) => setTimeout(resolve, ms)) // TODO: remove, this was for testing only
 const defaultMs = 2000
 
-export const getRaffle = async ({ id, asyncManager, setRaffle }) => {
+export const getRaffle = async ({ id, asyncManager, update }) => {
   try {
     asyncManager.start()
     // TODO: replace mock with contract logic to fetch by id
     // const raffle = await <someImportedAction>({ id })
     await timeout(defaultMs) // TODO: remove this after above action is made
+    const raffle = getMockRaffle(id) // TODO: remove this after above action is made
     asyncManager.success()
-    setRaffle(raffle)
+    update({ raffle })
   } catch (error) {
     asyncManager.fail(`Could not get raffle id \`${id}\``)
   }

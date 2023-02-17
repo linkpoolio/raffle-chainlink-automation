@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react'
 
 import { joinRaffle } from '@ui/features/raffleDetail'
 
-export const Join = ({ id, state, asyncManager, reset }) => {
+export const Join = ({ id, reset, store, asyncManager }) => {
   const [entries, setEntries] = useState('')
   const [success, setSuccess] = useState(false)
+
+  const { identifier } = store.state
 
   const onChange = (e) => {
     setEntries(e.target.value)
@@ -13,7 +15,7 @@ export const Join = ({ id, state, asyncManager, reset }) => {
   const onSubmit = async () => {
     const response = await joinRaffle({
       id,
-      identifier: state.identifier,
+      identifier,
       entries,
       asyncManager
     })
@@ -38,7 +40,7 @@ export const Join = ({ id, state, asyncManager, reset }) => {
     <>
       <div>
         Successfully joined raffle id `{id}` with `{entries}` entries for
-        participant `{state.identifier}`.
+        participant `{identifier}`.
       </div>
       <button onClick={reset}>Close</button>
     </>

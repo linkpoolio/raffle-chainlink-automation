@@ -17,13 +17,13 @@ const Lost = ({ reset }) => {
   )
 }
 
-const WonUnclaimed = ({ id, state, reset, asyncManager }) => {
+const WonUnclaimed = ({ id, reset, store, asyncManager }) => {
   const [success, setSuccess] = useState(false)
 
   const onClaim = async () => {
     const response = await claimPrize({
       id,
-      identifier: state.identifier,
+      identifier: store.state.identifier,
       asyncManager
     })
     setSuccess(response)
@@ -58,7 +58,7 @@ const WonClaimed = ({ reset }) => {
 }
 
 export const ParticipantStatus = (props) => {
-  switch (props.state.participantStatus) {
+  switch (props.store.state.participantStatus) {
     case participantStatus.LOST:
       return <Lost {...props} />
     case participantStatus.WON_UNCLAIMED:
