@@ -18,8 +18,13 @@
     "tsc": "tsc --noEmit"
   },
   "dependencies": {
+    "@chakra-ui/icons": "^2.0.17",
+    "@chakra-ui/react": "^2.5.1",
+    "@emotion/react": "^11.10.6",
+    "@emotion/styled": "^11.10.6",
     "connectkit": "^1.1.3",
     "ethers": "5.5.4",
+    "framer-motion": "^9.0.4",
     "keccak256": "^1.0.6",
     "react": "latest",
     "react-dom": "latest",
