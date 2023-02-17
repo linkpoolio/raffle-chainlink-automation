@@ -3,13 +3,41 @@
 exports[`App matches snapshot 1`] = `
 [
   <h2>
-    RaffleList
+    Raffles
   </h2>,
-  <a
-    href="/raffle/1"
-    onClick={[Function]}
+  <h4>
+    Filters
+  </h4>,
+  <span>
+    Owned by Me
+  </span>,
+  <input
+    checked={false}
+    onChange={[Function]}
+    type="checkbox"
+  />,
+  <span>
+    Status
+  </span>,
+  <select
+    onChange={[Function]}
+    value=""
   >
-    Raffle Detail
-  </a>,
+    <option
+      value=""
+    >
+      All
+    </option>
+    <option
+      value="IN_PROGRESS"
+    >
+      In Progress
+    </option>
+    <option
+      value="COMPLETE"
+    >
+      Complete
+    </option>
+  </select>,
 ]
 `;

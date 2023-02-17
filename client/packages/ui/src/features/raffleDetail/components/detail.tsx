@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
 import { Loading, Error } from '@ui/components'
@@ -7,14 +7,14 @@ import { Routes } from '@ui/Routes'
 import {
   StepManager,
   getRaffle,
-  steps,
-  raffleStatus,
-  raffleType
+  raffleType,
+  useActionButtons
 } from '@ui/features/raffleDetail'
 
 import { mockState } from '../mock' // TODO: remove
 
 export const initialState = {
+  raffle: null,
   step: null,
   identifier: null,
   participantStatus: null,
@@ -24,24 +24,15 @@ export const initialState = {
 // TODO: check for is participant on static after indentifer provided; and present a "you did not participant" type message
 
 export const RaffleDetail = ({ id }) => {
-  const [raffle, setRaffle] = useState(null)
-  const asyncManager = useAsyncManager()
   const store = useStore(initialState)
+  const asyncManager = useAsyncManager()
+  const ActionButtons = useActionButtons({ update: store.update })
 
   const { update } = store
-
-  const onParticipantStatusClick = () => {
-    if (raffle.type == raffleType.STATIC)
-      return update({ step: steps.PROVIDE_IDENTIFER })
-    // TODO: replace mock with user's wallet address from wagmi
-    if (raffle.type == raffleType.DYNAMIC)
-      return update({ identifier: mockState.walletAddress })
-  }
-
-  const onJoinRaffle = () => update({ step: steps.JOIN })
+  const { raffle } = store.state
 
   const componentDidMount = () => {
-    if (id) getRaffle({ id, setRaffle, asyncManager })
+    if (id) getRaffle({ id, update, asyncManager })
   }
   useEffect(componentDidMount, [])
 
@@ -61,18 +52,11 @@ export const RaffleDetail = ({ id }) => {
       <Link to={Routes.RaffleList}>Raffle List</Link>
       <Loading asyncManager={asyncManager} />
       <Error asyncManager={asyncManager} />
-      {raffle?.status == raffleStatus.COMPLETE && (
-        <div>
-          <button onClick={onParticipantStatusClick}>Did I win?</button>
-        </div>
-      )}
-      {raffle?.status == raffleStatus.IN_PROGRESS &&
-        raffle?.type == raffleType.DYNAMIC &&
-        store.state.identifier && (
-          <div>
-            <button onClick={onJoinRaffle}>Join Raffle</button>
-          </div>
-        )}
+      <ActionButtons.JoinRaffle
+        raffle={raffle}
+        identifier={store.state.identifier}
+      />
+      <ActionButtons.CheckStatus raffle={raffle} />
       <StepManager id={id} store={store} />
       <div>
         {raffle &&
