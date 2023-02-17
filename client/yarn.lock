@@ -4798,6 +4798,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/papaparse@npm:^5.3.1":
+  version: 5.3.7
+  resolution: "@types/papaparse@npm:5.3.7"
+  dependencies:
+    "@types/node": "*"
+  checksum: 5ffa6fc81c0f41cd18c9c015599b3690f2a19ee553dec85e92c17bd1ef4a045e0ba4973d8bd49aed9f83fcba3b0ec280ebbe0a0def66701c0b4860c691444694
+  languageName: node
+  linkType: hard
+
 "@types/parse-json@npm:^4.0.0":
   version: 4.0.0
   resolution: "@types/parse-json@npm:4.0.0"
@@ -11000,6 +11009,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"papaparse@npm:^5.3.1":
+  version: 5.3.2
+  resolution: "papaparse@npm:5.3.2"
+  checksum: a5950ef931a42f6759a8d3823a43dd30f375b37a0ddea6ea5448c0c5024cd226819231958c49c24fbcdeab297c63fd1d630130b3439876ea0fd17d8a267738ae
+  languageName: node
+  linkType: hard
+
 "parent-module@npm:^1.0.0":
   version: 1.0.1
   resolution: "parent-module@npm:1.0.1"
@@ -11488,6 +11504,7 @@ __metadata:
     react: latest
     react-dom: latest
     react-helmet: ^6.1.0
+    react-papaparse: ^4.1.0
     react-router: 5.3.1
     react-router-dom: 5.3.1
     react-test-renderer: ^18.2.0
@@ -11597,6 +11614,16 @@ __metadata:
   version: 17.0.2
   resolution: "react-is@npm:17.0.2"
   checksum: 9d6d111d8990dc98bc5402c1266a808b0459b5d54830bbea24c12d908b536df7883f268a7868cfaedde3dd9d4e0d574db456f84d2e6df9c4526f99bb4b5344d8
+  languageName: node
+  linkType: hard
+
+"react-papaparse@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "react-papaparse@npm:4.1.0"
+  dependencies:
+    "@types/papaparse": ^5.3.1
+    papaparse: ^5.3.1
+  checksum: 8ac23c9ef85d5b7782cd97ac796234b4ba311e250e9cb60acebc8ce505c932852f1fcbcb9b7d3a9fb33f1f9e8651ceeea7c2a33dc01336b1da208fabdf09b936
   languageName: node
   linkType: hard
 
