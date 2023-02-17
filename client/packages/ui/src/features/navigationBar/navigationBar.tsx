@@ -1,7 +1,8 @@
 import React from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import { Heading, Box, Container, Flex, Link, Circle } from '@chakra-ui/react'
-import { ConnectWallet } from '../connectWallet'
+import { ConnectWallet } from '@ui/features/connectWallet'
+import { Routes } from '@ui/Routes'
 
 export const NavigationBar = () => (
   <Box bg="brand.white" as="header">
@@ -9,7 +10,7 @@ export const NavigationBar = () => (
       <Flex as="nav" height={10} alignItems="center" gap="8">
         <Link
           as={RouterLink}
-          to="/"
+          to={Routes.RaffleList}
           _hover={{
             textTransform: 'none'
           }}
@@ -29,7 +30,7 @@ export const NavigationBar = () => (
           <Flex gap="6">
             <Link
               as={RouterLink}
-              to="/"
+              to={Routes.RaffleList}
               fontSize="sm"
               color="brand.gray_70"
               fontWeight={600}
@@ -37,12 +38,12 @@ export const NavigationBar = () => (
                 textTransform: 'none',
                 color: 'brand.primary'
               }}
-              href="/home">
+              href={Routes.RaffleList}>
               Home
             </Link>
             <Link
               as={RouterLink}
-              to="/"
+              to={Routes.RaffleCreate}
               fontSize="sm"
               color="brand.gray_70"
               fontWeight={600}
@@ -50,7 +51,7 @@ export const NavigationBar = () => (
                 textTransform: 'none',
                 color: 'brand.primary'
               }}
-              href="/home">
+              href={Routes.RaffleCreate}>
               Create Raffle
             </Link>
           </Flex>

@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Container, Grid } from '@chakra-ui/react'
 
-import { LoadingList, Error } from '@ui/components'
+import { LoadingList, Error, Success } from '@ui/components'
 import { useAsyncManager, useStore } from '@ui/hooks'
 import { getRaffleList, Row, Filters } from '@ui/features/raffleList'
 
@@ -14,11 +14,13 @@ const initialFilterState = {
   status: ''
 }
 
-export const RaffleList = () => {
+export const RaffleList = (props) => {
   const store = useStore(initialState)
   const filterStore = useStore(initialFilterState)
   const asyncManager = useAsyncManager()
-
+  const [created, setCreated] = useState(
+    props.location.search.includes('create-success')
+  )
   const { state, update } = store
   const filters = filterStore.state
 
@@ -41,6 +43,11 @@ export const RaffleList = () => {
 
   return (
     <Container maxW="container.xl" my="8">
+      <Success
+        message={'Raffle successfully created'}
+        show={created}
+        onClose={() => setCreated(null)}
+      />
       <Error asyncManager={asyncManager} />
       <Filters walletAddress={walletAddress} store={filterStore} />
       <Grid templateColumns="repeat(3, 1fr)" gap={16} my="4">
