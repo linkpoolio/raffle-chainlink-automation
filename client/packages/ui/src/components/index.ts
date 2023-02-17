@@ -1,4 +1,6 @@
 export * from './csvUpload'
 export * from './error'
+export * from './hero'
 export * from './loading'
+export * from './loadingList'
 export * from './modal'
