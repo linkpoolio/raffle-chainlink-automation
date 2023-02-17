@@ -1,5 +1,5 @@
 import { useContractRead } from 'wagmi'
-import { RAFFLE_MANAGER_CONTRACT_ADDRESS } from './const'
+import { RAFFLE_MANAGER_CONTRACT_ADDRESS } from '@ui/contract/raffle'
 import RaffleManager from './abi/RaffleManager.json'
 
 // ******** READ FUNCTIONS ********

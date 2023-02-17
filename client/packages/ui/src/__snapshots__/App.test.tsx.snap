@@ -1,20 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`App matches snapshot 1`] = `
-<div>
-  <a
-    href="/"
-  >
-    Chainlink Raffles
-  </a>
+[
   <h2>
     RaffleList
-  </h2>
+  </h2>,
   <a
     href="/raffle/1"
     onClick={[Function]}
   >
     Raffle Detail
-  </a>
-</div>
+  </a>,
+]
 `;

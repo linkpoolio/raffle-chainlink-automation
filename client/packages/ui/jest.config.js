@@ -15,6 +15,7 @@ module.exports = {
   ],
   setupFilesAfterEnv: [`${__dirname}/src/setupTests.ts`],
   transform: {
+    "^.+\\.[t|j]sx?$": "babel-jest",
     '^.+\\.tsx?$': [
       'ts-jest',
       {
