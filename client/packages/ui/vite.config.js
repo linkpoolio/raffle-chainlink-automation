@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import reactRefresh from '@vitejs/plugin-react-refresh'
 import path from 'path'
+import NodeGlobalsPolyfillPlugin from '@esbuild-plugins/node-globals-polyfill'
 
 // https://vitejs.dev/config/
 const prefix = 'UI'
@@ -44,5 +45,16 @@ export default defineConfig({
     alias: {
       '@ui': path.resolve(__dirname, './src')
     }
-  }
-})
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      define: {
+        global: 'globalThis'
+      },
+      plugins: [
+        NodeGlobalsPolyfillPlugin({
+          buffer: true,
+        })
+      ]
+    }
+  },})
