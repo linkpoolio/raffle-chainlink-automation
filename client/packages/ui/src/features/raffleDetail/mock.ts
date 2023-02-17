@@ -8,6 +8,12 @@ export const mockRaffle = {
   token: '0x326C977E6efc84E512bB9C30f76E30c160eD06FB',
   amount: 1000000000000000000,
   participants: [1, 2, 3],
+
+  // Testing: scenario 1
+  // status: raffleStatus.COMPLETE,
+  // type: raffleType.STATIC
+
+  // Testing: scenario 2
   status: raffleStatus.IN_PROGRESS,
   type: raffleType.DYNAMIC
 }

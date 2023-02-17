@@ -2,41 +2,38 @@ import React, { useState, useEffect } from 'react'
 
 import { getParticipantStatus, steps } from '@ui/features/raffleDetail'
 
-export const ProvideIdentifier = ({
-  id,
-  state,
-  stateManager,
-  asyncManager
-}) => {
-  const [input, setInput] = useState('')
+export const ProvideIdentifier = ({ id, store, asyncManager }) => {
+  const [identifier, setIdentifier] = useState('')
 
   const onChange = (e) => {
-    setInput(e.target.value)
+    setIdentifier(e.target.value)
   }
 
   const onSubmit = async () => {
-    const response = await getParticipantStatus({
+    const participantStatus = await getParticipantStatus({
       id,
-      identifier: input,
+      identifier,
       asyncManager
     })
 
-    if (response)
-      stateManager(
-        state,
-        ['identifier', 'participantStatus', 'step'],
-        [input, response, steps.PARTICIPANT_STATUS]
-      )
+    if (participantStatus)
+      store.update({
+        identifier,
+        participantStatus,
+        step: steps.PARTICIPANT_STATUS
+      })
   }
 
-  const componentDidUnmount = () => setInput('')
+  const componentDidUnmount = () => setIdentifier('')
   useEffect(componentDidUnmount, [])
 
   return (
     <>
       <div>Please enter your unique identifier</div>
-      <input type="text" value={input} onChange={onChange} />
-      <button disabled={asyncManager.loading || input == ''} onClick={onSubmit}>
+      <input type="text" value={identifier} onChange={onChange} />
+      <button
+        disabled={asyncManager.loading || identifier == ''}
+        onClick={onSubmit}>
         Next
       </button>
     </>

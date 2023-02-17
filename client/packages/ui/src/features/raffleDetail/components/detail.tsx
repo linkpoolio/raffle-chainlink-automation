@@ -2,12 +2,10 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
 import { Loading, Error } from '@ui/components'
-import { useAsyncManager } from '@ui/hooks'
+import { useAsyncManager, useStore } from '@ui/hooks'
 import { Routes } from '@ui/Routes'
 import {
   StepManager,
-  useStateManager,
-  initialState,
   getRaffle,
   steps,
   raffleStatus,
@@ -16,37 +14,44 @@ import {
 
 import { mockState } from '../mock' // TODO: remove
 
+export const initialState = {
+  step: null,
+  identifier: null,
+  participantStatus: null,
+  isParticipant: null
+}
+
+// TODO: check for is participant on static after indentifer provided; and present a "you did not participant" type message
+
 export const RaffleDetail = ({ id }) => {
   const [raffle, setRaffle] = useState(null)
-  const [state, setState] = useState(initialState)
   const asyncManager = useAsyncManager()
-  const stateManager = useStateManager(setState)
+  const store = useStore(initialState)
 
-  const reset = () => setState(initialState)
+  const { update } = store
 
   const onParticipantStatusClick = () => {
     if (raffle.type == raffleType.STATIC)
-      return stateManager(state, 'step', steps.PROVIDE_IDENTIFER)
+      return update({ step: steps.PROVIDE_IDENTIFER })
     // TODO: replace mock with user's wallet address from wagmi
     if (raffle.type == raffleType.DYNAMIC)
-      return stateManager(state, 'identifier', mockState.walletAddress)
+      return update({ identifier: mockState.walletAddress })
   }
 
-  const onJoinRaffle = () => stateManager(state, 'step', steps.JOIN)
+  const onJoinRaffle = () => update({ step: steps.JOIN })
 
   const componentDidMount = () => {
     if (id) getRaffle({ id, setRaffle, asyncManager })
-    return reset()
   }
   useEffect(componentDidMount, [])
 
   const raffleDidLoad = () => {
     // TODO: on raffle load, if dynamic and if wallet connected, check if user is a participant or not
-    // and save to state (e.g. state.isParticipant)
+    // and save to state (e.g. store.state.isParticipant)
 
     // TODO: replace this with real wallet address from actual connection
     if (raffle?.type == raffleType.DYNAMIC)
-      stateManager(state, 'identifier', mockState.walletAddress)
+      update({ identifier: mockState.walletAddress })
   }
   useEffect(raffleDidLoad, [raffle])
 
@@ -63,17 +68,12 @@ export const RaffleDetail = ({ id }) => {
       )}
       {raffle?.status == raffleStatus.IN_PROGRESS &&
         raffle?.type == raffleType.DYNAMIC &&
-        state.identifier && (
+        store.state.identifier && (
           <div>
             <button onClick={onJoinRaffle}>Join Raffle</button>
           </div>
         )}
-      <StepManager
-        id={id}
-        state={state}
-        stateManager={stateManager}
-        reset={reset}
-      />
+      <StepManager id={id} store={store} />
       <div>
         {raffle &&
           Object.keys(raffle).map((key) => (
