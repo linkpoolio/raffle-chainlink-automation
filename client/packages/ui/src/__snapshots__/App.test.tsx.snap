@@ -2,42 +2,64 @@
 
 exports[`App matches snapshot 1`] = `
 [
-  <h2>
-    Raffles
-  </h2>,
-  <h4>
-    Filters
-  </h4>,
-  <span>
-    Owned by Me
-  </span>,
-  <input
-    checked={false}
-    onChange={[Function]}
-    type="checkbox"
-  />,
-  <span>
-    Status
-  </span>,
-  <select
-    onChange={[Function]}
-    value=""
+  <div
+    className="chakra-container css-12lu1j9"
   >
-    <option
+    <h2
+      className="chakra-heading css-espiy2"
+    >
+      Chainlink Raffles
+    </h2>
+    <p
+      className="chakra-text css-lyv0ed"
+    >
+      Fun and Exciting Ways to Support Causes and Win Prizes
+    </p>
+    <hr
+      aria-orientation="horizontal"
+      className="chakra-divider css-3lql9w"
+    />
+  </div>,
+  <div
+    className="chakra-container css-1ho5nll"
+  >
+    <h4>
+      Filters
+    </h4>
+    <span>
+      Owned by Me
+    </span>
+    <input
+      checked={false}
+      onChange={[Function]}
+      type="checkbox"
+    />
+    <span>
+      Status
+    </span>
+    <select
+      onChange={[Function]}
       value=""
     >
-      All
-    </option>
-    <option
-      value="IN_PROGRESS"
-    >
-      In Progress
-    </option>
-    <option
-      value="COMPLETE"
-    >
-      Complete
-    </option>
-  </select>,
+      <option
+        value=""
+      >
+        All
+      </option>
+      <option
+        value="IN_PROGRESS"
+      >
+        In Progress
+      </option>
+      <option
+        value="COMPLETE"
+      >
+        Complete
+      </option>
+    </select>
+    <div
+      className="css-1lapfcl"
+    />
+  </div>,
 ]
 `;

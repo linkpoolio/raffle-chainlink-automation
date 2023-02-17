@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react'
-import { Error } from '@ui/components'
+import { Container, Grid } from '@chakra-ui/react'
+
+import { LoadingList, Error } from '@ui/components'
 import { useAsyncManager, useStore } from '@ui/hooks'
 import { getRaffleList, Row, Filters } from '@ui/features/raffleList'
-import { Container, Grid } from '@chakra-ui/react'
-import { LoadingList } from './loadingList'
 
 export const initialState = {
   list: []
