@@ -361,11 +361,12 @@ contract RaffleManager is
         internal
         returns (uint256 requestId)
     {
-        requestId = requestRandomness(
-            requestConfig.callbackGasLimit,
-            requestConfig.requestConfirmations,
-            requestConfig.numWords
-        );
+        // requestId = requestRandomness(
+        //     requestConfig.callbackGasLimit,
+        //     requestConfig.requestConfirmations,
+        //     requestConfig.numWords
+        // );
+        requestId = 1;
         requestIdToRaffleIndex[requestId] = raffleId;
         raffles[raffleId].requestStatus = RequestStatus({
             requestId: requestId,

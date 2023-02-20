@@ -6,10 +6,12 @@ import "forge-std/console.sol";
 import "../src/RaffleManager.sol";
 import {ERC20Mock} from "../src/mock/ERC20Mock.sol";
 import {ERC677Mock} from "../src/mock/ERC677Mock.sol";
+import {VRFV2WrapperMock} from "../src/mock/VRFV2WrapperMock.sol";
 
 contract RaffleManagerTest is Test {
     RaffleManager raffleManager;
     ERC20Mock customToken;
+    VRFV2WrapperMock vrfMock;
     address wrapperAddress;
     uint16 requestConfirmations;
     uint32 callbackGasLimit;
@@ -24,6 +26,9 @@ contract RaffleManagerTest is Test {
     address addrB = address(0x0000000000000000000000000000000000000002);
     bytes32[] proofA = new bytes32[](2);
     bytes32[] proofB = new bytes32[](2);
+    uint96 BASE_FEE = 2500000000;
+    uint96 GAS_PRICE_LINK = 1e9;
+    uint256 mainnetFork;
 
     event RaffleCreated(
         bytes prize,
@@ -44,6 +49,7 @@ contract RaffleManagerTest is Test {
     );
 
     function setUp() public {
+        // mainnetFork = vm.createSelectFork(vm.rpcUrl("mainnet"));
         admin = makeAddr("admin");
         raffleAdmin = makeAddr("raffleAdmin");
         user1 = makeAddr("user1");
@@ -67,8 +73,9 @@ contract RaffleManagerTest is Test {
         ] = 0x5b70e80538acdabd6137353b0f9d8d149f4dba91e8be2e7946e409bfdbe685b9;
         vm.startPrank(admin);
         customLINK = new ERC677Mock("Chainlink", "LINK", 1000000 ether);
+        vrfMock = new VRFV2WrapperMock(BASE_FEE, GAS_PRICE_LINK);
         raffleManager = new RaffleManager(
-            wrapperAddress,
+            address(vrfMock),
             requestConfirmations,
             callbackGasLimit,
             keeperAddress,
@@ -169,6 +176,25 @@ contract RaffleManagerTest is Test {
             fee: 1 ether,
             name: bytes32("Big Mac Contest"),
             feeToken: address(customToken),
+            merkleRoot: bytes32(""),
+            automation: false,
+            participants: new bytes32[](0),
+            totalWinners: 1,
+            entriesPerUser: 1
+        });
+    }
+
+    function mainnetForkRaffleFixture() public {
+        vm.selectFork(mainnetFork);
+        vm.expectEmit(true, true, true, true);
+        emit RaffleCreated(bytes("BigMac"), 0, 1 ether, address(0), false);
+        vm.prank(raffleAdmin);
+        raffleManager.createRaffle({
+            prize: bytes("BigMac"),
+            timeLength: 0,
+            fee: 1 ether,
+            name: bytes32("Big Mac Contest"),
+            feeToken: address(0),
             merkleRoot: bytes32(""),
             automation: false,
             participants: new bytes32[](0),
@@ -373,5 +399,19 @@ contract RaffleManagerTest is Test {
         merkleFixture();
         merkleFixture();
         assertEq(raffleManager.getOwnerRaffles(raffleAdmin).length, 2);
+    }
+
+    function test_requestRandomWords_createsRequestStatusForRaffle() public {
+        vm.prank(admin);
+        customLINK.transfer(address(raffleAdmin), 1 ether);
+        staticRaffleFixture();
+        vm.prank(raffleAdmin);
+        customLINK.transferAndCall(
+            address(raffleManager),
+            1 ether,
+            bytes(abi.encode(0))
+        );
+        RaffleManager.RaffleInstance memory r = raffleManager.getRaffle(0);
+        assertEq(r.requestStatus.paid, 1 ether);
     }
 }
