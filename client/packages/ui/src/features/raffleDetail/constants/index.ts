@@ -19,3 +19,8 @@ export const participantStatus = {
   WON_UNCLAIMED: 'WON_UNCLAIMED',
   WON_CLAIMED: 'WON_CLAIMED'
 }
+
+export const raffleStatusHumanReadable = {
+  IN_PROGRESS: 'In Progress',
+  COMPLETE: 'Complete'
+}

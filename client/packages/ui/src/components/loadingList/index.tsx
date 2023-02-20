@@ -1,5 +1,5 @@
 import React from 'react'
-import { SkeletonText, Box } from '@chakra-ui/react'
+import { SkeletonText, SkeletonCircle, Box } from '@chakra-ui/react'
 
 export const LoadingList = ({ asyncManager }) => {
   return asyncManager.loading ? (
@@ -9,10 +9,19 @@ export const LoadingList = ({ asyncManager }) => {
           <Box
             key={i}
             padding="6"
+            border="1px"
+            borderColor="brand.gray_10"
             boxShadow="brand.base"
             bg="white"
-            borderRadius="md">
-            <SkeletonText noOfLines={4} spacing="4" skeletonHeight="6" />
+            borderRadius="base">
+            <SkeletonCircle size="6" />
+            <SkeletonText
+              mt="4"
+              noOfLines={6}
+              spacing="6"
+              skeletonHeight="4"
+              minHeight={'237px'}
+            />
           </Box>
         )
       })}
