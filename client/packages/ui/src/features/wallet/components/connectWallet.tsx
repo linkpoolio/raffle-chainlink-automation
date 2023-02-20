@@ -1,39 +1,46 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useAccount, useConnect } from 'wagmi'
+import { InjectedConnector } from 'wagmi/connectors/injected'
+
+import { WalletIcon } from './walletIcon'
+import { MetaMaskIcon } from './metaMaskIcon'
 import {
-  Center,
-  Text,
-  Flex,
   useDisclosure,
   Button,
+  Center,
+  Flex,
+  Heading,
+  Text,
   Modal,
   ModalOverlay,
   ModalContent,
   ModalHeader,
   ModalBody,
-  ModalCloseButton,
-  Heading
+  ModalCloseButton
 } from '@chakra-ui/react'
-import { WalletIcon } from './walletIcon'
-import { MetaMaskIcon } from './metaMaskIcon'
-import { ConnectedWallet } from './connectedWallet'
 
 export function ConnectWallet() {
+  const { address } = useAccount()
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const connected = false
+  const { connect } = useConnect({
+    connector: new InjectedConnector()
+  })
+
+  const addressDidChange = () => {
+    if (address) onClose()
+  }
+  useEffect(addressDidChange, [address])
+
   return (
-    <Flex>
-      {connected ? (
-        <ConnectedWallet />
-      ) : (
-        <Button
-          onClick={onOpen}
-          display={{ base: 'none', md: 'flex' }}
-          variant="nav"
-          gap="2">
-          <WalletIcon />
-          Connect Wallet
-        </Button>
-      )}
+    <>
+      <Button
+        onClick={onOpen}
+        display={{ base: 'none', md: 'flex' }}
+        variant="nav"
+        gap="2">
+        <WalletIcon />
+        Connect Wallet
+      </Button>
       <Modal isOpen={isOpen} onClose={onClose} motionPreset="slideInBottom">
         <ModalOverlay />
         <ModalContent>
@@ -43,7 +50,7 @@ export function ConnectWallet() {
             </Heading>
           </ModalHeader>
           <ModalCloseButton />
-          <ModalBody pb="6" my="4">
+          <ModalBody pb="6" my="4" onClick={() => connect}>
             <Center>
               <Flex
                 as="button"
@@ -64,6 +71,6 @@ export function ConnectWallet() {
           </ModalBody>
         </ModalContent>
       </Modal>
-    </Flex>
+    </>
   )
 }

@@ -5,7 +5,7 @@ import renderer from 'react-test-renderer'
 
 import { App } from '@ui/App'
 import { Providers } from '@ui/providers'
-import { NavigationBar } from '@ui/features/navigationBar'
+import { NavigationBar } from '@ui/components'
 
 const getComponent = () => {
   const component = (

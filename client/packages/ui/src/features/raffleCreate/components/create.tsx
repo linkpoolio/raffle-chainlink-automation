@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useHistory } from 'react-router-dom'
+import { useAccount } from 'wagmi'
 import { Container } from '@chakra-ui/react'
 
 import { Routes } from '@ui/Routes'
@@ -24,12 +25,12 @@ export const baseInitialState = {
 // TODO: add form validation (required inputs, input requirements, etc)
 // TODO: add reusable form input components
 export const RaffleCreate = () => {
-  const createdBy = '0x98765432109876543210' // TODO: remove; replace with real address from wagmi
+  const { address } = useAccount()
 
   const store = useStore({
     ...baseInitialState,
     ...initialStaticState,
-    createdBy
+    createdBy: address
   })
   const asyncManager = useAsyncManager()
   const history = useHistory()
@@ -38,7 +39,7 @@ export const RaffleCreate = () => {
   const { state, update } = store
 
   const componentDidMount = () => {
-    if (!createdBy) history.push(Routes.RaffleList)
+    if (!address) history.push(Routes.RaffleList)
   }
 
   const componentDidUnmount = () => store.reset()

@@ -1,8 +1,23 @@
 import React, { useEffect } from 'react'
+import { useAccount } from 'wagmi'
 
 import { raffleStatus } from '@ui/features/raffleDetail'
 
-export const Filters = ({ walletAddress, store }) => {
+export const initialFilterState = {
+  ownedByMe: false,
+  status: ''
+}
+
+export const filterList = (filters, address) => (raffle) => {
+  const status = filters.status == '' || filters.status == raffle.status
+  const ownedByMe = !filters.ownedByMe || raffle.creatorId == address
+
+  return status && ownedByMe
+}
+
+export const Filters = ({ store }) => {
+  const { address } = useAccount()
+
   const { state, update, reset } = store
 
   const onFilterStatus = (e) => update({ status: e.target.value })
@@ -14,7 +29,7 @@ export const Filters = ({ walletAddress, store }) => {
   return (
     <>
       <h4>Filters</h4>
-      {walletAddress && (
+      {address && (
         <>
           <span>Owned by Me</span>
           <input

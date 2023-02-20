@@ -1,4 +1,10 @@
 import React from 'react'
+import { useAccount, useDisconnect } from 'wagmi'
+
+import { shortenAddress } from '@ui/utils'
+import { WalletIcon } from './walletIcon'
+import { MetaMaskIcon } from './metaMaskIcon'
+import { ChevronDownIcon, ExternalLinkIcon } from '@chakra-ui/icons'
 import {
   Button,
   Text,
@@ -12,13 +18,11 @@ import {
   PopoverCloseButton,
   Link
 } from '@chakra-ui/react'
-import { WalletIcon } from './walletIcon'
-import { shortenAddress } from '@ui/utils'
-import { ChevronDownIcon, ExternalLinkIcon } from '@chakra-ui/icons'
-import { MetaMaskIcon } from './metaMaskIcon'
 
 export function ConnectedWallet() {
-  const address = '0x1234567890123456789012345678901234567890'
+  const { address } = useAccount()
+  const { disconnect } = useDisconnect()
+
   return (
     <Popover>
       <PopoverTrigger>
@@ -52,6 +56,13 @@ export function ConnectedWallet() {
             {shortenAddress(address)} <ExternalLinkIcon mx="2px" />
           </Flex>
         </PopoverBody>
+        <Button
+          onClick={() => disconnect()}
+          display={{ base: 'none', md: 'flex' }}
+          variant="nav"
+          gap="2">
+          Disconnect
+        </Button>
       </PopoverContent>
     </Popover>
   )
