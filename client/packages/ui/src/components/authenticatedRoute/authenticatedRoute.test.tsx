@@ -2,12 +2,16 @@ import React from 'react'
 import * as wagmi from 'wagmi'
 import { render, screen } from '@testing-library/react'
 import { Providers } from '@ui/providers'
-import { NavigationBar } from './'
+import { AuthenticatedRoute } from './'
+
+const text = 'Authenticated'
 
 const getComponent = () => {
   const component = (
     <Providers>
-      <NavigationBar />
+      <AuthenticatedRoute connected={true}>
+        <h2>{text}</h2>
+      </AuthenticatedRoute>
     </Providers>
   )
 
@@ -19,20 +23,21 @@ const spy = (value) => {
   spy.mockReturnValue(value)
 }
 
-describe('NavigationBar', () => {
-  it('does not render create button on not connected', () => {
+describe('AuthenticatedRoute', () => {
+  it('redirects on connected', () => {
     spy({ address: null })
     render(getComponent())
 
-    const button = screen.queryByText('Create Raffle')
-    expect(button).toBeNull()
+    const heading = screen.queryByText(text)
+    expect(heading).toBeNull()
   })
 
-  it('renders create button on connected', () => {
+  it('renders child component on connected', () => {
     spy({ address: '0x123' })
     render(getComponent())
 
-    const button = screen.getByText('Create Raffle')
-    expect(button).toBeTruthy()
+    const heading = screen.getByText(text)
+    expect(heading).toBeTruthy()
   })
 })
+

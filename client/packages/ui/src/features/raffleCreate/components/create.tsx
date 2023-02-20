@@ -77,9 +77,9 @@ export const RaffleCreate = () => {
       <h2>Create Raffle</h2>
 
       <div>
-        <select value={type} onChange={onTypeChange}>
+        <select value={type} onChange={onTypeChange} data-testid='select-type'>
           <option value={raffleType.STATIC}>Static</option>
-          <option value={raffleType.DYNAMIC}>Dynamic</option>
+          <option value={raffleType.DYNAMIC} data-testid='select-dynamic'>Dynamic</option>
         </select>
       </div>
 
