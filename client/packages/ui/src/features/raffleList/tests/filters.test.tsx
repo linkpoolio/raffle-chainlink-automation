@@ -8,7 +8,7 @@ const getComponent = () => {
   const store = {
     state: {
       ownedByMe: false,
-      status: '',
+      status: ''
     },
     update: () => {},
     reset: () => {}

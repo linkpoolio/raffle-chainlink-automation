@@ -40,4 +40,3 @@ describe('AuthenticatedRoute', () => {
     expect(heading).toBeTruthy()
   })
 })
-
