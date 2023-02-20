@@ -1,5 +1,5 @@
 import React from 'react'
-import { useAccount, useDisconnect } from 'wagmi'
+import { useAccount, useDisconnect, useNetwork } from 'wagmi'
 
 import { shortenAddress } from '@ui/utils'
 import { WalletIcon } from './walletIcon'
@@ -22,7 +22,7 @@ import {
 export function ConnectedWallet() {
   const { address } = useAccount()
   const { disconnect } = useDisconnect()
-
+  const { chain } = useNetwork()
   return (
     <Popover>
       <PopoverTrigger>
@@ -32,7 +32,7 @@ export function ConnectedWallet() {
           borderColor="brand.gray_20"
           borderWidth="1px"
           color="brand.biscay">
-          <WalletIcon />
+          <WalletIcon w="16px" />
           {shortenAddress(address)}
           <ChevronDownIcon w={6} h={6} />
         </Button>
@@ -50,7 +50,7 @@ export function ConnectedWallet() {
             alignItems="center"
             color="brand.link"
             fontWeight="bold"
-            to="https://etherscan.io"
+            href={`${chain?.blockExplorers?.default?.url}/address/${address}`}
             isExternal
             fontSize="sm">
             {shortenAddress(address)} <ExternalLinkIcon mx="2px" />

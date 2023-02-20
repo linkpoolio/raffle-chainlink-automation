@@ -8,7 +8,7 @@ import { LoadingList, Error, Success } from '@ui/components'
 import { useAsyncManager, useStore } from '@ui/hooks'
 import {
   getRaffleList,
-  Row,
+  Card,
   Filters,
   filterList,
   initialFilterState
@@ -34,7 +34,7 @@ export const RaffleList = (props) => {
   useEffect(componentDidUnmount, [])
 
   return (
-    <Container maxW="container.xl" my="8">
+    <Container maxW="container.xl" mt="8" mb="20">
       <Success
         message={'Raffle successfully created'}
         show={props.location?.search?.includes('create-success')}
@@ -46,7 +46,7 @@ export const RaffleList = (props) => {
         <LoadingList asyncManager={asyncManager} />
         {store.state.list
           .filter(filterList(filterStore.state, address))
-          .map(Row)}
+          .map(Card)}
       </Grid>
     </Container>
   )

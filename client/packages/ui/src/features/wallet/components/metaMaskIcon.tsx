@@ -1,8 +1,10 @@
 import React from 'react'
+import { Box } from '@chakra-ui/react'
 
-export const MetaMaskIcon = (props) => {
+export const MetaMaskIcon = ({ ...props }) => {
   return (
-    <svg
+    <Box
+      as="svg"
       width="1em"
       height="1em"
       viewBox="0 0 64 64"
@@ -212,6 +214,6 @@ export const MetaMaskIcon = (props) => {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-    </svg>
+    </Box>
   )
 }
