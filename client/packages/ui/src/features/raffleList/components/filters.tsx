@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { useAccount } from 'wagmi'
 import { Switch, FormLabel, Select, HStack, Box, Flex } from '@chakra-ui/react'
 
-import { raffleStatus } from '@ui/features/raffleDetail'
+import { RaffleStatus } from '@ui/models'
 
 export const initialFilterState = {
   ownedByMe: false,
@@ -11,7 +11,7 @@ export const initialFilterState = {
 
 export const filterList = (filters, address) => (raffle) => {
   const status = filters.status == '' || filters.status == raffle.status
-  const ownedByMe = !filters.ownedByMe || raffle.creatorId == address
+  const ownedByMe = !filters.ownedByMe || raffle.owner == address
 
   return status && ownedByMe
 }
@@ -49,8 +49,9 @@ export const Filters = ({ store }) => {
             onChange={onFilterStatus}
             maxWidth="250px">
             <option value="">All</option>
-            <option value={raffleStatus.IN_PROGRESS}>In Progress</option>
-            <option value={raffleStatus.COMPLETE}>Complete</option>
+            <option value={RaffleStatus.STAGED}>Staged</option>
+            <option value={RaffleStatus.LIVE}>Live</option>
+            <option value={RaffleStatus.FINISHED}>Finished</option>
           </Select>
         </HStack>
       </Box>

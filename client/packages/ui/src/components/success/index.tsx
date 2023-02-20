@@ -1,6 +1,5 @@
 import React from 'react'
 
-// TODO: style this component
 export const Success = ({ show, onClose, message }) =>
   show && (
     <div>

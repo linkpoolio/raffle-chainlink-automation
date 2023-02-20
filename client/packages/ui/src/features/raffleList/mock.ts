@@ -3,24 +3,72 @@
 export const mockList = [
   {
     id: 1,
-    name: 'My Static Raffle',
-    creatorId: '0x12345678901234567890',
-    prize: '20 LINK',
-    token: '0x326C977E6efc84E512bB9C30f76E30c160eD06FB',
-    amount: 1000000000000000000,
-    participants: [1, 2, 3],
-    status: 'COMPLETE',
-    type: 'STATIC'
+    name: 'Static:Live',
+    type: 1,
+    status: 1,
+    owner: '0x12345678901234567890',
+    winners: [],
+    claimedPrizes: [],
+    contestantsAddresses: [
+      '0x7465737400000000000000000000000000000000000000000000000000000000', // "test"
+      '0x7465737500000000000000000000000000000000000000000000000000000000'
+    ]
   },
   {
     id: 2,
-    name: 'My Dynamic',
-    creatorId: '0x98765432109876543210',
-    prize: '20 LINK',
-    token: '0x326C977E6efc84E512bB9C30f76E30c160eD06FB',
-    amount: 1000000000000000000,
-    participants: [1, 2, 3],
-    status: 'IN_PROGRESS',
-    type: 'DYNAMIC'
+    name: 'Static:Finished',
+    type: 1,
+    status: 2,
+    owner: '0x12345678901234567890',
+    winners: [
+      '0x7465737400000000000000000000000000000000000000000000000000000000', // "test"
+      '0x7465737500000000000000000000000000000000000000000000000000000000'
+    ],
+    claimedPrizes: [
+      '0x7465737400000000000000000000000000000000000000000000000000000000', // "test"
+      '0x7465737500000000000000000000000000000000000000000000000000000000'
+    ],
+    contestantsAddresses: [
+      '0x7465737400000000000000000000000000000000000000000000000000000000', // "test"
+      '0x7465737500000000000000000000000000000000000000000000000000000000'
+    ]
+  },
+  {
+    id: 3,
+    name: 'Dynamic:Live:Not Joined',
+    type: 0,
+    status: 1,
+    owner: '0x98765432109876543210',
+    winners: [],
+    claimedPrizes: [],
+    contestantsAddresses: []
+  },
+  {
+    id: 4,
+    name: 'Dynamic:Live:Joined',
+    type: 0,
+    status: 1,
+    owner: '0x98765432109876543210',
+    winners: [],
+    claimedPrizes: [],
+    contestantsAddresses: [
+      '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+      '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a321'
+    ]
+  },
+  {
+    id: 5,
+    name: 'Dynamic:Finished',
+    type: 0,
+    status: 2,
+    owner: '0x98765432109876543210',
+    winners: [
+      '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+      '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a321'
+    ],
+    contestantsAddresses: [
+      '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+      '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a321'
+    ]
   }
 ]

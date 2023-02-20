@@ -1,14 +1,16 @@
 import React from 'react'
 
-import { steps, raffleStatus, raffleType } from '@ui/features/raffleDetail'
+import { steps } from '@ui/features/raffleDetail'
+import { RaffleStatus, RaffleType, isRaffleParticipant } from '@ui/models'
 
 const onJoinClick = ({ update }) => update({ step: steps.JOIN })
 
 export const JoinButton = ({ update, raffle, address, identifier }) =>
-  raffle?.status == raffleStatus.IN_PROGRESS &&
-  raffle?.type == raffleType.DYNAMIC &&
+  raffle?.status == RaffleStatus.LIVE &&
+  raffle?.type == RaffleType.DYNAMIC &&
   address &&
-  identifier && (
+  identifier &&
+  !isRaffleParticipant(raffle, identifier) && (
     <div>
       <button onClick={() => onJoinClick({ update })}>Join Raffle</button>
     </div>

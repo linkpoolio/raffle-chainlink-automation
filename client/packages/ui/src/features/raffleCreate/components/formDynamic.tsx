@@ -1,13 +1,13 @@
 import React from 'react'
 
 export const initialDynamicState = {
-  duration: 24,
+  timeLength: 24,
   automation: false,
   token: '',
   tokenAmount: 0,
   feeToken: '',
-  feeTokenAmount: 0,
-  whitelistMerkleRoot: ''
+  fee: 0,
+  merkleRoot: ''
 }
 
 export const FormDynamic = ({ state, onTextChange, onCheckboxChange }) => {
@@ -17,8 +17,8 @@ export const FormDynamic = ({ state, onTextChange, onCheckboxChange }) => {
         <span>Duration (hours)</span>
         <input
           type="number"
-          value={state.duration}
-          onChange={onTextChange('duration')}
+          value={state.timeLength}
+          onChange={onTextChange('timeLength')}
         />
       </div>
 
@@ -60,19 +60,15 @@ export const FormDynamic = ({ state, onTextChange, onCheckboxChange }) => {
 
       <div>
         <span>Fee Token Amount (wei)</span>
-        <input
-          type="text"
-          value={state.feeTokenAmount}
-          onChange={onTextChange('feeTokenAmount')}
-        />
+        <input type="text" value={state.fee} onChange={onTextChange('fee')} />
       </div>
 
       <div>
         <span>Whitelist Merkle Root</span>
         <input
           type="text"
-          value={state.whitelistMerkleRoot}
-          onChange={onTextChange('whitelistMerkleRoot')}
+          value={state.merkleRoot}
+          onChange={onTextChange('merkleRoot')}
         />
       </div>
     </>

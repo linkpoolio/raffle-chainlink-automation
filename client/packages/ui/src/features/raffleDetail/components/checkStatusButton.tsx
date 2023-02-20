@@ -1,28 +1,29 @@
 import React from 'react'
 
-import {
-  steps,
-  raffleStatus,
-  raffleType,
-  getParticipantStatus
-} from '@ui/features/raffleDetail'
+import { steps } from '@ui/features/raffleDetail'
+import { RaffleStatus, RaffleType } from '@ui/models'
 
-const onParticipantStatusClick = async ({
-  update,
-  asyncManager,
-  raffle,
-  identifier
-}) => {
+const onParticipantStatusClick = async ({ update, raffle, identifier }) => {
   // Require user to provide unique identifier
-  if (raffle.type == raffleType.STATIC)
+  if (raffle.type == RaffleType.STATIC)
     return update({ step: steps.PROVIDE_IDENTIFER })
   // Automatically use users wallet address as unique identifier
-  if (raffle.type == raffleType.DYNAMIC) {
-    const participantStatus = await getParticipantStatus({
-      id: raffle.id,
-      identifier,
-      asyncManager
+  if (raffle.type == RaffleType.DYNAMIC) {
+    let winner = false
+    let claimedPrize = false
+
+    raffle.winners.map((bytes32) => {
+      if (identifier == bytes32) winner = true
     })
+
+    if (winner) {
+      raffle.claimedPrizes.map((bytes32) => {
+        if (identifier == bytes32) claimedPrize = true
+      })
+    }
+
+    const participantStatus =
+      winner && claimedPrize ? 'WON_CLAIMED' : winner ? 'WON_UNCLAIMED' : 'LOST'
 
     if (participantStatus)
       update({
@@ -34,7 +35,7 @@ const onParticipantStatusClick = async ({
 }
 
 export const CheckStatusButton = (props) =>
-  props.raffle?.status == raffleStatus.COMPLETE && (
+  props.raffle?.status == RaffleStatus.FINISHED && (
     <div>
       <button onClick={() => onParticipantStatusClick(props)}>
         Did I win?

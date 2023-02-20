@@ -27,14 +27,19 @@ exports[`RaffleList matches snapshot 1`] = `
               All
             </option>
             <option
-              value="IN_PROGRESS"
+              value={0}
             >
-              In Progress
+              Staged
             </option>
             <option
-              value="COMPLETE"
+              value={1}
             >
-              Complete
+              Live
+            </option>
+            <option
+              value={2}
+            >
+              Finished
             </option>
           </select>
           <div

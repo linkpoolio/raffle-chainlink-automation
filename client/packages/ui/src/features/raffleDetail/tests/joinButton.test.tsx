@@ -6,7 +6,8 @@ import { JoinButton } from '../'
 const getProps = ({ type, status, address }) => ({
   raffle: {
     type,
-    status
+    status,
+    contestantsAddresses: ['0x122']
   },
   address,
   identifier: address
@@ -35,7 +36,7 @@ describe('JoinButton', () => {
 
   it('does not render join button on status == in progress && type != dynamic', () => {
     const props = getProps({
-      status: 'IN_PROGRESS',
+      status: 1,
       type: null,
       address: null
     })
@@ -47,8 +48,8 @@ describe('JoinButton', () => {
 
   it('does not render join button on status == in progress && type == dynamic && wallet != connected', () => {
     const props = getProps({
-      status: 'IN_PROGRESS',
-      type: 'DYNAMIC',
+      status: 1,
+      type: 0,
       address: null
     })
     render(getComponent(props))
@@ -57,10 +58,22 @@ describe('JoinButton', () => {
     expect(button).toBeNull()
   })
 
-  it('renders join button on status == in progress && type == dynamic && wallet == connected', () => {
+  it('does not render join button on status == in progress && type == dynamic && wallet == connected && already participant', () => {
     const props = getProps({
-      status: 'IN_PROGRESS',
-      type: 'DYNAMIC',
+      status: 1,
+      type: 0,
+      address: '0x122'
+    })
+    render(getComponent(props))
+
+    const button = screen.queryByText(joinText)
+    expect(button).toBeNull()
+  })
+
+  it('renders join button on status == in progress && type == dynamic && wallet == connected && not already participant', () => {
+    const props = getProps({
+      status: 1,
+      type: 0,
       address: '0x123'
     })
     render(getComponent(props))

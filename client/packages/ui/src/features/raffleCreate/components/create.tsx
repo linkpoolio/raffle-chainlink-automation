@@ -13,17 +13,16 @@ import {
   initialStaticState,
   initialDynamicState
 } from '@ui/features/raffleCreate'
-import { raffleType } from '@ui/features/raffleDetail'
+import { RaffleType } from '@ui/models'
 
 export const baseInitialState = {
   name: '',
   createdBy: null,
-  winners: 1,
+  totalWinners: 1,
   prize: ''
 }
 
-// TODO: add form validation (required inputs, input requirements, etc)
-// TODO: add reusable form input components
+// TODO: (nice to have) add resuable form components with form validation
 export const RaffleCreate = () => {
   const { address } = useAccount()
 
@@ -34,7 +33,7 @@ export const RaffleCreate = () => {
   })
   const asyncManager = useAsyncManager()
   const history = useHistory()
-  const [type, setType] = useState(raffleType.STATIC)
+  const [type, setType] = useState(RaffleType.STATIC)
 
   const { state, update } = store
 
@@ -48,15 +47,15 @@ export const RaffleCreate = () => {
   useEffect(componentDidUnmount, [])
 
   const onTypeChange = (e) => {
-    if (e.target.value == raffleType.STATIC) {
-      setType(raffleType.STATIC)
+    if (e.target.value == RaffleType.STATIC) {
+      setType(RaffleType.STATIC)
       update({
         ...baseInitialState,
         ...initialStaticState
       })
     }
-    if (e.target.value == raffleType.DYNAMIC) {
-      setType(raffleType.DYNAMIC)
+    if (e.target.value == RaffleType.DYNAMIC) {
+      setType(RaffleType.DYNAMIC)
       update({
         ...baseInitialState,
         ...initialDynamicState
@@ -78,10 +77,8 @@ export const RaffleCreate = () => {
 
       <div>
         <select value={type} onChange={onTypeChange} data-testid="select-type">
-          <option value={raffleType.STATIC}>Static</option>
-          <option value={raffleType.DYNAMIC} data-testid="select-dynamic">
-            Dynamic
-          </option>
+          <option value={RaffleType.STATIC}>Static</option>
+          <option value={RaffleType.DYNAMIC}>Dynamic</option>
         </select>
       </div>
 
@@ -92,8 +89,8 @@ export const RaffleCreate = () => {
         <span>Number of winners</span>
         <input
           type="text"
-          value={state.winners}
-          onChange={onTextChange('winners')}
+          value={state.totalWinners}
+          onChange={onTextChange('totalWinners')}
         />
       </div>
 
@@ -106,7 +103,7 @@ export const RaffleCreate = () => {
         />
       </div>
 
-      {type == raffleType.STATIC ? (
+      {type == RaffleType.STATIC ? (
         <FormStatic update={update} />
       ) : (
         <FormDynamic

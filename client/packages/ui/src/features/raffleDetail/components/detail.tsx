@@ -5,10 +5,10 @@ import { useAccount } from 'wagmi'
 import { Routes } from '@ui/Routes'
 import { Loading, Error } from '@ui/components'
 import { useAsyncManager, useStore } from '@ui/hooks'
+import { RaffleType } from '@ui/models'
 import {
   StepManager,
   getRaffle,
-  raffleType,
   JoinButton,
   CheckStatusButton
 } from '@ui/features/raffleDetail'
@@ -21,6 +21,7 @@ export const initialState = {
   isParticipant: null
 }
 
+// TODO: need a contextual action button for the creator of the contract marking it as finished and performing VRF direct
 export const RaffleDetail = ({ id }) => {
   const store = useStore(initialState)
   const asyncManager = useAsyncManager()
@@ -34,7 +35,7 @@ export const RaffleDetail = ({ id }) => {
   useEffect(componentDidMount, [])
 
   const addressOrRafleDidChange = () => {
-    if (raffle?.type == raffleType.DYNAMIC)
+    if (raffle?.type == RaffleType.DYNAMIC)
       store.update({ identifier: address })
   }
   useEffect(addressOrRafleDidChange, [address, raffle])
@@ -55,7 +56,6 @@ export const RaffleDetail = ({ id }) => {
         update={store.update}
         raffle={raffle}
         identifier={store.state.identifier}
-        asyncManager={asyncManager}
       />
       <StepManager id={id} store={store} />
       <div>
