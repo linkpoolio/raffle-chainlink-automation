@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 
 import { participantStatus, claimPrize } from '@ui/features/raffleDetail'
 
@@ -17,33 +17,28 @@ const Lost = ({ reset }) => {
   )
 }
 
-const WonUnclaimed = ({ id, reset, store, asyncManager }) => {
-  const [success, setSuccess] = useState(false)
-
+const WonUnclaimed = ({ id, store, asyncManager }) => {
   const onClaim = async () => {
     const response = await claimPrize({
       id,
       identifier: store.state.identifier,
       asyncManager
     })
-    setSuccess(response)
+
+    if (response)
+      store.update({
+        participantStatus: participantStatus.WON_CLAIMED
+      })
   }
 
   return (
     <>
       <span>You won!</span>
-      {!success ? (
-        <div>
-          <button disabled={asyncManager.loading} onClick={onClaim}>
-            Claim Prize
-          </button>
-        </div>
-      ) : (
-        <>
-          <div>Success, prize claimed!</div>
-          <Close reset={reset} />
-        </>
-      )}
+      <div>
+        <button disabled={asyncManager.loading} onClick={onClaim}>
+          Claim Prize
+        </button>
+      </div>
     </>
   )
 }
@@ -51,7 +46,7 @@ const WonUnclaimed = ({ id, reset, store, asyncManager }) => {
 const WonClaimed = ({ reset }) => {
   return (
     <>
-      <div>You Won! (and you already claimed your prize)</div>
+      <div>You Won! (and you successfully claimed your prize)</div>
       <Close reset={reset} />
     </>
   )

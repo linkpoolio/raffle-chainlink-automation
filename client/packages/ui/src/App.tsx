@@ -5,7 +5,7 @@ import { Routes } from '@ui/Routes'
 import { RaffleList } from '@ui/features/raffleList'
 import { RaffleDetail } from '@ui/features/raffleDetail'
 import { RaffleCreate } from '@ui/features/raffleCreate'
-import { Hero } from '@ui/components'
+import { AuthenticatedRoute, Hero } from '@ui/components'
 
 export const App = () => (
   <>
@@ -27,10 +27,12 @@ export const App = () => (
       />
 
       <Route exact path={Routes.RaffleCreate}>
-        <RaffleCreate />
+        <AuthenticatedRoute connected={true}>
+          <RaffleCreate />
+        </AuthenticatedRoute>
       </Route>
 
-      <Redirect to="/" />
+      <Redirect to={Routes.RaffleList} />
     </Switch>
   </>
 )

@@ -1,17 +1,17 @@
 import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useAccount } from 'wagmi'
 
+import { Routes } from '@ui/Routes'
 import { Loading, Error } from '@ui/components'
 import { useAsyncManager, useStore } from '@ui/hooks'
-import { Routes } from '@ui/Routes'
 import {
   StepManager,
   getRaffle,
   raffleType,
-  useActionButtons
+  JoinButton,
+  CheckStatusButton
 } from '@ui/features/raffleDetail'
-
-import { mockState } from '../mock' // TODO: remove
 
 export const initialState = {
   raffle: null,
@@ -21,30 +21,23 @@ export const initialState = {
   isParticipant: null
 }
 
-// TODO: check for is participant on static after indentifer provided; and present a "you did not participant" type message
-
 export const RaffleDetail = ({ id }) => {
   const store = useStore(initialState)
   const asyncManager = useAsyncManager()
-  const ActionButtons = useActionButtons({ update: store.update })
+  const { address } = useAccount()
 
-  const { update } = store
   const { raffle } = store.state
 
   const componentDidMount = () => {
-    if (id) getRaffle({ id, update, asyncManager })
+    if (id) getRaffle({ id, update: store.update, asyncManager })
   }
   useEffect(componentDidMount, [])
 
-  const raffleDidLoad = () => {
-    // TODO: on raffle load, if dynamic and if wallet connected, check if user is a participant or not
-    // and save to state (e.g. store.state.isParticipant)
-
-    // TODO: replace this with real wallet address from actual connection
+  const addressOrRafleDidChange = () => {
     if (raffle?.type == raffleType.DYNAMIC)
-      update({ identifier: mockState.walletAddress })
+      store.update({ identifier: address })
   }
-  useEffect(raffleDidLoad, [raffle])
+  useEffect(addressOrRafleDidChange, [address, raffle])
 
   return (
     <>
@@ -52,11 +45,18 @@ export const RaffleDetail = ({ id }) => {
       <Link to={Routes.RaffleList}>Raffle List</Link>
       <Loading asyncManager={asyncManager} />
       <Error asyncManager={asyncManager} />
-      <ActionButtons.JoinRaffle
+      <JoinButton
+        update={store.update}
         raffle={raffle}
+        address={address}
         identifier={store.state.identifier}
       />
-      <ActionButtons.CheckStatus raffle={raffle} />
+      <CheckStatusButton
+        update={store.update}
+        raffle={raffle}
+        identifier={store.state.identifier}
+        asyncManager={asyncManager}
+      />
       <StepManager id={id} store={store} />
       <div>
         {raffle &&

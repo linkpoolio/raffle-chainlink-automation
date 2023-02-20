@@ -1,0 +1,44 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RaffleList matches snapshot 1`] = `
+[
+  <div
+    className="chakra-container css-1fvob37"
+  >
+    <h4>
+      Filters
+    </h4>
+    <span>
+      Status
+    </span>
+    <select
+      onChange={[Function]}
+      value=""
+    >
+      <option
+        value=""
+      >
+        All
+      </option>
+      <option
+        value="IN_PROGRESS"
+      >
+        In Progress
+      </option>
+      <option
+        value="COMPLETE"
+      >
+        Complete
+      </option>
+    </select>
+    <div
+      className="css-e8v9bf"
+    />
+  </div>,
+  <span />,
+  <span
+    hidden={true}
+    id="__chakra_env"
+  />,
+]
+`;
