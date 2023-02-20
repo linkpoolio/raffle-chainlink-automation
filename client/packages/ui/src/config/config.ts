@@ -1,7 +1,3 @@
-// Example usage
-// import { env } from '@ui/config'
-// const contractAddress = env.contractAddress()
-
 const getEnv = (app, local) => {
   const key = `GLOBAL_${app}`
   return window[key] ? window[key] : local

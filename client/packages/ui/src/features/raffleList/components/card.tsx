@@ -11,14 +11,10 @@ import {
 } from '@chakra-ui/react'
 
 import { Routes, createRoute } from '@ui/Routes'
-import {
-  raffleStatus,
-  raffleType,
-  raffleStatusHumanReadable
-} from '@ui/features/raffleDetail'
+import { RaffleStatus, RaffleType } from '@ui/models'
 
 const StatusIcon = ({ status }) => {
-  return raffleStatus.COMPLETE === status ? (
+  return RaffleStatus.FINISHED === status ? (
     <svg
       width="11"
       height="11"
@@ -125,7 +121,11 @@ export const Card = (raffle) => {
           <HStack spacing="3" alignItems={'center'}>
             <StatusIcon status={raffle.status} />{' '}
             <Text fontSize={'sm'}>
-              {raffleStatusHumanReadable[raffle.status]}
+              {raffle.status == 0
+                ? 'Staged'
+                : raffle.status == 1
+                ? 'Live'
+                : 'Finished'}
             </Text>
           </HStack>
           {!raffle.permissioned && (
@@ -140,14 +140,14 @@ export const Card = (raffle) => {
           {raffle.name}
         </Heading>
         <Divider orientation="horizontal" />
-        {raffle.status !== raffleStatus.COMPLETE &&
-          raffle.type === raffleType.DYNAMIC && (
+        {raffle.status !== RaffleStatus.FINISHED &&
+          raffle.type === RaffleType.DYNAMIC && (
             <Flex justify="space-between" w="100%">
               <Text fontSize={'sm'}>Active Until:</Text>
               <Text fontSize={'sm'}>14.02.2023</Text>
             </Flex>
           )}
-        {raffle.status === raffleStatus.COMPLETE && (
+        {raffle.status === RaffleStatus.FINISHED && (
           <Flex justify="space-between" w="100%">
             <Text fontSize={'sm'}>Completed at:</Text>
             <Text fontSize={'sm'}>14.02.2023</Text>

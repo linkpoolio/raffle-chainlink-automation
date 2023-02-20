@@ -1,6 +1,5 @@
 import React from 'react'
 
-// TODO: style component
 export const Modal = ({ children, onClose }) => (
   <div>
     <button onClick={onClose}>X</button>

@@ -21,7 +21,7 @@ const getComponent = (props) => {
 const checkStatusText = 'Did I win?'
 
 describe('CheckStatusButton', () => {
-  it('does not render check status button on status != complete', () => {
+  it('does not render check status button on status != finished', () => {
     const props = getProps({
       status: null
     })
@@ -31,9 +31,9 @@ describe('CheckStatusButton', () => {
     expect(button).toBeNull()
   })
 
-  it('renders check status button on status == complete', () => {
+  it('renders check status button on status == finished', () => {
     const props = getProps({
-      status: 'COMPLETE'
+      status: 2
     })
     render(getComponent(props))
 

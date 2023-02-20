@@ -1,20 +1,34 @@
 import React, { useState, useEffect } from 'react'
+import { ethers } from 'ethers'
 
-import { getParticipantStatus, steps } from '@ui/features/raffleDetail'
+import { steps } from '@ui/features/raffleDetail'
 
-export const ProvideIdentifier = ({ id, store, asyncManager }) => {
+export const ProvideIdentifier = ({ store, asyncManager }) => {
   const [identifier, setIdentifier] = useState('')
 
   const onChange = (e) => {
     setIdentifier(e.target.value)
   }
 
-  const onSubmit = async () => {
-    const participantStatus = await getParticipantStatus({
-      id,
-      identifier,
-      asyncManager
+  const onSubmit = () => {
+    let winner = false
+    let claimedPrize = false
+
+    const { raffle } = store.state
+
+    raffle.winners.map((bytes32) => {
+      if (identifier == ethers.utils.parseBytes32String(bytes32)) winner = true
     })
+
+    if (winner) {
+      raffle.claimedPrizes.map((bytes32) => {
+        if (identifier == ethers.utils.parseBytes32String(bytes32))
+          claimedPrize = true
+      })
+    }
+
+    const participantStatus =
+      winner && claimedPrize ? 'WON_CLAIMED' : winner ? 'WON_UNCLAIMED' : 'LOST'
 
     if (participantStatus)
       store.update({

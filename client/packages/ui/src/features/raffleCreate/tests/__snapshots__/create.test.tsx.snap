@@ -12,16 +12,15 @@ exports[`RaffleCreate matches snapshot 1`] = `
       <select
         data-testid="select-type"
         onChange={[Function]}
-        value="STATIC"
+        value={1}
       >
         <option
-          value="STATIC"
+          value={1}
         >
           Static
         </option>
         <option
-          data-testid="select-dynamic"
-          value="DYNAMIC"
+          value={0}
         >
           Dynamic
         </option>
