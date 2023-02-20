@@ -37,7 +37,7 @@ export const RaffleList = (props) => {
     <Container maxW="container.xl" my="8">
       <Success
         message={'Raffle successfully created'}
-        show={props.location.search.includes('create-success')}
+        show={props.location?.search?.includes('create-success')}
         onClose={() => history.push(Routes.RaffleList)}
       />
       <Error asyncManager={asyncManager} />

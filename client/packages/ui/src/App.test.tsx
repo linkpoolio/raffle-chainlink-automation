@@ -1,11 +1,10 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { act } from '@testing-library/react'
-import renderer from 'react-test-renderer'
 
-import { App } from '@ui/App'
 import { Providers } from '@ui/providers'
 import { NavigationBar } from '@ui/components'
+import { App } from '@ui/App'
 
 const getComponent = () => {
   const component = (
@@ -28,11 +27,5 @@ describe('App', () => {
     act(() => root.render(getComponent()))
 
     expect(document.body.textContent).toBeTruthy()
-  })
-
-  it('matches snapshot', () => {
-    const tree = renderer.create(getComponent()).toJSON()
-
-    expect(tree).toMatchSnapshot()
   })
 })

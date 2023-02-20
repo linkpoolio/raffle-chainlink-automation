@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RaffleDetail matches snapshot 1`] = `
+[
+  <h2>
+    Raffle Detail
+  </h2>,
+  <a
+    href="/"
+    onClick={[Function]}
+  >
+    Raffle List
+  </a>,
+  <div />,
+  <span />,
+  <span
+    hidden={true}
+    id="__chakra_env"
+  />,
+]
+`;
