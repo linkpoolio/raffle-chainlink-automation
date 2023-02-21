@@ -7,12 +7,8 @@ import abi from './abi/RaffleManager.json'
 const address = env.contractAddress()
 const defaultOptions = { abi, address }
 
-// TODO: doesn't this need the address of the creator/owner?
-// TODO: we never specified entries per user in the UI, so we need to either add it to the UI or set
-// a default setting in the api method
-// TODO: verify that if we are creating a static raffle and the value is null for fee, timeLength, feeToken, etc
-// the method will still work
-// TODO: this is missing token and tokenAmount (for the prizes)
+// TODO: set entriesPerUser to 1
+// TODO: provide default values if null
 export const createRaffle = (params: contracts.CreateRaffleParams) => {
   try {
     const { config } = usePrepareContractWrite({
@@ -38,7 +34,6 @@ export const createRaffle = (params: contracts.CreateRaffleParams) => {
   }
 }
 
-// TODO: doesn't this need the identifier of the individual entering?
 export const enterRaffle = (params: contracts.EnterRaffleParams) => {
   try {
     const { raffleId, entries, proof } = params
@@ -54,25 +49,6 @@ export const enterRaffle = (params: contracts.EnterRaffleParams) => {
   }
 }
 
-// TODO: question- what is this doing -- is this the action for the creator to mark the static raffle as done?
-export const fulfillRandomWords = (
-  params: contracts.FulfillRandomWordsParams
-) => {
-  try {
-    const { requestId, randomWords } = params
-    const { config } = usePrepareContractWrite({
-      ...defaultOptions,
-      functionName: 'fulfillRandomWords',
-      args: [requestId, randomWords]
-    })
-    const { data, isLoading, isSuccess } = useContractWrite(config)
-    return { data, isLoading, isSuccess }
-  } catch (error: any) {
-    throw new Error(`Error fulfilling random words: ${error.message}`)
-  }
-}
-
-// TODO: doesn't this also need the identifier?
 export const claimPrize = (params: contracts.ClaimPrizeParams) => {
   try {
     const { raffleId } = params
@@ -87,3 +63,9 @@ export const claimPrize = (params: contracts.ClaimPrizeParams) => {
     throw new Error(`Error claiming prize: ${error.message}`)
   }
 }
+
+// TODO: add function for picking winners to call erc677
+// TODO: include abi for this contract as well
+// TODO: reference the new env var for the contract address
+
+// TODO: add function for withdrawing link

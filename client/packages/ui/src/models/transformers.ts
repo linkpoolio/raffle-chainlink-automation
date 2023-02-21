@@ -2,7 +2,6 @@ import { ethers } from 'ethers'
 
 import { RaffleInstance } from '@ui/models'
 
-// TODO: review this list in depth for accuracy
 export const transformRaffleItem = (raffle): RaffleInstance => {
   try {
     return {
@@ -11,17 +10,15 @@ export const transformRaffleItem = (raffle): RaffleInstance => {
       type: raffle.base.raffleType,
       status: raffle.raffleState,
       owner: raffle.owner,
-      startDate: raffle.base.startDate.toString(),
-      timeLength: raffle.timeLength.toString(),
+      startDate: raffle.base.startDate.toString(), // TODO: convert unix timestamp to new date format probably
+      timeLength: raffle.timeLength.toString(), // TODO: convert unix seconds to hours probably
       entriesPerUser: raffle.base.entriesPerUser,
       totalWinners: raffle.base.totalWinners,
       prizeName: raffle.prize.prizeName,
       prizeWorth: raffle.prizeWorth.toString(),
       paymentNeeded: raffle.paymentNeeded,
       fee: raffle.fee.toString(),
-      feeToken: raffle.base.feeToken,
       feeTokenAddress: raffle.base.feeTokenAddress,
-      linkTotal: raffle.linkTotal.toString(),
       automation: raffle.base.automation,
       merkleRoot: raffle.merkleRoot,
       permissioned: raffle.base.permissioned,
@@ -29,10 +26,7 @@ export const transformRaffleItem = (raffle): RaffleInstance => {
       contestantsAddresses: raffle.contestantsAddresses,
       winners: raffle.winners,
       claimedPrizes: raffle.prize.claimedPrizes,
-      requestId: raffle.requestStatus[0].toString(),
-      paid: raffle.requestStatus[1].toString(),
-      fulfilled: raffle.requestStatus[2],
-      randomWords: raffle.requestStatus[3].map((word) => word.toString())
+      withdrawn: raffle.requests.withdrawn
     }
   } catch (error: any) {
     throw new Error(`Error transforming raffle item: ${error.message}`)

@@ -20,12 +20,10 @@ export interface RaffleInstance {
   entriesPerUser: number // uint8
   totalWinners: number // uint8
   prizeName: string
-  prizeWorth: string
+  prizeWorth: string // denominated in: feeTokenAddress ? feeTokenAddress : eth address
   paymentNeeded: boolean
   fee: string
-  feeToken: boolean
   feeTokenAddress: string // address
-  linkTotal: string
   automation: boolean
   merkleRoot: string // bytes32
   permissioned: boolean
@@ -33,8 +31,5 @@ export interface RaffleInstance {
   contestantsAddresses: Array<string> // bytes32[]
   winners: Array<string> // bytes32[]
   claimedPrizes: Array<string> // bytes32[]
-  requestId: string
-  paid: string
-  fulfilled: boolean
-  randomWords: Array<number> // uint256[]
+  withdrawn: boolean
 }
