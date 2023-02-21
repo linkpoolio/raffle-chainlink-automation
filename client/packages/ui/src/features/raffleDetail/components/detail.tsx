@@ -10,7 +10,9 @@ import {
   StepManager,
   getRaffle,
   JoinButton,
-  CheckStatusButton
+  CheckStatusButton,
+  PickWinnersButton,
+  WithdrawButton
 } from '@ui/features/raffleDetail'
 
 export const initialState = {
@@ -57,6 +59,12 @@ export const RaffleDetail = ({ id }) => {
         raffle={raffle}
         identifier={store.state.identifier}
       />
+      <PickWinnersButton
+        raffle={raffle}
+        update={store.update}
+        address={address}
+      />
+      <WithdrawButton raffle={raffle} update={store.update} address={address} />
       <StepManager id={id} store={store} />
       <div>
         {raffle &&

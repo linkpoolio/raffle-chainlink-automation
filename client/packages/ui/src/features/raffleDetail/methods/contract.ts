@@ -19,7 +19,7 @@ export const claimPrize = async ({ id, asyncManager }) => {
     asyncManager.start()
     // const payload: contracts.ClaimPrizeParams = { id }
     // const { isSuccess } = await contracts.claimPrize(payload)
-    // if (!isSuccess) throw new Error('Request to create raffle was not successful')
+    // if (!isSuccess) throw new Error('Request to claim prize was not successful')
     asyncManager.success()
     return true
   } catch (error) {
@@ -33,7 +33,7 @@ export const joinRaffle = async ({ id, asyncManager, update }) => {
     asyncManager.start()
     // const payload: contracts.EnterRaffleParams = { id }
     // const { isSuccess } = await contracts.enterRaffle(payload)
-    // if (!isSuccess) throw new Error('Request to create raffle was not successful')
+    // if (!isSuccess) throw new Error('Request to join raffle was not successful')
     asyncManager.success()
     update(true)
     return true
@@ -43,4 +43,43 @@ export const joinRaffle = async ({ id, asyncManager, update }) => {
   }
 }
 
-// TODO: need a method for the owner marking the raffle as finished and paying for it
+export const pickWinners = async ({ id, asyncManager, update }) => {
+  try {
+    asyncManager.start()
+    // const payload: contracts.EnterRaffleParams = { id }
+    // const { isSuccess } = await contracts.pickWinners(payload)
+    // if (!isSuccess) throw new Error('Request to pick winners was not successful')
+    asyncManager.success()
+    update(true)
+    return true
+  } catch (error) {
+    asyncManager.fail(`Could not pick winners for raffle id \`${id}\``)
+    return false
+  }
+}
+
+export const withdrawLink = async ({ id, asyncManager, update }) => {
+  try {
+    asyncManager.start()
+    // const payload: contracts.EnterRaffleParams = { id }
+    // const { isSuccess } = await contracts.withdrawLink(payload)
+    // if (!isSuccess) throw new Error('Request to withdraw LINK was not successful')
+    asyncManager.success()
+    update(true)
+    return true
+  } catch (error) {
+    asyncManager.fail(`Could not withdraw LINK for raffle id \`${id}\``)
+    return false
+  }
+}
+
+export const canWithdraw = async ({ id, update }) => {
+  try {
+    // const response: bool = await contracts.canWithdraw(id) // TODO: contract method for checking if excess LINK is available to withdraw
+    const response = true || id // TODO: remove mock response
+    update(response)
+    return true
+  } catch (error) {
+    return false
+  }
+}
