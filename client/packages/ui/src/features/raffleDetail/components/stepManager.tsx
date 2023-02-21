@@ -6,6 +6,8 @@ import {
   Join,
   ProvideIdentifier,
   ParticipantStatus,
+  PickWinners,
+  Withdraw,
   steps
 } from '@ui/features/raffleDetail'
 
@@ -17,6 +19,10 @@ const getComponent = (props) => {
       return <ProvideIdentifier {...props} />
     case steps.PARTICIPANT_STATUS:
       return <ParticipantStatus {...props} />
+    case steps.PICK_WINNERS:
+      return <PickWinners {...props} />
+    case steps.WITHDRAW:
+      return <Withdraw {...props} />
     default:
       return null
   }
@@ -34,7 +40,6 @@ export const StepManager = ({ id, store }) => {
       <Modal onClose={reset}>
         <Loading asyncManager={asyncManager} />
         <Error asyncManager={asyncManager} />
-        <h3>{step == steps.JOIN ? 'Join Raffle' : 'Did I win?'}</h3>
         {getComponent({ id, store, asyncManager, reset })}
       </Modal>
     )

@@ -43,6 +43,7 @@ export const ProvideIdentifier = ({ store, asyncManager }) => {
 
   return (
     <>
+      <h3>Did I win?</h3>
       <div>Please enter your unique identifier</div>
       <input type="text" value={identifier} onChange={onChange} />
       <button

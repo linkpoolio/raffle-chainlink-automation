@@ -66,6 +66,62 @@ export const mockList = [
       '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
       '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a321'
     ],
+    claimedPrizes: [],
+    contestantsAddresses: [
+      '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+      '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a321'
+    ]
+  },
+  {
+    id: 6,
+    name: 'Dynamic:Live:Joined:Owner:No Automation',
+    type: 0,
+    status: 1,
+    owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+    winners: [],
+    claimedPrizes: [],
+    contestantsAddresses: [
+      '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+      '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a321'
+    ]
+  },
+  {
+    id: 7,
+    name: 'Dynamic:Live:Joined:Owner:Automation',
+    type: 0,
+    status: 1,
+    owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+    automation: true,
+    winners: [],
+    claimedPrizes: [],
+    contestantsAddresses: [
+      '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+      '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a321'
+    ]
+  },
+  {
+    id: 8,
+    name: 'Dynamic:Staged:Joined:Owner:Automation',
+    type: 0,
+    status: 0,
+    owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+    automation: true,
+    winners: [],
+    claimedPrizes: [],
+    contestantsAddresses: [
+      '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+      '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a321'
+    ]
+  },
+  {
+    id: 9,
+    name: 'Dynamic:Finished:Joined:Owner:!Withdrawn',
+    type: 0,
+    status: 2,
+    owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+    withdrawn: false,
+    winners: [],
+    claimedPrizes: [],
     contestantsAddresses: [
       '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
       '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a321'

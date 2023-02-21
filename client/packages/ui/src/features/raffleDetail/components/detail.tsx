@@ -10,7 +10,9 @@ import {
   StepManager,
   getRaffle,
   JoinButton,
-  CheckStatusButton
+  CheckStatusButton,
+  PickWinnersButton,
+  WithdrawButton
 } from '@ui/features/raffleDetail'
 
 export const initialState = {
@@ -21,7 +23,6 @@ export const initialState = {
   isParticipant: null
 }
 
-// TODO: need a contextual action button for the creator of the contract marking it as finished and performing VRF direct
 export const RaffleDetail = ({ id }) => {
   const store = useStore(initialState)
   const asyncManager = useAsyncManager()
@@ -57,6 +58,12 @@ export const RaffleDetail = ({ id }) => {
         raffle={raffle}
         identifier={store.state.identifier}
       />
+      <PickWinnersButton
+        raffle={raffle}
+        update={store.update}
+        address={address}
+      />
+      <WithdrawButton raffle={raffle} update={store.update} address={address} />
       <StepManager id={id} store={store} />
       <div>
         {raffle &&

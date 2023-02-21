@@ -1,6 +1,7 @@
 import React from 'react'
 
 import { participantStatus, claimPrize } from '@ui/features/raffleDetail'
+import { RaffleType } from '@ui/models'
 
 const Close = ({ reset }) => (
   <div>
@@ -11,6 +12,7 @@ const Close = ({ reset }) => (
 const Lost = ({ reset }) => {
   return (
     <>
+      <h3>Did I win?</h3>
       <div>Sorry, no luck this time! Try again soon.</div>
       <Close reset={reset} />
     </>
@@ -21,7 +23,6 @@ const WonUnclaimed = ({ id, store, asyncManager }) => {
   const onClaim = async () => {
     const response = await claimPrize({
       id,
-      identifier: store.state.identifier,
       asyncManager
     })
 
@@ -33,6 +34,7 @@ const WonUnclaimed = ({ id, store, asyncManager }) => {
 
   return (
     <>
+      <h3>Did I win?</h3>
       <span>You won!</span>
       <div>
         <button disabled={asyncManager.loading} onClick={onClaim}>
@@ -43,10 +45,15 @@ const WonUnclaimed = ({ id, store, asyncManager }) => {
   )
 }
 
-const WonClaimed = ({ reset }) => {
+const WonClaimed = ({ store, reset }) => {
   return (
     <>
-      <div>You Won! (and you successfully claimed your prize)</div>
+      <h3>Did I win?</h3>
+      <div>
+        You Won!
+        {store.state.raffle.type == RaffleType.DYNAMIC &&
+          ` (and you successfully claimed your prize)`}
+      </div>
       <Close reset={reset} />
     </>
   )

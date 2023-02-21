@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react'
 
-import { joinRaffle } from '@ui/features/raffleDetail'
+import { withdrawLink } from '@ui/features/raffleDetail'
 
-export const Join = ({ id, reset, asyncManager }) => {
+export const Withdraw = ({ id, reset, asyncManager }) => {
   const [success, update] = useState(false)
 
   const componentDidMount = () => {
-    joinRaffle({
+    withdrawLink({
       id,
       asyncManager,
       update
@@ -17,8 +17,8 @@ export const Join = ({ id, reset, asyncManager }) => {
   return (
     success && (
       <>
-        <h3>Join Raffle</h3>
-        <div>Successfully joined raffle id `{id}`.</div>
+        <h3>Withdraw LINK</h3>
+        <div>Successfully withdrew LINK for raffle id `{id}`.</div>
         <button onClick={reset}>Close</button>
       </>
     )
