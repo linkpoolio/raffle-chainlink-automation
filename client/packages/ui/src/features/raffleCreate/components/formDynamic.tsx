@@ -1,13 +1,7 @@
 import React from 'react'
-import {
-  Input,
-  FormControl,
-  FormLabel,
-  FormHelperText,
-  GridItem,
-  Checkbox,
-  Flex
-} from '@chakra-ui/react'
+import { Input, GridItem, Checkbox, Flex } from '@chakra-ui/react'
+
+import { Control } from '@ui/components'
 
 export const initialDynamicState = {
   timeLength: 24,
@@ -23,20 +17,17 @@ export const FormDynamic = ({ state, onTextChange, onCheckboxChange }) => {
   return (
     <>
       <GridItem>
-        <FormControl>
-          <FormLabel>Duration (hours)</FormLabel>
+        <Control label="Duration (hours)" helper="Description">
           <Input
             type="number"
             value={state.timeLength}
             onChange={onTextChange('timeLength')}
           />
-          <FormHelperText>Description</FormHelperText>
-        </FormControl>
+        </Control>
       </GridItem>
 
       <GridItem>
-        <FormControl>
-          <FormLabel>Automation</FormLabel>
+        <Control label="Automation" helper="What is Automation?">
           <Flex align="center" h="40px">
             <Checkbox
               checked={state.automation}
@@ -44,63 +35,53 @@ export const FormDynamic = ({ state, onTextChange, onCheckboxChange }) => {
               Enabled
             </Checkbox>
           </Flex>
-          <FormHelperText>What is Automation?</FormHelperText>
-        </FormControl>
+        </Control>
       </GridItem>
 
       <GridItem colSpan={2}>
-        <FormControl>
-          <FormLabel>Token</FormLabel>
+        <Control label="Token" helper="Ethereum Address">
           <Input
             type="text"
             value={state.token}
             onChange={onTextChange('token')}
           />
-          <FormHelperText>Ethereum Address</FormHelperText>
-        </FormControl>
+        </Control>
       </GridItem>
 
       <GridItem>
-        <FormControl>
-          <FormLabel>Token Amount</FormLabel>
+        <Control label="Token Amount" helper="Use Wei units">
           <Input
             type="text"
             value={state.tokenAmount}
             onChange={onTextChange('tokenAmount')}
           />
-          <FormHelperText>Use Wei units</FormHelperText>
-        </FormControl>
+        </Control>
       </GridItem>
 
       <GridItem colSpan={2}>
-        <FormControl>
-          <FormLabel>Fee Token</FormLabel>
+        <Control label="Fee Token" helper="Ethereum Address">
           <Input
             type="text"
             value={state.feeToken}
             onChange={onTextChange('feeToken')}
           />
-          <FormHelperText>Ethereum Address</FormHelperText>
-        </FormControl>
+        </Control>
       </GridItem>
 
       <GridItem>
-        <FormControl>
-          <FormLabel>Fee Token Amount</FormLabel>
+        <Control label="Fee Token Amount" helper="Use Wei units">
           <Input type="text" value={state.fee} onChange={onTextChange('fee')} />
-          <FormHelperText>Use Wei units</FormHelperText>
-        </FormControl>
+        </Control>
       </GridItem>
 
       <GridItem>
-        <FormControl>
-          <FormLabel>Whitelist Merkle Root</FormLabel>
+        <Control label="Whitelist Merkle Root" helper="Use Wei units">
           <Input
             type="text"
             value={state.merkleRoot}
             onChange={onTextChange('merkleRoot')}
           />
-        </FormControl>
+        </Control>
       </GridItem>
     </>
   )

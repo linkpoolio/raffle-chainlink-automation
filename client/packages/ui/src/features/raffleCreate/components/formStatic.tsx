@@ -1,13 +1,8 @@
 import React from 'react'
 import { ethers } from 'ethers'
-import {
-  FormControl,
-  FormLabel,
-  FormHelperText,
-  GridItem
-} from '@chakra-ui/react'
+import { GridItem } from '@chakra-ui/react'
 
-import { CSVUpload } from '@ui/components'
+import { CSVUpload, Control } from '@ui/components'
 
 export const initialStaticState = {
   participants: []
@@ -23,16 +18,17 @@ export const FormStatic = ({ update }) => {
   }
 
   return (
-    <>
-      <GridItem colSpan={2}>
-        <FormControl>
-          <FormLabel>Participants</FormLabel>
-          <CSVUpload callback={onCsvUpload} />
-          <FormHelperText>
+    <GridItem colSpan={2}>
+      <Control
+        label="Participants"
+        helper={
+          <>
+            {' '}
             <button>Click here to download</button> CSV file example
-          </FormHelperText>
-        </FormControl>
-      </GridItem>
-    </>
+          </>
+        }>
+        <CSVUpload callback={onCsvUpload} />
+      </Control>
+    </GridItem>
   )
 }

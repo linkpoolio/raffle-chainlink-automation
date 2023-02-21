@@ -8,16 +8,13 @@ import {
   Text,
   Select,
   Input,
-  FormControl,
-  FormLabel,
-  FormHelperText,
   Grid,
   GridItem,
   Button
 } from '@chakra-ui/react'
 
 import { Routes } from '@ui/Routes'
-import { Error } from '@ui/components'
+import { Error, Control } from '@ui/components'
 import { useAsyncManager, useStore } from '@ui/hooks'
 import {
   createRaffle,
@@ -103,8 +100,7 @@ export const RaffleCreate = () => {
       </Center>
       <Grid templateColumns="repeat(3, 1fr)" gap={14} rowGap={14} mb={12}>
         <GridItem>
-          <FormControl>
-            <FormLabel>Select Raffle Type</FormLabel>
+          <Control label="Select Raffle Type">
             <Select
               value={type}
               onChange={onTypeChange}
@@ -112,44 +108,40 @@ export const RaffleCreate = () => {
               <option value={RaffleType.STATIC}>Static</option>
               <option value={RaffleType.DYNAMIC}>Dynamic</option>
             </Select>
-          </FormControl>
+          </Control>
         </GridItem>
+
         <GridItem>
-          <FormControl>
-            <FormLabel>Raffle Name</FormLabel>
+          <Control label="Raffle Name" helper="Max 40 characters">
             <Input
               type="text"
               placeholder="Name"
               value={state.name}
               onChange={onTextChange('name')}
             />
-            <FormHelperText>Max 40 characters.</FormHelperText>
-          </FormControl>
+          </Control>
         </GridItem>
+
         <GridItem>
-          <FormControl>
-            <FormLabel>Number of winners</FormLabel>
+          <Control label="Number of winners" helper="Max 120 winners">
             <Input
               type="text"
               placeholder="Number"
               value={state.totalWinners}
               onChange={onTextChange('totalWinners')}
             />
-            <FormHelperText>Max 120 winners</FormHelperText>
-          </FormControl>
+          </Control>
         </GridItem>
 
         <GridItem>
-          <FormControl>
-            <FormLabel>Prize description</FormLabel>
+          <Control label="Prize description" helper="Max 40 charcters">
             <Input
               type="text"
               placeholder="Number"
               value={state.prize}
               onChange={onTextChange('prize')}
             />
-            <FormHelperText>Max 40 charcters</FormHelperText>
-          </FormControl>
+          </Control>
         </GridItem>
         {type == RaffleType.STATIC ? (
           <FormStatic update={update} />
