@@ -1,6 +1,7 @@
 import React from 'react'
 
 import { participantStatus, claimPrize } from '@ui/features/raffleDetail'
+import { RaffleType } from '@ui/models'
 
 const Close = ({ reset }) => (
   <div>
@@ -42,10 +43,14 @@ const WonUnclaimed = ({ id, store, asyncManager }) => {
   )
 }
 
-const WonClaimed = ({ reset }) => {
+const WonClaimed = ({ store, reset }) => {
   return (
     <>
-      <div>You Won! (and you successfully claimed your prize)</div>
+      <div>
+        You Won!
+        {store.state.raffle.type == RaffleType.DYNAMIC &&
+          ` (and you successfully claimed your prize)`}
+      </div>
       <Close reset={reset} />
     </>
   )

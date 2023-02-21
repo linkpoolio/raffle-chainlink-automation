@@ -66,6 +66,7 @@ export const mockList = [
       '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
       '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a321'
     ],
+    claimedPrizes: [],
     contestantsAddresses: [
       '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
       '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a321'

@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { steps } from '@ui/features/raffleDetail'
-import { RaffleStatus, RaffleType } from '@ui/models'
+import { RaffleStatus, RaffleType, isRaffleParticipant } from '@ui/models'
 
 const onParticipantStatusClick = async ({ update, raffle, identifier }) => {
   // Require user to provide unique identifier
@@ -35,7 +35,9 @@ const onParticipantStatusClick = async ({ update, raffle, identifier }) => {
 }
 
 export const CheckStatusButton = (props) =>
-  props.raffle?.status == RaffleStatus.FINISHED && (
+  props.raffle?.status == RaffleStatus.FINISHED &&
+  (props.raffle?.type != RaffleType.DYNAMIC ||
+    isRaffleParticipant(props.raffle, props.identifier)) && (
     <div>
       <button onClick={() => onParticipantStatusClick(props)}>
         Did I win?
