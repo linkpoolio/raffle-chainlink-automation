@@ -23,7 +23,6 @@ export const initialState = {
   isParticipant: null
 }
 
-// TODO: need a contextual action button for the creator of the contract marking it as finished and performing VRF direct
 export const RaffleDetail = ({ id }) => {
   const store = useStore(initialState)
   const asyncManager = useAsyncManager()

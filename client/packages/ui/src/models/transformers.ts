@@ -11,7 +11,7 @@ export const transformRaffleItem = (raffle): RaffleInstance => {
       status: raffle.raffleState,
       owner: raffle.owner,
       startDate: raffle.base.startDate.toString(), // TODO: convert unix timestamp to new date format probably
-      timeLength: raffle.timeLength.toString(), // TODO: convert unix seconds to hours probably
+      hours: raffle.timeLength.toString() / 60 / 60,
       entriesPerUser: raffle.base.entriesPerUser,
       totalWinners: raffle.base.totalWinners,
       prizeName: raffle.prize.prizeName,

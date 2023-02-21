@@ -16,7 +16,7 @@ export interface RaffleInstance {
   status: typeof RaffleStatus
   owner: string // address
   startDate: string
-  timeLength: string
+  hours: number
   entriesPerUser: number // uint8
   totalWinners: number // uint8
   prizeName: string
