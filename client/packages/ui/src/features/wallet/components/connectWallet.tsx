@@ -18,7 +18,8 @@ import {
   ModalBody,
   ModalCloseButton,
   SimpleGrid,
-  Divider
+  Divider,
+  Box
 } from '@chakra-ui/react'
 
 export function ConnectWallet() {
@@ -35,13 +36,11 @@ export function ConnectWallet() {
 
   return (
     <>
-      <Button
-        onClick={onOpen}
-        display={{ base: 'none', md: 'flex' }}
-        variant="nav"
-        gap="2">
+      <Button onClick={onOpen} variant="nav" gap="2">
         <WalletIcon w="16px" />
-        Connect Wallet
+        <Box as="span" display={{ base: 'none', md: 'inline' }}>
+          Connect Wallet
+        </Box>
       </Button>
       <Modal isOpen={isOpen} onClose={onClose} motionPreset="slideInBottom">
         <ModalOverlay />

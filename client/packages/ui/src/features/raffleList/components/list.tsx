@@ -42,7 +42,15 @@ export const RaffleList = (props) => {
       />
       <Error asyncManager={asyncManager} />
       <Filters store={filterStore} />
-      <Grid templateColumns="repeat(3, 1fr)" gap={16} my="4">
+      <Grid
+        templateColumns={{
+          base: 'repeat(, 1fr)',
+          sm: 'repeat(1, 1fr)',
+          md: 'repeat(2, 1fr)',
+          lg: 'repeat(3, 1fr)'
+        }}
+        gap={16}
+        my="4">
         <LoadingList asyncManager={asyncManager} />
         {store.state.list
           .filter(filterList(filterStore.state, address))

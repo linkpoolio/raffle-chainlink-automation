@@ -6,6 +6,7 @@ import { WalletIcon } from './walletIcon'
 import { MetaMaskIcon } from './metaMaskIcon'
 import { ChevronDownIcon, ExternalLinkIcon } from '@chakra-ui/icons'
 import {
+  Box,
   Button,
   Text,
   Flex,
@@ -33,8 +34,10 @@ export function ConnectedWallet() {
           borderWidth="1px"
           color="brand.biscay">
           <WalletIcon w="16px" />
-          {shortenAddress(address)}
-          <ChevronDownIcon w={6} h={6} />
+          <Box as="span" display={{ base: 'none', md: 'inline' }}>
+            {shortenAddress(address)}
+            <ChevronDownIcon w={6} h={6} />
+          </Box>
         </Button>
       </PopoverTrigger>
       <PopoverContent p="3">
@@ -56,11 +59,7 @@ export function ConnectedWallet() {
             {shortenAddress(address)} <ExternalLinkIcon mx="2px" />
           </Flex>
         </PopoverBody>
-        <Button
-          onClick={() => disconnect()}
-          display={{ base: 'none', md: 'flex' }}
-          variant="nav"
-          gap="2">
+        <Button onClick={() => disconnect()} variant="nav" gap="2">
           Disconnect
         </Button>
       </PopoverContent>
