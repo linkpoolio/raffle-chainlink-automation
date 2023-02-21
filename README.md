@@ -20,21 +20,19 @@ $ git clone git@github.com:linkpoolio/raffle-chainlink-automation.git
 ### 3. Setup contracts environment variables
 
 ```bash
-# Specify network
-export NETWORK="hardhat"
 
 # Network RPCs
-export MAINNET_RPC_URL=
-export GOERLI_RPC_URL=
-export BINANCE_MAINNET_RPC_URL=
-export POLYGON_MAINNET_RPC_URL=
+export RPC_URL=
 
-# Etherscan
-export ETHERSCAN_KEY=
+# Private key for contract deployment
+export PRIVATE_KEY=
+
+# Explorer API key used to verify contracts
+export EXPLORER_KEY=
 
 # From anvil
 export LOCAL_RPC_URL="http://localhost:8545"
-export PRIVATE_KEY="" # Get from anvil after running for the first time, see below
+export ANVIL_PRIVATE_KEY="" # Get from anvil after running for the first time, see below
 
 # UI
 export UI_CONTRACT_ADDRESS="" # Get from anvil after deploying contract
@@ -70,11 +68,11 @@ $ docker compose up
 $ curl -L https://foundry.paradigm.xyz | bash
 
 # Install foundry
-$ foundry up
+$ foundryup
 
 # (Mac only) Install anvil (prereq: Homebrew)
 $ brew install libusb
-  ```
+```
 
 ### 2. Install contract dependencies if changes have been made to contracts
 
@@ -84,8 +82,9 @@ $ make install
 ```
 
 ### 3. Run anvil
+
 ```bash
-# <root>/contracts
+# <root>/contracts (run in new terminal window)
 $ anvil
 ```
 
@@ -99,8 +98,8 @@ Note: each time anvil is restarted, the contract will need to be re-deployed but
 # If deploying locally
 $ make deploy-local
 
-# Or if deploying to goerli:
-$ make deploy 
+# Or if deploying to public network, set RPC_URL to desired network:
+$ make deploy
 ```
 
 ### 5. Install UI dependencies
@@ -128,8 +127,7 @@ $ yarn start
 
 ```bash
 # <root>/contracts
-make test-contracts
-make coverage
+make test-contracts-all
 ```
 
 ### 2. Test UI

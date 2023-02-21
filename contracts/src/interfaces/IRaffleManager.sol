@@ -3,10 +3,10 @@ pragma solidity ^0.8.17;
 
 interface IRaffleManager {
     function createRaffle(
-        bytes memory prize,
+        string memory prizeName,
         uint256 timeLength,
         uint256 fee,
-        bytes32 name,
+        string memory name,
         address feeToken,
         bytes32 merkleRoot,
         bool automation,
@@ -15,21 +15,13 @@ interface IRaffleManager {
         uint8 entriesPerUser
     ) external payable;
 
-    function enterRaffle(
-        uint256 raffleId,
-        uint8 entries,
-        bytes32[] memory proof
-    ) external payable;
+    function enterRaffle(uint256 raffleId, uint8 entries, bytes32[] memory proof) external payable;
 
-    function getWinners(uint256 raffleId)
-        external
-        view
-        returns (bytes32[] memory);
+    function getWinners(uint256 raffleId) external view returns (bytes32[] memory);
 
     function claimPrize(uint256 raffleId) external;
 
     function setKeeperRegistryAddress(address newKeeperAddress) external;
 
-    function setProvenanceHash(uint256 raffleId, bytes memory provenanceHash)
-        external;
+    function setProvenanceHash(uint256 raffleId, bytes memory provenanceHash) external;
 }
