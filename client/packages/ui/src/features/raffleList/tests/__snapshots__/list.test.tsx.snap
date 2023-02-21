@@ -15,7 +15,7 @@ exports[`RaffleList matches snapshot 1`] = `
           className="chakra-select__wrapper css-4j45yy"
         >
           <select
-            className="chakra-select css-szqrq0"
+            className="chakra-select css-1psspw3"
             onBlur={[Function]}
             onChange={[Function]}
             onFocus={[Function]}
@@ -69,7 +69,7 @@ exports[`RaffleList matches snapshot 1`] = `
       </div>
     </div>
     <div
-      className="css-e8v9bf"
+      className="css-1db7fom"
     />
   </div>,
   <span />,

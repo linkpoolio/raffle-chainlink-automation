@@ -5,6 +5,7 @@ import { Divider } from './divider'
 import { Switch } from './switch'
 import { Input } from './input'
 import { Select } from './select'
+import { Form } from './form'
 
 export const theme = extendTheme({
   colors: {
@@ -64,6 +65,7 @@ export const theme = extendTheme({
     Divider,
     Switch,
     Input,
-    Select
+    Select,
+    Form
   }
 })

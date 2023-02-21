@@ -33,7 +33,7 @@ export const Filters = ({ store }) => {
         <HStack spacing="24px">
           {address && (
             <Flex align="center">
-              <FormLabel htmlFor="ownerd-by-me" mb="0">
+              <FormLabel htmlFor="ownerd-by-me" mb="0" w="105px">
                 Owned by Me
               </FormLabel>
               <Switch

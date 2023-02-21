@@ -6,7 +6,7 @@ exports[`Wallet matches snapshot 1`] = `
     className="css-k008qs"
   >
     <button
-      className="chakra-button css-1vb1af"
+      className="chakra-button css-1nktvje"
       onClick={[Function]}
       type="button"
     >
@@ -22,7 +22,11 @@ exports[`Wallet matches snapshot 1`] = `
           fillRule="evenodd"
         />
       </svg>
-      Connect Wallet
+      <span
+        className="css-bs7b3k"
+      >
+        Connect Wallet
+      </span>
     </button>
   </div>,
   <span />,

@@ -1,7 +1,15 @@
 import React from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import { useAccount } from 'wagmi'
-import { Heading, Box, Container, Flex, Link, Circle } from '@chakra-ui/react'
+import {
+  Heading,
+  Box,
+  Container,
+  Flex,
+  Link,
+  Circle,
+  Button
+} from '@chakra-ui/react'
 
 import { Routes } from '@ui/Routes'
 import { Wallet } from '@ui/features/wallet'
@@ -20,13 +28,11 @@ export const NavigationBar = () => {
               textTransform: 'none'
             }}
             display="flex"
-            alignItems="center">
-            <Circle
-              size="18px"
-              bg="brand.primary"
-              color="white"
-              mr="3"></Circle>
+            alignItems="center"
+            gap="3">
+            <Circle size="18px" bg="brand.primary" color="white"></Circle>
             <Heading
+              display={{ base: 'none', md: 'inline' }}
               as="h1"
               size="md"
               color="brand.primary"
@@ -50,23 +56,19 @@ export const NavigationBar = () => {
                 href={Routes.RaffleList}>
                 Home
               </Link>
+            </Flex>
+            <Flex alignItems="center" justifyContent="space-between" gap="6">
               {address && (
-                <Link
+                <Button
                   as={RouterLink}
                   to={Routes.RaffleCreate}
-                  fontSize="sm"
-                  color="brand.gray_70"
-                  fontWeight={600}
-                  _hover={{
-                    textTransform: 'none',
-                    color: 'brand.primary'
-                  }}
-                  href={Routes.RaffleCreate}>
+                  href={Routes.RaffleCreate}
+                  variant="cta">
                   Create Raffle
-                </Link>
+                </Button>
               )}
+              <Wallet />
             </Flex>
-            <Wallet />
           </Flex>
         </Flex>
       </Container>

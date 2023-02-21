@@ -1,18 +1,10 @@
 import React, { useState } from 'react'
 import { useCSVReader, formatFileSize } from 'react-papaparse'
-
-import {
-  styles,
-  DEFAULT_REMOVE_HOVER_COLOR,
-  REMOVE_HOVER_COLOR_LIGHT
-} from './styles'
+import { Flex, Text, Box } from '@chakra-ui/react'
 
 export const CSVUpload = ({ callback }) => {
   const { CSVReader } = useCSVReader()
   const [zoneHover, setZoneHover] = useState(false)
-  const [removeHoverColor, setRemoveHoverColor] = useState(
-    DEFAULT_REMOVE_HOVER_COLOR
-  )
 
   return (
     <CSVReader
@@ -36,44 +28,72 @@ export const CSVUpload = ({ callback }) => {
         Remove
       }: any) => (
         <>
-          <div
-            {...getRootProps()}
-            style={Object.assign(
-              {},
-              styles.zone,
-              zoneHover && styles.zoneHover
-            )}>
+          <Flex
+            px="3"
+            borderWidth={2}
+            borderStyle="dashed"
+            borderColor={
+              zoneHover || acceptedFile ? 'brand.primary' : 'brand.gray_40'
+            }
+            borderRadius="base"
+            direction="column"
+            justify="center"
+            _hover={{ borderColor: 'brand.primary' }}
+            cursor="pointer"
+            h="38px"
+            {...getRootProps()}>
             {acceptedFile ? (
               <>
-                <div style={styles.file}>
-                  <div style={styles.info}>
-                    <span style={styles.size}>
-                      {formatFileSize(acceptedFile.size)}
-                    </span>
-                    <span style={styles.name}>{acceptedFile.name}</span>
-                  </div>
-                  <div style={styles.progressBar}>
+                <Flex position="relative" zIndex="1">
+                  <Box
+                    zIndex="-1"
+                    opacity="0.1"
+                    width="100%"
+                    position="absolute"
+                    bottom="0"
+                    overflow="hidden"
+                    sx={{
+                      span: {
+                        backgroundColor: 'brand.primary!important',
+                        height: '24px!important',
+                        boxShadow: 'none!important'
+                      }
+                    }}>
                     <ProgressBar />
-                  </div>
-                  <div
+                  </Box>
+
+                  <Text size="md" color="brand.primary">
+                    {acceptedFile.name}
+                  </Text>
+                  <Box as="span" mx="3">
+                    |
+                  </Box>
+                  <Text size="sm"> {formatFileSize(acceptedFile.size)}</Text>
+
+                  <Box
+                    position="absolute"
+                    height="32px"
+                    right="0px"
+                    top="1px"
+                    w="23px"
+                    h="23px"
+                    fill={'brand.red'}
+                    _hover={{ opacity: 0.5 }}
                     {...getRemoveFileProps()}
-                    style={styles.remove}
                     onMouseOver={(event: Event) => {
                       event.preventDefault()
-                      setRemoveHoverColor(REMOVE_HOVER_COLOR_LIGHT)
                     }}
                     onMouseOut={(event: Event) => {
                       event.preventDefault()
-                      setRemoveHoverColor(DEFAULT_REMOVE_HOVER_COLOR)
                     }}>
-                    <Remove color={removeHoverColor} />
-                  </div>
-                </div>
+                    <Remove />
+                  </Box>
+                </Flex>
               </>
             ) : (
-              'Drop CSV file here or click to upload'
+              <Text size="md"> Drop CSV file here or click to upload</Text>
             )}
-          </div>
+          </Flex>
         </>
       )}
     </CSVReader>
