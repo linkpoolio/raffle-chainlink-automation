@@ -2,24 +2,49 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
+import "forge-std/StdJson.sol";
 import {RaffleManager} from "../src/RaffleManager.sol";
 
 contract RaffleManagerScript is Script {
-    RaffleManager raffleManager;
+    using stdJson for string;
 
-    function setUp() public {}
+    RaffleManager raffleManager;
+    uint256 deployerPrivateKey;
+
+    struct Config {
+        uint32 callbackGasLimit;
+        address keepersRegistry;
+        address linkAddress;
+        string name;
+        uint16 requestConfirmations;
+        address wrapperAddress;
+    }
+
+    function configureNetwork(string memory input) internal view returns (Config memory) {
+        string memory inputDir = string.concat(vm.projectRoot(), "/script/input/");
+        string memory chainDir = string.concat(vm.toString(block.chainid), "/");
+        string memory file = string.concat(input, ".json");
+        string memory data = vm.readFile(string.concat(inputDir, chainDir, file));
+        bytes memory rawConfig = data.parseRaw("");
+        return abi.decode(rawConfig, (Config));
+    }
 
     function run() public {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        Config memory config = configureNetwork("config");
+        if (block.chainid == 31337) {
+            deployerPrivateKey = vm.envUint("ANVIL_PRIVATE_KEY");
+        } else {
+            deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        }
+
         vm.startBroadcast(deployerPrivateKey);
 
-        // goerli deployment
         raffleManager = new RaffleManager(
-            0x708701a1DfF4f478de54383E49a627eD4852C816,
-            3,
-            100000,
-            0x02777053d6764996e594c3E88AF1D58D5363a2e6,
-            0x326C977E6efc84E512bB9C30f76E30c160eD06FB
+            config.wrapperAddress,
+            config.requestConfirmations,
+            config.callbackGasLimit,
+            config.keepersRegistry,
+            config.linkAddress
         );
 
         vm.stopBroadcast();

@@ -8,7 +8,7 @@ deploy:
 	forge script script/RaffleManager.s.sol:RaffleManagerScript --rpc-url ${GOERLI_RPC_URL} --etherscan-api-key ${ETHERSCAN_KEY} --broadcast --verify -vvvv
 
 deploy-local:
-	forge script script/RaffleManager.s.sol:RaffleManagerScript --rpc-url ${LOCAL_RPC_URL} --etherscan-api-key ${ETHERSCAN_KEY} --broadcast --verify -vvvv
+	forge script script/RaffleManager.s.sol:RaffleManagerScript --rpc-url ${LOCAL_RPC_URL} --broadcast -vvvv
 
 # tests
 test-contracts-all:
