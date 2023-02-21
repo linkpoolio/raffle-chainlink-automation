@@ -59,7 +59,7 @@ contract RaffleManager is
     struct RaffleInstance {
         RaffleBase base;
         address owner;
-        bytes32 raffleName;
+        string raffleName;
         bytes32[] contestantsAddresses;
         bytes32[] winners;
         uint256 prizeWorth;
@@ -106,7 +106,7 @@ contract RaffleManager is
     }
 
     //------------------------------ EVENTS ----------------------------------
-    event RaffleCreated(bytes prize, uint256 indexed time, uint256 indexed fee, address feeToken, bool permissioned);
+    event RaffleCreated(string prize, uint256 indexed time, uint256 indexed fee, address feeToken, bool permissioned);
     event RaffleJoined(uint256 indexed raffleId, bytes32 indexed player, uint256 entries);
     event RaffleClosed(uint256 indexed raffleId, bytes32[] participants);
     event RaffleStaged(uint256 indexed raffleId);
@@ -155,7 +155,7 @@ contract RaffleManager is
 
     /**
      * @notice creates new raffle
-     * @param prize bytes string of name of prize
+     * @param prizeName string of name of prize
      * @param timeLength time length of raffle in seconds
      * @param fee fee to enter raffle in wei
      * @param name name of raffle
@@ -167,10 +167,10 @@ contract RaffleManager is
      *
      */
     function createRaffle(
-        bytes memory prize,
+        string memory prizeName,
         uint256 timeLength,
         uint256 fee,
-        bytes32 name,
+        string memory name,
         address feeToken,
         bytes32 merkleRoot,
         bool automation,
@@ -199,7 +199,7 @@ contract RaffleManager is
             timeLength: timeLength,
             fee: fee,
             raffleState: RaffleState.LIVE,
-            prize: Prize({prizeName: string(prize), claimedPrizes: new bytes32[](0)}),
+            prize: Prize({prizeName: prizeName, claimedPrizes: new bytes32[](0)}),
             paymentNeeded: fee == 0 ? false : true,
             merkleRoot: merkleRoot,
             requestStatus: RequestStatus({
@@ -214,7 +214,7 @@ contract RaffleManager is
         raffles[raffleCounter.current()] = newRaffle;
         liveRaffles.add(raffleCounter.current());
         raffleCounter.increment();
-        emit RaffleCreated(prize, timeLength, fee, feeToken, merkleRoot != bytes32(0) ? true : false);
+        emit RaffleCreated(prizeName, timeLength, fee, feeToken, merkleRoot != bytes32(0) ? true : false);
     }
 
     /**
@@ -544,5 +544,16 @@ contract RaffleManager is
      */
     function isPaused() external view returns (bool) {
         return paused();
+    }
+
+    /**
+     * @notice returns the amount of claimable LINK for a specific raffle
+     * @param raffleId id of the raffle
+     * @return claimable amount of claimable LINK
+     * @dev claimable LINK is the total LINK sent to the raffle minus the amount already paid on VRF fees
+     *
+     */
+    function claimableLink(uint256 raffleId) external view returns (uint256 claimable) {
+        claimable = raffles[raffleId].requestStatus.totalLink - raffles[raffleId].requestStatus.paid;
     }
 }

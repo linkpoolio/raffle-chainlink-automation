@@ -33,13 +33,14 @@ contract RaffleManagerTest is Test {
     uint256 mainnetFork;
     string email;
 
-    event RaffleCreated(bytes prize, uint256 indexed time, uint256 indexed fee, address feeToken, bool permissioned);
+    event RaffleCreated(
+        string prizeName, uint256 indexed time, uint256 indexed fee, address feeToken, bool permissioned
+    );
     event RaffleJoined(uint256 indexed raffleId, bytes32 indexed player, uint256 entries);
     event RaffleOwnerUpdated(uint256 indexed raffleId, address oldOwner, address newOwner);
     event RaffleWon(uint256 indexed raffleId, bytes32[] indexed winners);
 
     function setUp() public {
-        // mainnetFork = vm.createSelectFork(vm.rpcUrl("mainnet"));
         admin = makeAddr("admin");
         raffleAdmin = makeAddr("raffleAdmin");
         user1 = makeAddr("user1");
@@ -71,13 +72,13 @@ contract RaffleManagerTest is Test {
 
     function successFixture() public {
         vm.expectEmit(true, true, true, true);
-        emit RaffleCreated(bytes("BigMac"), 30, 0, address(0), false);
+        emit RaffleCreated("BigMac", 30, 0, address(0), false);
         vm.prank(raffleAdmin);
         raffleManager.createRaffle({
-            prize: bytes("BigMac"),
+            prizeName: "BigMac",
             timeLength: 30,
             fee: 0,
-            name: bytes32("Big Mac Contest"),
+            name: "Big Mac Contest",
             feeToken: address(0),
             merkleRoot: bytes32(""),
             automation: false,
@@ -89,13 +90,13 @@ contract RaffleManagerTest is Test {
 
     function successFixtureWithETH() public {
         vm.expectEmit(true, true, true, true);
-        emit RaffleCreated(bytes("BigMac"), 0, 1 ether, address(0), false);
+        emit RaffleCreated("BigMac", 0, 1 ether, address(0), false);
         vm.prank(raffleAdmin);
         raffleManager.createRaffle({
-            prize: bytes("BigMac"),
+            prizeName: "BigMac",
             timeLength: 0,
             fee: 1 ether,
-            name: bytes32("Big Mac Contest"),
+            name: "Big Mac Contest",
             feeToken: address(0),
             merkleRoot: bytes32(""),
             automation: false,
@@ -109,13 +110,13 @@ contract RaffleManagerTest is Test {
         vm.prank(admin);
         customToken = new ERC20Mock("Custom Token", "CT");
         vm.expectEmit(true, true, true, true);
-        emit RaffleCreated(bytes("BigMac"), 0, 1 ether, address(customToken), false);
+        emit RaffleCreated("BigMac", 0, 1 ether, address(customToken), false);
         vm.prank(raffleAdmin);
         raffleManager.createRaffle({
-            prize: bytes("BigMac"),
+            prizeName: "BigMac",
             timeLength: 0,
             fee: 1 ether,
-            name: bytes32("Big Mac Contest"),
+            name: "Big Mac Contest",
             feeToken: address(customToken),
             merkleRoot: bytes32(""),
             automation: false,
@@ -127,13 +128,13 @@ contract RaffleManagerTest is Test {
 
     function successFixtureMultipleWinners() public {
         vm.expectEmit(true, true, true, true);
-        emit RaffleCreated(bytes("BigMac"), 30, 0, address(0), false);
+        emit RaffleCreated("BigMac", 30, 0, address(0), false);
         vm.prank(raffleAdmin);
         raffleManager.createRaffle({
-            prize: bytes("BigMac"),
+            prizeName: "BigMac",
             timeLength: 30,
             fee: 0,
-            name: bytes32("Big Mac Contest"),
+            name: "Big Mac Contest",
             feeToken: address(0),
             merkleRoot: bytes32(""),
             automation: false,
@@ -145,13 +146,13 @@ contract RaffleManagerTest is Test {
 
     function merkleFixture() public {
         vm.expectEmit(true, true, true, true);
-        emit RaffleCreated(bytes("BigMac"), 30, 0, address(0), true);
+        emit RaffleCreated("BigMac", 30, 0, address(0), true);
         vm.prank(raffleAdmin);
         raffleManager.createRaffle({
-            prize: bytes("BigMac"),
+            prizeName: "BigMac",
             timeLength: 30,
             fee: 0,
-            name: bytes32("Big Mac Contest"),
+            name: "Big Mac Contest",
             feeToken: address(0),
             merkleRoot: merkleRoot,
             automation: false,
@@ -165,13 +166,13 @@ contract RaffleManagerTest is Test {
         bytes32[] memory participants = new bytes32[](1);
         participants[0] = keccak256(abi.encodePacked(email));
         vm.expectEmit(true, true, true, true);
-        emit RaffleCreated(bytes("BigMac"), 30, 0, address(0), false);
+        emit RaffleCreated("BigMac", 30, 0, address(0), false);
         vm.prank(raffleAdmin);
         raffleManager.createRaffle({
-            prize: bytes("BigMac"),
+            prizeName: "BigMac",
             timeLength: 30,
             fee: 0,
-            name: bytes32("Big Mac Contest"),
+            name: "Big Mac Contest",
             feeToken: address(0),
             merkleRoot: bytes32(""),
             automation: false,
@@ -186,13 +187,13 @@ contract RaffleManagerTest is Test {
         customToken = new ERC20Mock("Custom Token", "CT");
         vm.stopPrank();
         vm.expectEmit(true, true, true, true);
-        emit RaffleCreated(bytes("BigMac"), 30, 1 ether, address(customToken), false);
+        emit RaffleCreated("BigMac", 30, 1 ether, address(customToken), false);
         vm.prank(raffleAdmin);
         raffleManager.createRaffle({
-            prize: bytes("BigMac"),
+            prizeName: "BigMac",
             timeLength: 30,
             fee: 1 ether,
-            name: bytes32("Big Mac Contest"),
+            name: "Big Mac Contest",
             feeToken: address(customToken),
             merkleRoot: bytes32(""),
             automation: false,
@@ -204,13 +205,13 @@ contract RaffleManagerTest is Test {
 
     function gasTokenRaffleFixture() public {
         vm.expectEmit(true, true, true, true);
-        emit RaffleCreated(bytes("BigMac"), 30, 1 ether, address(0), false);
+        emit RaffleCreated("BigMac", 30, 1 ether, address(0), false);
         vm.prank(raffleAdmin);
         raffleManager.createRaffle({
-            prize: bytes("BigMac"),
+            prizeName: "BigMac",
             timeLength: 30,
             fee: 1 ether,
-            name: bytes32("Big Mac Contest"),
+            name: "Big Mac Contest",
             feeToken: address(customToken),
             merkleRoot: bytes32(""),
             automation: false,
@@ -223,13 +224,13 @@ contract RaffleManagerTest is Test {
     function mainnetForkRaffleFixture() public {
         vm.selectFork(mainnetFork);
         vm.expectEmit(true, true, true, true);
-        emit RaffleCreated(bytes("BigMac"), 0, 1 ether, address(0), false);
+        emit RaffleCreated("BigMac", 0, 1 ether, address(0), false);
         vm.prank(raffleAdmin);
         raffleManager.createRaffle({
-            prize: bytes("BigMac"),
+            prizeName: "BigMac",
             timeLength: 0,
             fee: 1 ether,
-            name: bytes32("Big Mac Contest"),
+            name: "Big Mac Contest",
             feeToken: address(0),
             merkleRoot: bytes32(""),
             automation: false,
@@ -246,7 +247,6 @@ contract RaffleManagerTest is Test {
     function test_createRaffle_CheckVariableSetup_Dynamic_NoPermissions_NoFeeToken() public {
         successFixture();
         RaffleManager.RaffleInstance memory raffle = raffleManager.getRaffle(0);
-        assertEq(raffle.raffleName, bytes32("Big Mac Contest"));
         assertFalse(raffle.base.permissioned);
         assertEq(uint8(raffle.base.raffleType), uint8(RaffleManager.RaffleType.DYNAMIC));
         assertFalse(raffle.base.feeToken);
@@ -254,10 +254,10 @@ contract RaffleManagerTest is Test {
 
     function test_createRaffle_CheckVariableSetup_Dynamic_NoPermissions_FeeToken() public {
         raffleManager.createRaffle({
-            prize: bytes("BigMac"),
+            prizeName: "BigMac",
             timeLength: 30,
             fee: 1 ether,
-            name: bytes32("Big Mac Contest"),
+            name: "Big Mac Contest",
             feeToken: makeAddr("doge"),
             merkleRoot: bytes32(""),
             automation: false,
@@ -266,7 +266,6 @@ contract RaffleManagerTest is Test {
             entriesPerUser: 1
         });
         RaffleManager.RaffleInstance memory raffle = raffleManager.getRaffle(0);
-        assertEq(raffle.raffleName, bytes32("Big Mac Contest"));
         assertFalse(raffle.base.permissioned);
         assertEq(uint8(raffle.base.raffleType), uint8(RaffleManager.RaffleType.DYNAMIC));
         assert(raffle.base.feeToken);
@@ -274,10 +273,10 @@ contract RaffleManagerTest is Test {
 
     function test_createRaffle_CheckVariableSetup_Dynamic_Permissions() public {
         raffleManager.createRaffle({
-            prize: bytes("BigMac"),
+            prizeName: "BigMac",
             timeLength: 30,
             fee: 1 ether,
-            name: bytes32("Big Mac Contest"),
+            name: "Big Mac Contest",
             feeToken: makeAddr("doge"),
             merkleRoot: bytes32("merkleRoot"),
             automation: false,
@@ -286,7 +285,6 @@ contract RaffleManagerTest is Test {
             entriesPerUser: 1
         });
         RaffleManager.RaffleInstance memory raffle = raffleManager.getRaffle(0);
-        assertEq(raffle.raffleName, bytes32("Big Mac Contest"));
         assert(raffle.base.permissioned);
         assertEq(uint8(raffle.base.raffleType), uint8(RaffleManager.RaffleType.DYNAMIC));
         assert(raffle.base.feeToken);
