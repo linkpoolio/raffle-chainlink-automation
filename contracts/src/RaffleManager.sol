@@ -14,6 +14,7 @@ import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import {IRaffleManager} from "./interfaces/IRaffleManager.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
 /**
  * @title Raffle Manager
@@ -24,6 +25,7 @@ contract RaffleManager is
     VRFV2WrapperConsumerBase,
     AutomationCompatibleInterface,
     ERC677ReceiverInterface,
+    Pausable,
     ReentrancyGuard
 {
     using SafeERC20 for IERC20;
@@ -104,32 +106,14 @@ contract RaffleManager is
     }
 
     //------------------------------ EVENTS ----------------------------------
-    event RaffleCreated(
-        bytes prize,
-        uint256 indexed time,
-        uint256 indexed fee,
-        address feeToken,
-        bool permissioned
-    );
-    event RaffleJoined(
-        uint256 indexed raffleId,
-        bytes32 indexed player,
-        uint256 entries
-    );
+    event RaffleCreated(bytes prize, uint256 indexed time, uint256 indexed fee, address feeToken, bool permissioned);
+    event RaffleJoined(uint256 indexed raffleId, bytes32 indexed player, uint256 entries);
     event RaffleClosed(uint256 indexed raffleId, bytes32[] participants);
     event RaffleStaged(uint256 indexed raffleId);
-    event RaffleWon(uint256 indexed raffleId, bytes32[] indexed winner);
-    event RafflePrizeClaimed(
-        uint256 indexed raffleId,
-        address indexed winner,
-        uint256 value
-    );
+    event RaffleWon(uint256 indexed raffleId, bytes32[] indexed winners);
+    event RafflePrizeClaimed(uint256 indexed raffleId, address indexed winner, uint256 value);
     event KeeperRegistryAddressUpdated(address oldAddress, address newAddress);
-    event RaffleOwnerUpdated(
-        uint256 indexed raffleId,
-        address oldOwner,
-        address newOwner
-    );
+    event RaffleOwnerUpdated(uint256 indexed raffleId, address oldOwner, address newOwner);
 
     modifier onlyOwner() {
         require(msg.sender == owner);
@@ -158,14 +142,14 @@ contract RaffleManager is
         address keeperAddress,
         address linkAddress
     ) VRFV2WrapperConsumerBase(linkAddress, wrapperAddress) {
+        require(keeperAddress != address(0), "Keeper Registry address cannot be 0x0");
+        require(linkAddress != address(0), "Link Token address cannot be 0x0");
+        require(wrapperAddress != address(0), "Wrapper address cannot be 0x0");
         owner = msg.sender;
         vrfWrapper = VRFV2WrapperInterface(wrapperAddress);
         linkTokenAddress = linkAddress;
-        requestConfig = RequestConfig({
-            callbackGasLimit: callbackGasLimit,
-            requestConfirmations: requestConfirmations,
-            numWords: 1
-        });
+        requestConfig =
+            RequestConfig({callbackGasLimit: callbackGasLimit, requestConfirmations: requestConfirmations, numWords: 1});
         setKeeperRegistryAddress(keeperAddress);
     }
 
@@ -193,12 +177,10 @@ contract RaffleManager is
         bytes32[] memory participants,
         uint8 totalWinners,
         uint8 entriesPerUser
-    ) external payable {
+    ) external payable whenNotPaused {
         RaffleInstance memory newRaffle = RaffleInstance({
             base: RaffleBase({
-                raffleType: participants.length > 0
-                    ? RaffleType.STATIC
-                    : RaffleType.DYNAMIC,
+                raffleType: participants.length > 0 ? RaffleType.STATIC : RaffleType.DYNAMIC,
                 id: raffleCounter.current(),
                 automation: automation,
                 feeToken: feeToken != address(0) ? true : false,
@@ -211,18 +193,13 @@ contract RaffleManager is
             }),
             owner: msg.sender,
             raffleName: name,
-            contestantsAddresses: participants.length > 0
-                ? participants
-                : new bytes32[](0),
+            contestantsAddresses: participants.length > 0 ? participants : new bytes32[](0),
             winners: new bytes32[](0),
             prizeWorth: msg.value,
             timeLength: timeLength,
             fee: fee,
             raffleState: RaffleState.LIVE,
-            prize: Prize({
-                prizeName: string(prize),
-                claimedPrizes: new bytes32[](0)
-            }),
+            prize: Prize({prizeName: string(prize), claimedPrizes: new bytes32[](0)}),
             paymentNeeded: fee == 0 ? false : true,
             merkleRoot: merkleRoot,
             requestStatus: RequestStatus({
@@ -237,13 +214,7 @@ contract RaffleManager is
         raffles[raffleCounter.current()] = newRaffle;
         liveRaffles.add(raffleCounter.current());
         raffleCounter.increment();
-        emit RaffleCreated(
-            prize,
-            timeLength,
-            fee,
-            feeToken,
-            merkleRoot != bytes32(0) ? true : false
-        );
+        emit RaffleCreated(prize, timeLength, fee, feeToken, merkleRoot != bytes32(0) ? true : false);
     }
 
     /**
@@ -255,48 +226,25 @@ contract RaffleManager is
      * @dev if raffle is permissioned, proof must be provided
      *
      */
-    function enterRaffle(
-        uint256 raffleId,
-        uint8 entries,
-        bytes32[] memory proof
-    ) external payable {
+    function enterRaffle(uint256 raffleId, uint8 entries, bytes32[] memory proof) external payable nonReentrant {
+        require(raffles[raffleId].raffleState == RaffleState.LIVE, "Raffle is not live");
+        require(raffles[raffleId].base.raffleType == RaffleType.DYNAMIC, "Cannot enter static raffle");
+        require(entries > 0 && entries <= raffles[raffleId].base.entriesPerUser, "Too many entries");
         require(
-            raffles[raffleId].raffleState == RaffleState.LIVE,
-            "Raffle is not live"
-        );
-        require(
-            raffles[raffleId].base.raffleType == RaffleType.DYNAMIC,
-            "Cannot enter static raffle"
-        );
-        require(
-            entries > 0 && entries <= raffles[raffleId].base.entriesPerUser,
-            "Too many entries"
-        );
-        require(
-            userEntries[msg.sender][raffleId] + entries <=
-                raffles[raffleId].base.entriesPerUser,
-            "Too many entries"
+            userEntries[msg.sender][raffleId] + entries <= raffles[raffleId].base.entriesPerUser, "Too many entries"
         );
         bytes32 _userHash = keccak256(abi.encodePacked(msg.sender));
         if (raffles[raffleId].base.permissioned) {
-            require(
-                proof.verify(raffles[raffleId].merkleRoot, _userHash),
-                "Not authorized"
-            );
+            require(proof.verify(raffles[raffleId].merkleRoot, _userHash), "Not authorized");
         }
-        if (
-            raffles[raffleId].paymentNeeded && raffles[raffleId].base.feeToken
-        ) {
+        if (raffles[raffleId].paymentNeeded && raffles[raffleId].base.feeToken) {
             IERC20(raffles[raffleId].base.feeTokenAddress).safeTransferFrom(
-                msg.sender,
-                address(this),
-                (raffles[raffleId].fee * entries)
+                msg.sender, address(this), (raffles[raffleId].fee * entries)
             );
+            raffles[raffleId].prizeWorth += raffles[raffleId].fee * entries;
         } else if (raffles[raffleId].paymentNeeded) {
-            require(
-                msg.value >= (raffles[raffleId].fee * entries),
-                "Not enough ETH to join raffle"
-            );
+            require(msg.value >= (raffles[raffleId].fee * entries), "Not enough ETH to join raffle");
+            raffles[raffleId].prizeWorth += msg.value;
         }
         for (uint256 i = 0; i < entries; i++) {
             raffles[raffleId].contestantsAddresses.push(_userHash);
@@ -325,11 +273,7 @@ contract RaffleManager is
      * @return address of the winner
      *
      */
-    function getWinners(uint256 raffleId)
-        external
-        view
-        returns (bytes32[] memory)
-    {
+    function getWinners(uint256 raffleId) external view returns (bytes32[] memory) {
         return raffles[raffleId].winners;
     }
 
@@ -339,16 +283,16 @@ contract RaffleManager is
      * @param amount amount of raffle entries
      *
      */
-    function _pickRandom(
-        uint256 randomValue,
-        uint256 amount,
-        uint256 raffleId
-    ) internal view returns (uint256[] memory) {
+    function _pickRandom(uint256 randomValue, uint256 amount, uint256 raffleId)
+        internal
+        view
+        returns (uint256[] memory)
+    {
         uint256[] memory winners = new uint256[](
             raffles[raffleId].base.totalWinners
         );
         uint256 _amount = amount;
-        for (uint256 i = 0; i < raffles[raffleId].winners.length; i++) {
+        for (uint256 i = 0; i < winners.length; i++) {
             uint256 v = uint256(keccak256(abi.encode(randomValue, 0)));
             winners[i] = uint256(v % _amount) + 1;
             _amount--;
@@ -357,21 +301,15 @@ contract RaffleManager is
         return winners;
     }
 
-    function _requestRandomWords(uint256 raffleId, uint256 value)
-        internal
-        returns (uint256 requestId)
-    {
+    function _requestRandomWords(uint256 raffleId, uint256 value) internal returns (uint256 requestId) {
         requestId = requestRandomness(
-            requestConfig.callbackGasLimit,
-            requestConfig.requestConfirmations,
-            requestConfig.numWords
+            requestConfig.callbackGasLimit, requestConfig.requestConfirmations, requestConfig.numWords
         );
+        emit RaffleStaged(raffleId);
         requestIdToRaffleIndex[requestId] = raffleId;
         raffles[raffleId].requestStatus = RequestStatus({
             requestId: requestId,
-            paid: vrfWrapper.calculateRequestPrice(
-                requestConfig.callbackGasLimit
-            ),
+            paid: vrfWrapper.calculateRequestPrice(requestConfig.callbackGasLimit),
             randomWords: new uint256[](0),
             fulfilled: false,
             totalLink: value,
@@ -381,33 +319,22 @@ contract RaffleManager is
         return requestId;
     }
 
-    function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords)
-        internal
-        override
-    {
+    function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal override {
         uint256 raffleIndexFromRequestId = requestIdToRaffleIndex[requestId];
-        raffles[raffleIndexFromRequestId]
-            .requestStatus
-            .randomWords = randomWords;
+        raffles[raffleIndexFromRequestId].requestStatus.randomWords = randomWords;
         raffles[raffleIndexFromRequestId].requestStatus.fulfilled = true;
         _updateLiveRaffles(raffleIndexFromRequestId);
         uint256[] memory winners = _pickRandom(
-            randomWords[0],
-            raffles[raffleIndexFromRequestId].contestantsAddresses.length,
-            raffleIndexFromRequestId
+            randomWords[0], raffles[raffleIndexFromRequestId].contestantsAddresses.length, raffleIndexFromRequestId
         );
         for (uint256 i = 0; i < winners.length; i++) {
             raffles[raffleIndexFromRequestId].winners.push(
-                raffles[raffleIndexFromRequestId].contestantsAddresses[
-                    winners[i] - 1
-                ]
+                raffles[raffleIndexFromRequestId].contestantsAddresses[winners[i] - 1]
             );
         }
+
         raffles[raffleIndexFromRequestId].raffleState = RaffleState.FINISHED;
-        emit RaffleWon(
-            raffleIndexFromRequestId,
-            raffles[raffleIndexFromRequestId].winners
-        );
+        emit RaffleWon(raffleIndexFromRequestId, raffles[raffleIndexFromRequestId].winners);
     }
 
     /**
@@ -417,48 +344,37 @@ contract RaffleManager is
      *
      */
     function claimPrize(uint256 raffleId) external nonReentrant {
-        require(
-            raffles[raffleId].raffleState == RaffleState.FINISHED,
-            "Raffle is not finished"
-        );
+        require(raffles[raffleId].raffleState == RaffleState.FINISHED, "Raffle is not finished");
+        require(raffles[raffleId].prizeWorth > 0, "No prize to claim");
         bytes32 _claimer = keccak256(abi.encodePacked(msg.sender));
+        bool eligible = false;
         for (uint256 i = 0; i < raffles[raffleId].winners.length; i++) {
-            require(
-                raffles[raffleId].winners[i] != _claimer,
-                "You are not the winner of this raffle"
-            );
+            if (raffles[raffleId].winners[i] == _claimer) {
+                eligible = true;
+                break;
+            }
         }
-        for (
-            uint256 i = 0;
-            i < raffles[raffleId].prize.claimedPrizes.length;
-            i++
-        ) {
-            require(
-                raffles[raffleId].prize.claimedPrizes[i] != _claimer,
-                "You have already claimed your prize"
-            );
+        require(eligible, "You are not eligible to claim this prize");
+        for (uint256 i = 0; i < raffles[raffleId].prize.claimedPrizes.length; i++) {
+            require(raffles[raffleId].prize.claimedPrizes[i] != _claimer, "Prize already claimed");
         }
 
         if (raffles[raffleId].base.feeToken) {
-            IERC20(raffles[raffleId].base.feeTokenAddress).safeTransfer(
-                msg.sender,
-                (raffles[raffleId].prizeWorth /
-                    raffles[raffleId].base.totalWinners)
-            );
             raffles[raffleId].prize.claimedPrizes.push(_claimer);
+            emit RafflePrizeClaimed(
+                raffleId, msg.sender, (raffles[raffleId].prizeWorth / raffles[raffleId].base.totalWinners)
+                );
+            IERC20(raffles[raffleId].base.feeTokenAddress).safeTransfer(
+                msg.sender, (raffles[raffleId].prizeWorth / raffles[raffleId].base.totalWinners)
+            );
         } else if (raffles[raffleId].fee > 0) {
             // transfer total prize div by total winners
-            payable(msg.sender).transfer(
-                raffles[raffleId].prizeWorth /
-                    raffles[raffleId].base.totalWinners
-            );
             raffles[raffleId].prize.claimedPrizes.push(_claimer);
+            emit RafflePrizeClaimed(
+                raffleId, msg.sender, (raffles[raffleId].prizeWorth / raffles[raffleId].base.totalWinners)
+                );
+            payable(msg.sender).transfer(raffles[raffleId].prizeWorth / raffles[raffleId].base.totalWinners);
         }
-        emit RafflePrizeClaimed(
-            raffleId,
-            msg.sender,
-            raffles[raffleId].prizeWorth
-        );
     }
 
     /**
@@ -473,13 +389,8 @@ contract RaffleManager is
         returns (bool upkeepNeeded, bytes memory performData)
     {
         uint256 raffleId = abi.decode(checkData, (uint256));
-        if (
-            raffles[raffleId].raffleState == RaffleState.LIVE &&
-            raffles[raffleId].base.automation
-        ) {
-            upkeepNeeded =
-                (block.timestamp - raffles[raffleId].base.startDate) >
-                raffles[raffleId].timeLength;
+        if (raffles[raffleId].raffleState == RaffleState.LIVE && raffles[raffleId].base.automation) {
+            upkeepNeeded = (block.timestamp - raffles[raffleId].base.startDate) > raffles[raffleId].timeLength;
         }
         performData = checkData;
     }
@@ -489,21 +400,11 @@ contract RaffleManager is
      * @dev will stage the raffle if the time has passed and allow for owner to call VRF
      *
      */
-    function performUpkeep(bytes calldata performData)
-        external
-        override
-        onlyKeeperRegistry
-    {
+    function performUpkeep(bytes calldata performData) external override onlyKeeperRegistry {
         uint256 raffleId = abi.decode(performData, (uint256));
 
-        if (
-            raffles[raffleId].raffleState == RaffleState.LIVE &&
-            raffles[raffleId].base.automation
-        ) {
-            if (
-                (block.timestamp - raffles[raffleId].base.startDate) >
-                raffles[raffleId].timeLength
-            ) {
+        if (raffles[raffleId].raffleState == RaffleState.LIVE && raffles[raffleId].base.automation) {
+            if ((block.timestamp - raffles[raffleId].base.startDate) > raffles[raffleId].timeLength) {
                 raffles[raffleId].raffleState == RaffleState.STAGED;
                 emit RaffleStaged(liveRaffles.at(raffleId));
             }
@@ -513,26 +414,14 @@ contract RaffleManager is
     /**
      * @notice Sets the keeper registry address.
      */
-    function setKeeperRegistryAddress(address newKeeperAddress)
-        public
-        onlyOwner
-    {
+    function setKeeperRegistryAddress(address newKeeperAddress) public onlyOwner {
         require(newKeeperAddress != address(0));
         keeperRegistryAddress = newKeeperAddress;
-        emit KeeperRegistryAddressUpdated(
-            keeperRegistryAddress,
-            newKeeperAddress
-        );
+        emit KeeperRegistryAddressUpdated(keeperRegistryAddress, newKeeperAddress);
     }
 
-    function setProvenanceHash(uint256 raffleId, bytes memory provenanceHash)
-        external
-        onlyRaffleOwner(raffleId)
-    {
-        require(
-            raffles[raffleId].base.provenanceHash.length == 0,
-            "provenance hash already set"
-        );
+    function setProvenanceHash(uint256 raffleId, bytes memory provenanceHash) external onlyRaffleOwner(raffleId) {
+        require(raffles[raffleId].base.provenanceHash.length == 0, "provenance hash already set");
 
         raffles[raffleId].base.provenanceHash = provenanceHash;
     }
@@ -550,11 +439,7 @@ contract RaffleManager is
      * @return raffle instance
      *
      */
-    function getRaffle(uint256 raffleId)
-        external
-        view
-        returns (RaffleInstance memory)
-    {
+    function getRaffle(uint256 raffleId) external view returns (RaffleInstance memory) {
         return raffles[raffleId];
     }
 
@@ -579,11 +464,7 @@ contract RaffleManager is
      * @return RaffleInstance[] of all owner raffles
      *
      */
-    function getOwnerRaffles(address raffleOwner)
-        external
-        view
-        returns (RaffleInstance[] memory)
-    {
+    function getOwnerRaffles(address raffleOwner) external view returns (RaffleInstance[] memory) {
         uint256 _index = 0;
         for (uint256 i = 0; i < raffleCounter.current(); i++) {
             if (raffles[i].owner == raffleOwner) {
@@ -609,21 +490,10 @@ contract RaffleManager is
      * @dev user is the msg.sender
      *
      */
-    function getUserEntries(uint256 raffleId, address user)
-        external
-        view
-        returns (uint256)
-    {
+    function getUserEntries(uint256 raffleId, address user) external view returns (uint256) {
         uint256 userEntriesCount = 0;
-        for (
-            uint256 i = 0;
-            i < raffles[raffleId].contestantsAddresses.length;
-            i++
-        ) {
-            if (
-                raffles[raffleId].contestantsAddresses[i] ==
-                keccak256(abi.encodePacked(user))
-            ) {
+        for (uint256 i = 0; i < raffles[raffleId].contestantsAddresses.length; i++) {
+            if (raffles[raffleId].contestantsAddresses[i] == keccak256(abi.encodePacked(user))) {
                 userEntriesCount++;
             }
         }
@@ -637,10 +507,7 @@ contract RaffleManager is
      * @param newAdmin address of the new admin
      *
      */
-    function updateRaffleOwner(uint256 raffleId, address newAdmin)
-        external
-        onlyRaffleOwner(raffleId)
-    {
+    function updateRaffleOwner(uint256 raffleId, address newAdmin) external onlyRaffleOwner(raffleId) {
         raffles[raffleId].owner = newAdmin;
         emit RaffleOwnerUpdated(raffleId, msg.sender, newAdmin);
     }
@@ -650,21 +517,13 @@ contract RaffleManager is
      * @param raffleId id of the raffle
      * @dev must be owner of raffle to withdraw LINK from raffle instance
      */
-    function withdrawLink(uint256 raffleId)
-        external
-        onlyRaffleOwner(raffleId)
-        nonReentrant
-    {
-        require(
-            !raffles[raffleId].requestStatus.withdrawn,
-            "Already withdrawn"
-        );
-        LinkTokenInterface link = LinkTokenInterface(linkTokenAddress);
-        uint256 claimable = raffles[raffleId].requestStatus.totalLink -
-            raffles[raffleId].requestStatus.paid;
+    function withdrawLink(uint256 raffleId) external onlyRaffleOwner(raffleId) nonReentrant {
+        require(!raffles[raffleId].requestStatus.withdrawn, "Already withdrawn");
+        IERC20 link = IERC20(linkTokenAddress);
+        uint256 claimable = raffles[raffleId].requestStatus.totalLink - raffles[raffleId].requestStatus.paid;
         require(claimable > 0, "Nothing to claim");
         raffles[raffleId].requestStatus.withdrawn = true;
-        require(link.transfer(msg.sender, claimable), "Unable to transfer");
+        link.safeTransfer(msg.sender, claimable);
     }
 
     /**
@@ -672,13 +531,18 @@ contract RaffleManager is
      * @dev Uses Chainlink VRF direct funding to generate random number paid by raffle owner.
      *
      */
-    function onTokenTransfer(
-        address sender,
-        uint256 value,
-        bytes calldata raffleId
-    ) external {
+    function onTokenTransfer(address sender, uint256 value, bytes calldata raffleId) external {
         uint256 _raffle = abi.decode(raffleId, (uint256));
         require(sender == raffles[_raffle].owner, "Only owner can pick winner");
         _pickWinner(_raffle, value);
+    }
+
+    /**
+     * @notice checks status of contract
+     * @return bool paused status
+     *
+     */
+    function isPaused() external view returns (bool) {
+        return paused();
     }
 }
