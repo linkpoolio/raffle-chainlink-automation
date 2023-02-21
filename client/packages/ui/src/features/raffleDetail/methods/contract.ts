@@ -2,13 +2,11 @@
 
 import { getMockRaffle } from '../mock' // TODO: remove
 
-const timeout = (ms) => new Promise((resolve) => setTimeout(resolve, ms)) // TODO: remove, this was for testing only
-
 export const getRaffle = async ({ id, asyncManager, update }) => {
   try {
     asyncManager.start()
     const raffle = getMockRaffle(id) // TODO: remove this when enabling the actual request
-    // const raffle = await contracts.getRaffle(id) // TODO uncomment this when ready to use contract request
+    // const raffle = await contracts.getRaffle(id)
     asyncManager.success()
     update({ raffle })
   } catch (error) {
@@ -16,37 +14,31 @@ export const getRaffle = async ({ id, asyncManager, update }) => {
   }
 }
 
-export const claimPrize = async ({ id, identifier, asyncManager }) => {
+export const claimPrize = async ({ id, asyncManager }) => {
   try {
     asyncManager.start()
-    // const payload: contracts.ClaimPrizeParams = { raffleId: id, contestant: identifier } // TODO: encode relevant state for payload
-    // const { isSuccess } = await contracts.claimPrize(payload) // TODO uncomment this when function is ready
-    // if (!isSuccess) throw new Error('Request to create raffle was not successful') // TODO uncomment this when function is ready
-    await timeout(2000) // TODO: remove this after above action is made
+    // const payload: contracts.ClaimPrizeParams = { id }
+    // const { isSuccess } = await contracts.claimPrize(payload)
+    // if (!isSuccess) throw new Error('Request to create raffle was not successful')
     asyncManager.success()
     return true
   } catch (error) {
-    asyncManager.fail(
-      `Could not claim prize on raffle id \`${id}\` for participant \`${identifier}\``
-    )
+    asyncManager.fail(`Could not claim prize on raffle id \`${id}\``)
     return false
   }
 }
 
-// enterRaffle = (params: contracts.EnterRaffleParams) => {
-export const joinRaffle = async ({ id, identifier, entries, asyncManager }) => {
+export const joinRaffle = async ({ id, asyncManager, update }) => {
   try {
     asyncManager.start()
-    // const payload: contracts.EnterRaffleParams = { raffleId: id, entries, contestant: identifier } // TODO: encode relevant state for payload
-    // const { isSuccess } = await contracts.enterRaffle(payload) // TODO uncomment this when function is ready
-    // if (!isSuccess) throw new Error('Request to create raffle was not successful') // TODO uncomment this when function is ready
-    await timeout(2000) // TODO: remove this after above action is made
+    // const payload: contracts.EnterRaffleParams = { id }
+    // const { isSuccess } = await contracts.enterRaffle(payload)
+    // if (!isSuccess) throw new Error('Request to create raffle was not successful')
     asyncManager.success()
+    update(true)
     return true
   } catch (error) {
-    asyncManager.fail(
-      `Could not join raffle id \`${id}\` for participant \`${identifier}\` with \`${entries}\` entries.`
-    )
+    asyncManager.fail(`Could not join raffle id \`${id}\``)
     return false
   }
 }

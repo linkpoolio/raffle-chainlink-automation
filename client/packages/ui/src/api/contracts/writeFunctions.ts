@@ -7,24 +7,22 @@ import abi from './abi/RaffleManager.json'
 const address = env.contractAddress()
 const defaultOptions = { abi, address }
 
-// TODO: set entriesPerUser to 1
-// TODO: provide default values if null
 export const createRaffle = (params: contracts.CreateRaffleParams) => {
   try {
     const { config } = usePrepareContractWrite({
       ...defaultOptions,
       functionName: 'createRaffle',
       args: [
-        params.prize,
-        params.timeLength,
+        params.prizeName,
+        params.timeLength ? params.timeLength : 0,
         params.fee,
         params.name,
         params.feeToken,
-        params.merkleRoot,
-        params.automation,
-        params.participants,
+        params.merkleRoot ? params.merkleRoot : '',
+        params.automation ? params.automation : false,
+        params.participants ? params.participants : [],
         params.totalWinners,
-        params.entriesPerUser
+        params.entriesPerUser ? params.entriesPerUser : 1
       ]
     })
     const { data, isLoading, isSuccess } = useContractWrite(config)
@@ -36,11 +34,11 @@ export const createRaffle = (params: contracts.CreateRaffleParams) => {
 
 export const enterRaffle = (params: contracts.EnterRaffleParams) => {
   try {
-    const { raffleId, entries, proof } = params
+    const { id, proof } = params
     const { config } = usePrepareContractWrite({
       ...defaultOptions,
       functionName: 'enterRaffle',
-      args: [raffleId, entries, proof]
+      args: [id, params.entries ? params.entries : 1, proof ? proof : []]
     })
     const { data, isLoading, isSuccess } = useContractWrite(config)
     return { data, isLoading, isSuccess }
@@ -51,11 +49,11 @@ export const enterRaffle = (params: contracts.EnterRaffleParams) => {
 
 export const claimPrize = (params: contracts.ClaimPrizeParams) => {
   try {
-    const { raffleId } = params
+    const { id } = params
     const { config } = usePrepareContractWrite({
       ...defaultOptions,
       functionName: 'claimPrize',
-      args: [raffleId]
+      args: [id]
     })
     const { data, isLoading, isSuccess } = useContractWrite(config)
     return { data, isLoading, isSuccess }

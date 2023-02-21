@@ -27,19 +27,16 @@ import { RaffleType } from '@ui/models'
 
 export const baseInitialState = {
   name: '',
-  createdBy: null,
-  totalWinners: 1,
-  prize: ''
+  prizeName: '',
+  totalWinners: 1
 }
 
-// TODO: (nice to have) add resuable form components with form validation
 export const RaffleCreate = () => {
   const { address } = useAccount()
 
   const store = useStore({
     ...baseInitialState,
-    ...initialStaticState,
-    createdBy: address
+    ...initialStaticState
   })
   const asyncManager = useAsyncManager()
   const history = useHistory()
@@ -138,8 +135,8 @@ export const RaffleCreate = () => {
             <Input
               type="text"
               placeholder="Number"
-              value={state.prize}
-              onChange={onTextChange('prize')}
+              value={state.prizeName}
+              onChange={onTextChange('prizeName')}
             />
           </Control>
         </GridItem>

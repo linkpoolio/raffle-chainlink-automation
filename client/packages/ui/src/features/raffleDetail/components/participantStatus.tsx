@@ -21,7 +21,6 @@ const WonUnclaimed = ({ id, store, asyncManager }) => {
   const onClaim = async () => {
     const response = await claimPrize({
       id,
-      identifier: store.state.identifier,
       asyncManager
     })
 
