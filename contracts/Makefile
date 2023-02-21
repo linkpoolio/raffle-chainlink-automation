@@ -3,7 +3,6 @@
 install:
 	forge install --no-git Openzeppelin/openzeppelin-contracts foundry-rs/forge-std smartcontractkit/chainlink
 
-# TODO: refactor deploy and deploy-local to intuit the RPC_URL based on environment var for `NETWORK`
 deploy:
 	forge script script/RaffleManager.s.sol:RaffleManagerScript --rpc-url ${GOERLI_RPC_URL} --etherscan-api-key ${ETHERSCAN_KEY} --broadcast --verify -vvvv
 
