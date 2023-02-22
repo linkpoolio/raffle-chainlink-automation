@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Button, Text, Flex, Heading } from '@chakra-ui/react'
 
 import { pickWinners } from '@ui/features/raffleDetail'
 
@@ -17,9 +18,15 @@ export const PickWinners = ({ id, reset, asyncManager }) => {
   return (
     success && (
       <>
-        <h3>Pick Winners</h3>
-        <div>Successfully picked winners for raffle id `{id}`.</div>
-        <button onClick={reset}>Close</button>
+        <Heading size="md" mb="6">
+          Pick Winners
+        </Heading>
+        <Text>Successfully picked winners for raffle id `{id}`.</Text>
+        <Flex mt="2" justify="end">
+          <Button variant="default" onClick={reset}>
+            Close
+          </Button>
+        </Flex>
       </>
     )
   )

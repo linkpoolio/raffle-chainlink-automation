@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { ethers } from 'ethers'
+import { Button, Flex, Input, Heading } from '@chakra-ui/react'
 
+import { Control } from '@ui/components'
 import { steps } from '@ui/features/raffleDetail'
 
 export const ProvideIdentifier = ({ store, asyncManager }) => {
@@ -43,14 +45,20 @@ export const ProvideIdentifier = ({ store, asyncManager }) => {
 
   return (
     <>
-      <h3>Did I win?</h3>
-      <div>Please enter your unique identifier</div>
-      <input type="text" value={identifier} onChange={onChange} />
-      <button
-        disabled={asyncManager.loading || identifier == ''}
-        onClick={onSubmit}>
-        Next
-      </button>
+      <Heading size="md" mb="6">
+        Did I win?
+      </Heading>
+      <Control label="Please enter your unique identifier">
+        <Input type="text" value={identifier} onChange={onChange} />
+      </Control>
+      <Flex mt="2" justify="end">
+        <Button
+          variant="default"
+          disabled={asyncManager.loading || identifier == ''}
+          onClick={onSubmit}>
+          Next
+        </Button>
+      </Flex>
     </>
   )
 }

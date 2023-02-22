@@ -1,4 +1,5 @@
 import React from 'react'
+import { Button } from '@chakra-ui/react'
 
 import { steps } from '@ui/features/raffleDetail'
 import { RaffleStatus, RaffleType, isRaffleParticipant } from '@ui/models'
@@ -11,7 +12,7 @@ export const JoinButton = ({ update, raffle, address, identifier }) =>
   address &&
   identifier &&
   !isRaffleParticipant(raffle, identifier) && (
-    <div>
-      <button onClick={() => onJoinClick({ update })}>Join Raffle</button>
-    </div>
+    <Button onClick={() => onJoinClick({ update })} variant="default">
+      Join Raffle
+    </Button>
   )

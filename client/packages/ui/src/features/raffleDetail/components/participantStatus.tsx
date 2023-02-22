@@ -1,19 +1,24 @@
 import React from 'react'
+import { Button, Text, Flex, Heading } from '@chakra-ui/react'
 
 import { participantStatus, claimPrize } from '@ui/features/raffleDetail'
 import { RaffleType } from '@ui/models'
 
 const Close = ({ reset }) => (
-  <div>
-    <button onClick={reset}>Close</button>
-  </div>
+  <Flex mt="2" justify="end">
+    <Button variant="default" onClick={reset}>
+      Close
+    </Button>
+  </Flex>
 )
 
 const Lost = ({ reset }) => {
   return (
     <>
-      <h3>Did I win?</h3>
-      <div>Sorry, no luck this time! Try again soon.</div>
+      <Heading size="md" mb="6">
+        Did I win?
+      </Heading>
+      <Text>Sorry, no luck this time! Try again soon.</Text>
       <Close reset={reset} />
     </>
   )
@@ -34,13 +39,18 @@ const WonUnclaimed = ({ id, store, asyncManager }) => {
 
   return (
     <>
-      <h3>Did I win?</h3>
-      <span>You won!</span>
-      <div>
-        <button disabled={asyncManager.loading} onClick={onClaim}>
+      <Heading size="md" mb="6">
+        Did I win?
+      </Heading>
+      <Text>You won!</Text>
+      <Flex mt="2" justify="end">
+        <Button
+          variant="default"
+          disabled={asyncManager.loading}
+          onClick={onClaim}>
           Claim Prize
-        </button>
-      </div>
+        </Button>
+      </Flex>
     </>
   )
 }
@@ -48,12 +58,15 @@ const WonUnclaimed = ({ id, store, asyncManager }) => {
 const WonClaimed = ({ store, reset }) => {
   return (
     <>
-      <h3>Did I win?</h3>
-      <div>
+      <Heading size="md" mb="6">
+        Did I win?
+      </Heading>
+      <Text>
+        {' '}
         You Won!
         {store.state.raffle.type == RaffleType.DYNAMIC &&
           ` (and you successfully claimed your prize)`}
-      </div>
+      </Text>
       <Close reset={reset} />
     </>
   )

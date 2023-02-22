@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Button, Text, Flex, Heading } from '@chakra-ui/react'
 
 import { joinRaffle } from '@ui/features/raffleDetail'
 
@@ -17,9 +18,15 @@ export const Join = ({ id, reset, asyncManager }) => {
   return (
     success && (
       <>
-        <h3>Join Raffle</h3>
-        <div>Successfully joined raffle id `{id}`.</div>
-        <button onClick={reset}>Close</button>
+        <Heading size="md" mb="6">
+          Join Raffle
+        </Heading>
+        <Text>Successfully joined raffle id `{id}`.</Text>
+        <Flex mt="2" justify="end">
+          <Button variant="default" onClick={reset}>
+            Close
+          </Button>
+        </Flex>
       </>
     )
   )

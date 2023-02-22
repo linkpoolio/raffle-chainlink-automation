@@ -1,4 +1,5 @@
 import React from 'react'
+import { Button } from '@chakra-ui/react'
 
 import { steps } from '@ui/features/raffleDetail'
 import { RaffleStatus, RaffleType, isRaffleParticipant } from '@ui/models'
@@ -38,9 +39,7 @@ export const CheckStatusButton = (props) =>
   props.raffle?.status == RaffleStatus.FINISHED &&
   (props.raffle?.type != RaffleType.DYNAMIC ||
     isRaffleParticipant(props.raffle, props.identifier)) && (
-    <div>
-      <button onClick={() => onParticipantStatusClick(props)}>
-        Did I win?
-      </button>
-    </div>
+    <Button onClick={() => onParticipantStatusClick(props)} variant="default">
+      Did I win?
+    </Button>
   )

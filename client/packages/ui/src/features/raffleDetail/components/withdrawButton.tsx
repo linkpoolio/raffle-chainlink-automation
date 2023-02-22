@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Button } from '@chakra-ui/react'
 
 import { steps, canWithdraw } from '@ui/features/raffleDetail'
 import { RaffleStatus, isRaffleOwner } from '@ui/models'
@@ -29,11 +30,9 @@ export const WithdrawButton = ({ update, raffle, address }) => {
 
   return (
     hasPermission && (
-      <div>
-        <button onClick={() => onWithdrawClick({ update })}>
-          Withdraw LINK
-        </button>
-      </div>
+      <Button onClick={() => onWithdrawClick({ update })} variant="default">
+        Withdraw LINK
+      </Button>
     )
   )
 }
