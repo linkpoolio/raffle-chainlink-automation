@@ -1,4 +1,5 @@
 import React from 'react'
+import { Button } from '@chakra-ui/react'
 
 import { steps } from '@ui/features/raffleDetail'
 import { RaffleStatus, isRaffleOwner } from '@ui/models'
@@ -13,11 +14,9 @@ export const PickWinnersButton = ({ update, raffle, address }) => {
 
   return (
     validStatus && (
-      <div>
-        <button onClick={() => onPickWinnersClick({ update })}>
-          Pick Winners
-        </button>
-      </div>
+      <Button onClick={() => onPickWinnersClick({ update })} variant="default">
+        Pick Winners
+      </Button>
     )
   )
 }

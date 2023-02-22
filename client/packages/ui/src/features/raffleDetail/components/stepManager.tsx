@@ -30,18 +30,15 @@ const getComponent = (props) => {
 
 export const StepManager = ({ id, store }) => {
   const asyncManager = useAsyncManager()
-
   const { step } = store.state
 
   const reset = () => store.update({ step: null })
 
   return (
-    step && (
-      <Modal onClose={reset}>
-        <Loading asyncManager={asyncManager} />
-        <Error asyncManager={asyncManager} />
-        {getComponent({ id, store, asyncManager, reset })}
-      </Modal>
-    )
+    <Modal onClose={reset} isOpen={!!step}>
+      <Loading asyncManager={asyncManager} />
+      <Error asyncManager={asyncManager} />
+      {getComponent({ id, store, asyncManager, reset })}
+    </Modal>
   )
 }

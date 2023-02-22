@@ -12,8 +12,8 @@ export enum RaffleType {
 export interface RaffleInstance {
   id: string
   name: string // bytes32
-  type: typeof RaffleType
-  status: typeof RaffleStatus
+  type: RaffleType
+  status: RaffleStatus
   owner: string // address
   startDate: string
   hours: number
