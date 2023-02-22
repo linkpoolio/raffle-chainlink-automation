@@ -1,8 +1,6 @@
-import { ethers } from 'ethers'
+import { BigNumber } from 'ethers'
 
 import { contracts } from '@ui/api'
-
-// TODO: everywhere we check `isSuccess` needs updated
 
 export const getRaffle = async ({ id, asyncManager, update }) => {
   try {
@@ -19,7 +17,8 @@ export const claimPrize = async ({ id, asyncManager }) => {
   try {
     asyncManager.start()
     const payload: contracts.ClaimPrizeParams = { id }
-    const { isSuccess } = await contracts.claimPrize(payload)
+    const { wait } = await contracts.claimPrize(payload)
+    const isSuccess = await wait().then((receipt) => receipt.status === 1)
     if (!isSuccess) throw new Error('Request to claim prize was not successful')
     asyncManager.success()
     return true
@@ -33,7 +32,8 @@ export const joinRaffle = async ({ id, fee, asyncManager, update }) => {
   try {
     asyncManager.start()
     const payload: contracts.EnterRaffleParams = { id, fee }
-    const { isSuccess } = await contracts.enterRaffle(payload)
+    const { wait } = await contracts.enterRaffle(payload)
+    const isSuccess = await wait().then((receipt) => receipt.status === 1)
     if (!isSuccess) throw new Error('Request to join raffle was not successful')
     asyncManager.success()
     update(true)
@@ -53,10 +53,11 @@ export const pickWinners = async ({ id, asyncManager, update }) => {
      * The risk of a high fixed amount is offset both by (a) initial deployment is on eth goerli
      * and (b) the owner can withdraw excess link amount after the raffle has been resolved.
      */
-    const value = '500000000000000000' // 0.5 LINK
+    const value = BigNumber.from('500000000000000000') // 0.5 LINK
     asyncManager.start()
     const payload: contracts.ResolveRaffleParams = { id, value }
-    const { isSuccess } = await contracts.resolveRaffle(payload)
+    const { wait } = await contracts.resolveRaffle(payload)
+    const isSuccess = await wait().then((receipt) => receipt.status === 1)
     if (!isSuccess)
       throw new Error('Request to pick winners was not successful')
     asyncManager.success()
@@ -72,7 +73,8 @@ export const withdrawLink = async ({ id, asyncManager, update }) => {
   try {
     asyncManager.start()
     const payload: contracts.WithdrawLinkParams = { id }
-    const { isSuccess } = await contracts.withdrawLink(payload)
+    const { wait } = await contracts.withdrawLink(payload)
+    const isSuccess = await wait().then((receipt) => receipt.status === 1)
     if (!isSuccess)
       throw new Error('Request to withdraw LINK was not successful')
     asyncManager.success()

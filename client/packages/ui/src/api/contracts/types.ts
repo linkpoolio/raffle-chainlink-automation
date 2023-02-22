@@ -1,3 +1,5 @@
+import { BigNumber } from 'ethers'
+
 export interface ClaimPrizeParams {
   id: number
 }
@@ -24,7 +26,7 @@ export interface CreateRaffleParams {
 
 export interface ResolveRaffleParams {
   id: number
-  value: number // link amount for funding txn
+  value: BigNumber // link amount for funding txn
 }
 
 export interface WithdrawLinkParams {

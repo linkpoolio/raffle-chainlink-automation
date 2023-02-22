@@ -11,7 +11,7 @@ import abi from './abi/RaffleManager.json'
 const raffleContractAddress = env.raffleManagerContractAddress()
 const defaultOptions = { abi, address: raffleContractAddress, watch: true }
 
-export const getAllRaffles = async (): RaffleInstance[] => {
+export const getAllRaffles = async (): Promise<RaffleInstance[]> => {
   try {
     const data = await readContract({
       ...defaultOptions,
@@ -25,7 +25,7 @@ export const getAllRaffles = async (): RaffleInstance[] => {
   }
 }
 
-export const getRaffle = async (id: number): RaffleInstance => {
+export const getRaffle = async (id: number): Promise<RaffleInstance> => {
   try {
     const data = await readContract({
       ...defaultOptions,

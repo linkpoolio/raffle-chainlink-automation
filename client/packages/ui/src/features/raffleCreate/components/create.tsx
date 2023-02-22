@@ -134,7 +134,7 @@ export const RaffleCreate = () => {
           <Control label="Prize description" helper="Max 40 charcters">
             <Input
               type="text"
-              placeholder="Number"
+              placeholder="Name"
               value={state.prizeName}
               onChange={onTextChange('prizeName')}
             />
