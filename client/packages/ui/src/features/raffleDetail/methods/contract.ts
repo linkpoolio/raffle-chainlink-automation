@@ -44,7 +44,7 @@ export const joinRaffle = async ({
     const isSuccess = await wait().then((receipt) => receipt.status === 1)
     if (!isSuccess) throw new Error('Request to join raffle was not successful')
     asyncManager.success()
-    await getRaffle({ id, asyncManager, update, success })
+    await getRaffle({ id, asyncManager, update })
     success(true)
     return true
   } catch (error) {
