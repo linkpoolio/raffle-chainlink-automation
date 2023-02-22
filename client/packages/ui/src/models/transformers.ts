@@ -6,7 +6,7 @@ export const transformRaffleItem = (raffle): RaffleInstance => {
   try {
     return {
       id: raffle.base.id.toString(),
-      name: ethers.utils.parseBytes32String(raffle[2]),
+      name: raffle[2],
       type: raffle.base.raffleType,
       status: raffle.raffleState,
       owner: raffle.owner,
@@ -26,7 +26,7 @@ export const transformRaffleItem = (raffle): RaffleInstance => {
       contestantsAddresses: raffle.contestantsAddresses,
       winners: raffle.winners,
       claimedPrizes: raffle.prize.claimedPrizes,
-      withdrawn: raffle.requests.withdrawn
+      withdrawn: raffle.requests?.withdrawn ? raffle.requests.withdrawnn : false
     }
   } catch (error: any) {
     throw new Error(`Error transforming raffle item: ${error.message}`)

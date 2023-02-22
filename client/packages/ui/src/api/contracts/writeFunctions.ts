@@ -12,25 +12,28 @@ const linkTokenContractAddress = env.linkTokenContractAddress()
 
 export const createRaffle = async (params: contracts.CreateRaffleParams) => {
   try {
-    const config = await prepareWriteContract({
+    const configParams = {
       address: raffleManagerContractAddress,
       abi: raffleManagerABI,
       functionName: 'createRaffle',
       args: [
         params.prizeName,
         params.timeLength ? params.timeLength : 0,
-        params.fee,
+        params.fee ? params.fee : 0,
         params.name,
-        params.feeToken,
-        params.merkleRoot ? params.merkleRoot : '',
+        params.feeToken ? params.feeToken : ethers.constants.AddressZero,
+        params.merkleRoot ? params.merkleRoot : '0x0000000000000000000000000000000000000000000000000000000000000000',
         params.automation ? params.automation : false,
         params.participants ? params.participants : [],
         params.totalWinners,
         params.entriesPerUser ? params.entriesPerUser : 1
       ]
-    })
+    }
+
+    const config = await prepareWriteContract(configParams)
     return writeContract(config)
   } catch (error: any) {
+    console.log({ error })
     throw new Error(`Error creating raffle: ${error.message}`)
   }
 }
