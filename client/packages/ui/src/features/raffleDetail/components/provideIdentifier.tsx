@@ -54,7 +54,9 @@ export const ProvideIdentifier = ({ store, asyncManager }) => {
       <Flex mt="2" justify="end">
         <Button
           variant="default"
-          disabled={asyncManager.loading || identifier == ''}
+          disabled={
+            asyncManager.loading || asyncManager.pending || identifier == ''
+          }
           onClick={onSubmit}>
           Next
         </Button>

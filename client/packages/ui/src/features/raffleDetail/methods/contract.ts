@@ -18,6 +18,7 @@ export const claimPrize = async ({ id, asyncManager }) => {
     asyncManager.start()
     const payload: contracts.ClaimPrizeParams = { id }
     const { wait } = await contracts.claimPrize(payload)
+    asyncManager.waiting()
     const isSuccess = await wait().then((receipt) => receipt.status === 1)
     if (!isSuccess) throw new Error('Request to claim prize was not successful')
     asyncManager.success()
@@ -28,15 +29,23 @@ export const claimPrize = async ({ id, asyncManager }) => {
   }
 }
 
-export const joinRaffle = async ({ id, fee, asyncManager, update }) => {
+export const joinRaffle = async ({
+  id,
+  fee,
+  asyncManager,
+  update,
+  success
+}) => {
   try {
     asyncManager.start()
     const payload: contracts.EnterRaffleParams = { id, fee }
     const { wait } = await contracts.enterRaffle(payload)
+    asyncManager.waiting()
     const isSuccess = await wait().then((receipt) => receipt.status === 1)
     if (!isSuccess) throw new Error('Request to join raffle was not successful')
     asyncManager.success()
-    update(true)
+    await getRaffle({ id, asyncManager, update, success })
+    success(true)
     return true
   } catch (error) {
     asyncManager.fail(`Could not join raffle id \`${id}\``)
@@ -57,6 +66,7 @@ export const pickWinners = async ({ id, asyncManager, update }) => {
     asyncManager.start()
     const payload: contracts.ResolveRaffleParams = { id, value }
     const { wait } = await contracts.resolveRaffle(payload)
+    asyncManager.waiting()
     const isSuccess = await wait().then((receipt) => receipt.status === 1)
     if (!isSuccess)
       throw new Error('Request to pick winners was not successful')
@@ -74,6 +84,7 @@ export const withdrawLink = async ({ id, asyncManager, update }) => {
     asyncManager.start()
     const payload: contracts.WithdrawLinkParams = { id }
     const { wait } = await contracts.withdrawLink(payload)
+    asyncManager.waiting()
     const isSuccess = await wait().then((receipt) => receipt.status === 1)
     if (!isSuccess)
       throw new Error('Request to withdraw LINK was not successful')

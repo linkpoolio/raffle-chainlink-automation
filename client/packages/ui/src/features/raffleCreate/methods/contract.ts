@@ -11,6 +11,7 @@ export const createRaffle = async ({ state, asyncManager, history }) => {
       timeLength: state.hours * 60 * 60
     }
     const { wait } = await contracts.createRaffle(payload)
+    asyncManager.waiting()
 
     const isSuccess = await wait().then((receipt) => receipt.status === 1)
 

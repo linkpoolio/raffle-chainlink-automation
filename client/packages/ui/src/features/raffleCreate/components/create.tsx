@@ -153,10 +153,12 @@ export const RaffleCreate = () => {
       <Center>
         <Button
           variant="default"
-          disabled={asyncManager.loading}
+          disabled={asyncManager.loading || asyncManager.pending}
           onClick={onSubmit}
-          isLoading={asyncManager.loading}
-          loadingText="Submitting">
+          isLoading={asyncManager.loading || asyncManager.pending}
+          loadingText={
+            asyncManager.loading ? 'Submitting' : 'Pending Transaction'
+          }>
           Create
         </Button>
       </Center>
