@@ -55,7 +55,7 @@ export const RaffleDetail = ({ id }) => {
   const { address } = useAccount()
 
   const { raffle } = store.state
-
+  console.log({ raffle })
   const componentDidMount = () => {
     if (id) getRaffle({ id, update: store.update, asyncManager })
   }

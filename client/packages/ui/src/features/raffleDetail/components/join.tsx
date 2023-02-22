@@ -3,12 +3,13 @@ import { Button, Text, Flex, Heading } from '@chakra-ui/react'
 
 import { joinRaffle } from '@ui/features/raffleDetail'
 
-export const Join = ({ id, reset, asyncManager }) => {
+export const Join = ({ id, store, reset, asyncManager }) => {
   const [success, update] = useState(false)
 
   const componentDidMount = () => {
     joinRaffle({
       id,
+      fee: store.state.raffle.fee,
       asyncManager,
       update
     })

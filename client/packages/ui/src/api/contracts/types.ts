@@ -6,6 +6,7 @@ export interface EnterRaffleParams {
   id: number
   entries?: number
   proof?: string[]
+  fee: string
 }
 
 export interface CreateRaffleParams {

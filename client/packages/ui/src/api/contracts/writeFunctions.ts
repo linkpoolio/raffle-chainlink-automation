@@ -12,7 +12,7 @@ const linkTokenContractAddress = env.linkTokenContractAddress()
 
 export const createRaffle = async (params: contracts.CreateRaffleParams) => {
   try {
-    const configParams = {
+    const config = await prepareWriteContract({
       address: raffleManagerContractAddress,
       abi: raffleManagerABI,
       functionName: 'createRaffle',
@@ -28,27 +28,34 @@ export const createRaffle = async (params: contracts.CreateRaffleParams) => {
         params.totalWinners,
         params.entriesPerUser ? params.entriesPerUser : 1
       ]
-    }
-
-    const config = await prepareWriteContract(configParams)
+    })
     return writeContract(config)
   } catch (error: any) {
-    console.log({ error })
     throw new Error(`Error creating raffle: ${error.message}`)
   }
 }
 
 export const enterRaffle = async (params: contracts.EnterRaffleParams) => {
   try {
-    const { id, proof } = params
-    const config = await prepareWriteContract({
+    const { id, proof, fee } = params
+    const paramsConfig = {
       address: raffleManagerContractAddress,
       abi: raffleManagerABI,
       functionName: 'enterRaffle',
-      args: [id, params.entries ? params.entries : 1, proof ? proof : []]
-    })
+      overrides: {
+        value: fee,
+      },
+      args: [
+        id,
+        params.entries ? params.entries : 1,
+        proof ? proof : [],        
+      ]
+    }
+    console.log({ paramsConfig })
+    const config = await prepareWriteContract(paramsConfig)
     return writeContract(config)
   } catch (error: any) {
+    console.log({ error })
     throw new Error(`Error entering raffle: ${error.message}`)
   }
 }
@@ -71,7 +78,9 @@ export const claimPrize = async (params: contracts.ClaimPrizeParams) => {
 export const resolveRaffle = async (params: contracts.ResolveRaffleParams) => {
   try {
     const { value, id } = params
-    const config = await prepareWriteContract({
+
+    // TODO: debug why this txn is auto reverting
+    const paramsConfig = {
       address: linkTokenContractAddress,
       abi: linkTokenABI,
       functionName: 'transferAndCall',
@@ -80,9 +89,12 @@ export const resolveRaffle = async (params: contracts.ResolveRaffleParams) => {
         value,
         ethers.utils.solidityPack(['uint256'], [id])
       ]
-    })
+    }
+    console.log( { paramsConfig })
+    const config = await prepareWriteContract(paramsConfig)
     return writeContract(config)
   } catch (error: any) {
+    console.log({ error })
     throw new Error(`Error resolving raffle: ${error.message}`)
   }
 }

@@ -1,4 +1,8 @@
+import { ethers } from 'ethers'
+
 import { contracts } from '@ui/api'
+
+// TODO: everywhere we check `isSuccess` needs updated
 
 export const getRaffle = async ({ id, asyncManager, update }) => {
   try {
@@ -25,10 +29,10 @@ export const claimPrize = async ({ id, asyncManager }) => {
   }
 }
 
-export const joinRaffle = async ({ id, asyncManager, update }) => {
+export const joinRaffle = async ({ id, fee, asyncManager, update }) => {
   try {
     asyncManager.start()
-    const payload: contracts.EnterRaffleParams = { id }
+    const payload: contracts.EnterRaffleParams = { id, fee }
     const { isSuccess } = await contracts.enterRaffle(payload)
     if (!isSuccess) throw new Error('Request to join raffle was not successful')
     asyncManager.success()
@@ -49,7 +53,7 @@ export const pickWinners = async ({ id, asyncManager, update }) => {
      * The risk of a high fixed amount is offset both by (a) initial deployment is on eth goerli
      * and (b) the owner can withdraw excess link amount after the raffle has been resolved.
      */
-    const value = 10
+    const value = '500000000000000000' // 0.5 LINK
     asyncManager.start()
     const payload: contracts.ResolveRaffleParams = { id, value }
     const { isSuccess } = await contracts.resolveRaffle(payload)

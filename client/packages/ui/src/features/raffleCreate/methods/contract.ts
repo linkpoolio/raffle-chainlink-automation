@@ -1,6 +1,8 @@
 import { Routes } from '@ui/Routes'
 import { contracts } from '@ui/api'
 
+// TODO: everywhere we check `isSuccess` needs updated
+
 export const createRaffle = async ({ state, asyncManager, history }) => {
   try {
     asyncManager.start()
