@@ -10,11 +10,9 @@ export const isRaffleOwner = (raffle, account): boolean =>
 export const isRaffleParticipant = (raffle, account): boolean =>
   raffle?.contestantsAddresses.includes(ethers.utils.keccak256(account))
 
-// TODO: refactor where we were checking for is raffle winner to use this method
 export const isRaffleWinner = (raffle, account): boolean =>
   raffle?.winners.includes(ethers.utils.keccak256(account))
 
-// TODO: refactor where we were checking for is raffle claimedPrize to use this method
 export const isRaffleClaimedPrize = (raffle, account): boolean =>
   raffle?.claimedPrizes.includes(ethers.utils.keccak256(account))
 

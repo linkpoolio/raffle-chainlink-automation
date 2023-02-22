@@ -7,7 +7,9 @@ const getProps = ({ type, status, address }) => ({
   raffle: {
     type,
     status,
-    contestantsAddresses: ['0x588d48a43dd2a9c301501b0c43fbe96b87dd688a32c6c9594a655ebb2f90a146']
+    contestantsAddresses: [
+      '0x588d48a43dd2a9c301501b0c43fbe96b87dd688a32c6c9594a655ebb2f90a146'
+    ]
   },
   address,
   identifier: address

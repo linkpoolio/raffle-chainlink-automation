@@ -4,6 +4,7 @@ import { Button, Flex, Input, Heading } from '@chakra-ui/react'
 
 import { Control } from '@ui/components'
 import { steps } from '@ui/features/raffleDetail'
+import { isRaffleClaimedPrize, isRaffleWinner } from '@ui/models'
 
 export const ProvideIdentifier = ({ store, asyncManager }) => {
   const [identifier, setIdentifier] = useState('')
@@ -13,21 +14,11 @@ export const ProvideIdentifier = ({ store, asyncManager }) => {
   }
 
   const onSubmit = () => {
-    let winner = false
-    let claimedPrize = false
-
     const { raffle } = store.state
 
-    raffle.winners.map((bytes32) => {
-      if (identifier == ethers.utils.parseBytes32String(bytes32)) winner = true
-    })
-
-    if (winner) {
-      raffle.claimedPrizes.map((bytes32) => {
-        if (identifier == ethers.utils.parseBytes32String(bytes32))
-          claimedPrize = true
-      })
-    }
+    const bytes32Identifier = ethers.utils.formatBytes32String(identifier)
+    const winner = isRaffleWinner(raffle, bytes32Identifier)
+    const claimedPrize = isRaffleClaimedPrize(raffle, bytes32Identifier)
 
     const participantStatus =
       winner && claimedPrize ? 'WON_CLAIMED' : winner ? 'WON_UNCLAIMED' : 'LOST'
