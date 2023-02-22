@@ -1,11 +1,9 @@
 import { contracts } from '@ui/api'
-import { getMockRaffle } from '../mock' // TODO: remove
 
 export const getRaffle = async ({ id, asyncManager, update }) => {
   try {
     asyncManager.start()
-    const raffle = getMockRaffle(id) // TODO: remove this when enabling the actual request
-    // const raffle = await contracts.getRaffle(id)
+    const raffle = await contracts.getRaffle(id)
     asyncManager.success()
     update({ raffle })
   } catch (error) {
@@ -45,7 +43,7 @@ export const joinRaffle = async ({ id, asyncManager, update }) => {
 export const pickWinners = async ({ id, asyncManager, update }) => {
   try {
     /*
-     * @Feature Enhancement
+     * @FeatureEnhancement
      * For now we harcode value to 10 LINK to cover all reasonable cases for funding the txn.
      * Later we will need to have this be smarter, as the actual amount required is variable.
      * The risk of a high fixed amount is offset both by (a) initial deployment is on eth goerli
