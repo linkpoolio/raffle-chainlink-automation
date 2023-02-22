@@ -70,7 +70,7 @@ export const claimPrize = (params: contracts.ClaimPrizeParams) => {
 
 export const resolveRaffle = (params: contracts.ResolveRaffleParams) => {
   try {
-    const { value, raffleId } = params
+    const { value, id } = params
     const { config } = usePrepareContractWrite({
       address: linkTokenContractAddress,
       abi: linkTokenABI,
@@ -78,7 +78,7 @@ export const resolveRaffle = (params: contracts.ResolveRaffleParams) => {
       args: [
         raffleManagerContractAddress,
         value,
-        ethers.utils.solidityPack(['uint256'], [raffleId])
+        ethers.utils.solidityPack(['uint256'], [id])
       ]
     })
     const { data, isLoading, isSuccess } = useContractWrite(config)
@@ -90,12 +90,12 @@ export const resolveRaffle = (params: contracts.ResolveRaffleParams) => {
 
 export const withdrawLink = (params: contracts.WithdrawLinkParams) => {
   try {
-    const { raffleId } = params
+    const { id } = params
     const { config } = usePrepareContractWrite({
       address: raffleManagerContractAddress,
       abi: raffleManagerABI,
       functionName: 'withdrawLink',
-      args: [raffleId]
+      args: [id]
     })
     const { data, isLoading, isSuccess } = useContractWrite(config)
     return { data, isLoading, isSuccess }
