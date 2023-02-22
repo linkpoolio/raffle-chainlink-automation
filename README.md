@@ -35,7 +35,8 @@ export LOCAL_RPC_URL="http://localhost:8545"
 export ANVIL_PRIVATE_KEY="" # Get from anvil after running for the first time, see below
 
 # UI
-export UI_CONTRACT_ADDRESS="" # Get from anvil after deploying contract
+export UI_RAFFLE_MANAGER_CONTRACT_ADDRESS= # Get from anvil after deploying contract 
+export UI_LINK_TOKEN_CONTRACT_ADDRESS= 
 ```
 
 ### 4. Setup Wallet
