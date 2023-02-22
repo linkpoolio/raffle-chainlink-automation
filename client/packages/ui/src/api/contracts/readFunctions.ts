@@ -8,8 +8,8 @@ import {
 } from '@ui/models'
 import abi from './abi/RaffleManager.json'
 
-const address = env.contractAddress()
-const defaultOptions = { abi, address, watch: true }
+const raffleContractAddress = env.raffleManagerContractAddress()
+const defaultOptions = { abi, raffleContractAddress, watch: true }
 
 export const getAllRaffles = (): RaffleInstance[] => {
   try {
