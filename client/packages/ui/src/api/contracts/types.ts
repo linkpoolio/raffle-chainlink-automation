@@ -22,10 +22,10 @@ export interface CreateRaffleParams {
 }
 
 export interface ResolveRaffleParams {
-  value: number // amount to transfer
-  raffleId: number // raffleId
+  id: number
+  value: number // link amount for funding txn
 }
 
 export interface WithdrawLinkParams {
-  raffleId: number
+  id: number
 }
