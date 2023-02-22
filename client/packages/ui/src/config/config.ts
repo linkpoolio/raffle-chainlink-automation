@@ -4,9 +4,15 @@ const getEnv = (app, local) => {
 }
 
 export const env = {
-  contractAddress: () =>
+  raffleManagerContractAddress: () =>
     getEnv(
-      `UI_CONTRACT_ADDRESS`,
+      `RAFFLE_MANAGER_CONTRACT_ADDRESS`,
+      // @ts-ignore:next-line
+      typeof envContractAddress == 'string' ? envContractAddress : undefined // eslint-disable-line no-undef
+    ),
+  linkTokenContractAddress: () =>
+    getEnv(
+      `LINK_TOKEN_CONTRACT_ADDRESS`,
       // @ts-ignore:next-line
       typeof envContractAddress == 'string' ? envContractAddress : undefined // eslint-disable-line no-undef
     )

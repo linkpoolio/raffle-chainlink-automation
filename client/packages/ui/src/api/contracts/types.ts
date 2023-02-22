@@ -20,3 +20,12 @@ export interface CreateRaffleParams {
   totalWinners: number
   entriesPerUser?: number
 }
+
+export interface ResolveRaffleParams {
+  value: number // amount to transfer
+  raffleId: number // raffleId
+}
+
+export interface WithdrawLinkParams {
+  raffleId: number
+}

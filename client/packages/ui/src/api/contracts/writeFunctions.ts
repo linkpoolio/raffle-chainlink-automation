@@ -1,16 +1,20 @@
 import { useContractWrite, usePrepareContractWrite } from 'wagmi'
 
+import { ethers } from 'ethers'
+
 import { env } from '@ui/config'
 import { contracts } from '@ui/api'
-import abi from './abi/RaffleManager.json'
+import raffleManagerABI from './abi/RaffleManager.json'
+import linkTokenABI from './abi/LinkToken.json'
 
-const address = env.contractAddress()
-const defaultOptions = { abi, address }
+const raffleManagerContractAddress = env.raffleManagerContractAddress()
+const linkTokenContractAddress = env.linkTokenContractAddress()
 
 export const createRaffle = (params: contracts.CreateRaffleParams) => {
   try {
     const { config } = usePrepareContractWrite({
-      ...defaultOptions,
+      address: raffleManagerContractAddress,
+      abi: raffleManagerABI,
       functionName: 'createRaffle',
       args: [
         params.prizeName,
@@ -36,7 +40,8 @@ export const enterRaffle = (params: contracts.EnterRaffleParams) => {
   try {
     const { id, proof } = params
     const { config } = usePrepareContractWrite({
-      ...defaultOptions,
+      address: raffleManagerContractAddress,
+      abi: raffleManagerABI,
       functionName: 'enterRaffle',
       args: [id, params.entries ? params.entries : 1, proof ? proof : []]
     })
@@ -51,7 +56,8 @@ export const claimPrize = (params: contracts.ClaimPrizeParams) => {
   try {
     const { id } = params
     const { config } = usePrepareContractWrite({
-      ...defaultOptions,
+      address: raffleManagerContractAddress,
+      abi: raffleManagerABI,
       functionName: 'claimPrize',
       args: [id]
     })
@@ -62,8 +68,38 @@ export const claimPrize = (params: contracts.ClaimPrizeParams) => {
   }
 }
 
-// TODO: add function for picking winners to call erc677
-// TODO: include abi for this contract as well
-// TODO: reference the new env var for the contract address
+export const resolveRaffle = (params: contracts.ResolveRaffleParams) => {
+  try {
+    const { value, raffleId } = params
+    const { config } = usePrepareContractWrite({
+      address: linkTokenContractAddress,
+      abi: linkTokenABI,
+      functionName: 'transferAndCall',
+      args: [
+        raffleManagerContractAddress,
+        value,
+        ethers.utils.solidityPack(['uint256'], [raffleId])
+      ]
+    })
+    const { data, isLoading, isSuccess } = useContractWrite(config)
+    return { data, isLoading, isSuccess }
+  } catch (error: any) {
+    throw new Error(`Error resolving raffle: ${error.message}`)
+  }
+}
 
-// TODO: add function for withdrawing link
+export const withdrawLink = (params: contracts.WithdrawLinkParams) => {
+  try {
+    const { raffleId } = params
+    const { config } = usePrepareContractWrite({
+      address: raffleManagerContractAddress,
+      abi: raffleManagerABI,
+      functionName: 'withdrawLink',
+      args: [raffleId]
+    })
+    const { data, isLoading, isSuccess } = useContractWrite(config)
+    return { data, isLoading, isSuccess }
+  } catch (error: any) {
+    throw new Error(`Error withdrawing link: ${error.message}`)
+  }
+}
