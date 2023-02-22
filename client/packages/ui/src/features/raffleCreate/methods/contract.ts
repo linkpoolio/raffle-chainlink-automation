@@ -1,6 +1,8 @@
 import { Routes } from '@ui/Routes'
 import { contracts } from '@ui/api'
 
+// TODO: everywhere we check `isSuccess` needs updated
+
 export const createRaffle = async ({ state, asyncManager, history }) => {
   try {
     asyncManager.start()
@@ -8,7 +10,11 @@ export const createRaffle = async ({ state, asyncManager, history }) => {
       ...state,
       timeLength: state.hours * 60 * 60
     }
-    const { isSuccess } = await contracts.createRaffle(payload)
+    const { wait } = await contracts.createRaffle(payload)
+    asyncManager.waiting()
+
+    const isSuccess = await wait().then((receipt) => receipt.status === 1)
+
     if (!isSuccess)
       throw new Error('Request to create raffle was not successful')
 

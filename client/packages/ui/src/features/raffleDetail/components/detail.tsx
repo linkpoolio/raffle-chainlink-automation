@@ -10,7 +10,7 @@ import {
   HStack
 } from '@chakra-ui/react'
 
-import { Loading, Error } from '@ui/components'
+import { Loading, Pending, Error } from '@ui/components'
 import { useAsyncManager, useStore } from '@ui/hooks'
 import {
   RaffleType,
@@ -55,7 +55,6 @@ export const RaffleDetail = ({ id }) => {
   const { address } = useAccount()
 
   const { raffle } = store.state
-
   const componentDidMount = () => {
     if (id) getRaffle({ id, update: store.update, asyncManager })
   }
@@ -77,6 +76,7 @@ export const RaffleDetail = ({ id }) => {
       boxShadow="brand.base"
       borderRadius="base">
       <Loading asyncManager={asyncManager} />
+      <Pending asyncManager={asyncManager} />
       <Error asyncManager={asyncManager} />
       <Center flexDirection="column" mb="14">
         <Heading

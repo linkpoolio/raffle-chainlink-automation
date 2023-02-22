@@ -21,9 +21,9 @@ jobs:
         env:
           DOCKER_BUILDKIT: 1
         with:
-          name: automation-raffle-ui
+          name: fairchance
           username: ${{ steps.ecr.outputs.username }}
           password: ${{ steps.ecr.outputs.password }}
           registry: ${{ steps.ecr.outputs.registry }}
-          dockerfile: Dockerfile
+          dockerfile: ui.dockerfile
           tag_names: true

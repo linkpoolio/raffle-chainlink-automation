@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Error, Loading, Modal } from '@ui/components'
+import { Error, Loading, Pending, Modal } from '@ui/components'
 import { useAsyncManager } from '@ui/hooks'
 import {
   Join,
@@ -37,6 +37,7 @@ export const StepManager = ({ id, store }) => {
   return (
     <Modal onClose={reset} isOpen={!!step}>
       <Loading asyncManager={asyncManager} />
+      <Pending asyncManager={asyncManager} />
       <Error asyncManager={asyncManager} />
       {getComponent({ id, store, asyncManager, reset })}
     </Modal>

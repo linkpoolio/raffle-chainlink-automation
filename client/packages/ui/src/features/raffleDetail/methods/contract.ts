@@ -1,11 +1,11 @@
+import { BigNumber } from 'ethers'
+
 import { contracts } from '@ui/api'
-import { getMockRaffle } from '../mock' // TODO: remove
 
 export const getRaffle = async ({ id, asyncManager, update }) => {
   try {
     asyncManager.start()
-    const raffle = getMockRaffle(id) // TODO: remove this when enabling the actual request
-    // const raffle = await contracts.getRaffle(id)
+    const raffle = await contracts.getRaffle(id)
     asyncManager.success()
     update({ raffle })
   } catch (error) {
@@ -17,7 +17,9 @@ export const claimPrize = async ({ id, asyncManager }) => {
   try {
     asyncManager.start()
     const payload: contracts.ClaimPrizeParams = { id }
-    const { isSuccess } = await contracts.claimPrize(payload)
+    const { wait } = await contracts.claimPrize(payload)
+    asyncManager.waiting()
+    const isSuccess = await wait().then((receipt) => receipt.status === 1)
     if (!isSuccess) throw new Error('Request to claim prize was not successful')
     asyncManager.success()
     return true
@@ -27,14 +29,23 @@ export const claimPrize = async ({ id, asyncManager }) => {
   }
 }
 
-export const joinRaffle = async ({ id, asyncManager, update }) => {
+export const joinRaffle = async ({
+  id,
+  fee,
+  asyncManager,
+  update,
+  success
+}) => {
   try {
     asyncManager.start()
-    const payload: contracts.EnterRaffleParams = { id }
-    const { isSuccess } = await contracts.enterRaffle(payload)
+    const payload: contracts.EnterRaffleParams = { id, fee }
+    const { wait } = await contracts.enterRaffle(payload)
+    asyncManager.waiting()
+    const isSuccess = await wait().then((receipt) => receipt.status === 1)
     if (!isSuccess) throw new Error('Request to join raffle was not successful')
     asyncManager.success()
-    update(true)
+    await getRaffle({ id, asyncManager, update })
+    success(true)
     return true
   } catch (error) {
     asyncManager.fail(`Could not join raffle id \`${id}\``)
@@ -45,16 +56,18 @@ export const joinRaffle = async ({ id, asyncManager, update }) => {
 export const pickWinners = async ({ id, asyncManager, update }) => {
   try {
     /*
-     * @Feature Enhancement
+     * @FeatureEnhancement
      * For now we harcode value to 10 LINK to cover all reasonable cases for funding the txn.
      * Later we will need to have this be smarter, as the actual amount required is variable.
      * The risk of a high fixed amount is offset both by (a) initial deployment is on eth goerli
      * and (b) the owner can withdraw excess link amount after the raffle has been resolved.
      */
-    const value = 10
+    const value = BigNumber.from('500000000000000000') // 0.5 LINK
     asyncManager.start()
     const payload: contracts.ResolveRaffleParams = { id, value }
-    const { isSuccess } = await contracts.resolveRaffle(payload)
+    const { wait } = await contracts.resolveRaffle(payload)
+    asyncManager.waiting()
+    const isSuccess = await wait().then((receipt) => receipt.status === 1)
     if (!isSuccess)
       throw new Error('Request to pick winners was not successful')
     asyncManager.success()
@@ -70,7 +83,9 @@ export const withdrawLink = async ({ id, asyncManager, update }) => {
   try {
     asyncManager.start()
     const payload: contracts.WithdrawLinkParams = { id }
-    const { isSuccess } = await contracts.withdrawLink(payload)
+    const { wait } = await contracts.withdrawLink(payload)
+    asyncManager.waiting()
+    const isSuccess = await wait().then((receipt) => receipt.status === 1)
     if (!isSuccess)
       throw new Error('Request to withdraw LINK was not successful')
     asyncManager.success()

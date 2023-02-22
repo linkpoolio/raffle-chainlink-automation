@@ -1,4 +1,4 @@
-import { useContractRead } from 'wagmi'
+import { readContract } from '@wagmi/core'
 
 import { env } from '@ui/config'
 import {
@@ -9,15 +9,15 @@ import {
 import abi from './abi/RaffleManager.json'
 
 const raffleContractAddress = env.raffleManagerContractAddress()
-const defaultOptions = { abi, raffleContractAddress, watch: true }
+const defaultOptions = { abi, address: raffleContractAddress, watch: true }
 
-export const getAllRaffles = (): RaffleInstance[] => {
+export const getAllRaffles = async (): Promise<RaffleInstance[]> => {
   try {
-    const data = useContractRead({
+    const data = await readContract({
       ...defaultOptions,
       functionName: 'getAllRaffles'
     })
-    return transformRaffleList(data.data)
+    return transformRaffleList(data)
   } catch (error: any) {
     throw new Error(
       `Error fetching raffles list from contract: ${error.message}`
@@ -25,14 +25,14 @@ export const getAllRaffles = (): RaffleInstance[] => {
   }
 }
 
-export const getRaffle = (id: number): RaffleInstance => {
+export const getRaffle = async (id: number): Promise<RaffleInstance> => {
   try {
-    const data = useContractRead({
+    const data = await readContract({
       ...defaultOptions,
       functionName: 'getRaffle',
       args: [id]
     })
-    return transformRaffleItem(data.data)
+    return transformRaffleItem(data)
   } catch (error: any) {
     throw new Error(`Error fetching raffle from contract: ${error.message}`)
   }

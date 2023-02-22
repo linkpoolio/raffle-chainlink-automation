@@ -46,7 +46,7 @@ const WonUnclaimed = ({ id, store, asyncManager }) => {
       <Flex mt="2" justify="end">
         <Button
           variant="default"
-          disabled={asyncManager.loading}
+          disabled={asyncManager.loading || asyncManager.pending}
           onClick={onClaim}>
           Claim Prize
         </Button>
