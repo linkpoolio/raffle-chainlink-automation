@@ -12,9 +12,10 @@ import {ERC677ReceiverInterface} from "@chainlink/contracts/src/v0.8/interfaces/
 import {VRFV2WrapperInterface} from "@chainlink/contracts/src/v0.8/interfaces/VRFV2WrapperInterface.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import {IRaffleManager} from "./interfaces/IRaffleManager.sol";
+import {IRaffleManager} from "@src/interfaces/IRaffleManager.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
+import {UD60x18, ud, intoUint256} from "@prb/math/UD60x18.sol";
 
 /**
  * @title Raffle Manager
@@ -62,7 +63,7 @@ contract RaffleManager is
         string raffleName;
         bytes32[] contestantsAddresses;
         bytes32[] winners;
-        uint256 prizeWorth;
+        UD60x18 prizeWorth;
         RequestStatus requestStatus;
         uint256 timeLength;
         uint256 fee;
@@ -195,7 +196,7 @@ contract RaffleManager is
             raffleName: name,
             contestantsAddresses: participants.length > 0 ? participants : new bytes32[](0),
             winners: new bytes32[](0),
-            prizeWorth: msg.value,
+            prizeWorth: ud(msg.value),
             timeLength: timeLength,
             fee: fee,
             raffleState: RaffleState.LIVE,
@@ -241,10 +242,10 @@ contract RaffleManager is
             IERC20(raffles[raffleId].base.feeTokenAddress).safeTransferFrom(
                 msg.sender, address(this), (raffles[raffleId].fee * entries)
             );
-            raffles[raffleId].prizeWorth += raffles[raffleId].fee * entries;
+            raffles[raffleId].prizeWorth = raffles[raffleId].prizeWorth.add(ud(raffles[raffleId].fee * entries));
         } else if (raffles[raffleId].paymentNeeded) {
             require(msg.value >= (raffles[raffleId].fee * entries), "Not enough ETH to join raffle");
-            raffles[raffleId].prizeWorth += msg.value;
+            raffles[raffleId].prizeWorth = raffles[raffleId].prizeWorth.add(ud(msg.value));
         }
         for (uint256 i = 0; i < entries; i++) {
             raffles[raffleId].contestantsAddresses.push(_userHash);
@@ -294,6 +295,7 @@ contract RaffleManager is
         uint256 _amount = amount;
         for (uint256 i = 0; i < winners.length; i++) {
             uint256 v = uint256(keccak256(abi.encode(randomValue, 0)));
+
             winners[i] = uint256(v % _amount) + 1;
             _amount--;
         }
@@ -345,7 +347,7 @@ contract RaffleManager is
      */
     function claimPrize(uint256 raffleId) external nonReentrant {
         require(raffles[raffleId].raffleState == RaffleState.FINISHED, "Raffle is not finished");
-        require(raffles[raffleId].prizeWorth > 0, "No prize to claim");
+        require(intoUint256(raffles[raffleId].prizeWorth) > 0, "No prize to claim");
         bytes32 _claimer = keccak256(abi.encodePacked(msg.sender));
         bool eligible = false;
         for (uint256 i = 0; i < raffles[raffleId].winners.length; i++) {
@@ -358,22 +360,18 @@ contract RaffleManager is
         for (uint256 i = 0; i < raffles[raffleId].prize.claimedPrizes.length; i++) {
             require(raffles[raffleId].prize.claimedPrizes[i] != _claimer, "Prize already claimed");
         }
-
+        // total claimable based on total prize pool divided by total winners using fixed point math
+        uint256 _total = intoUint256(raffles[raffleId].prizeWorth.div(ud(raffles[raffleId].base.totalWinners * 1e18)));
         if (raffles[raffleId].base.feeToken) {
+            // custom token transfer
             raffles[raffleId].prize.claimedPrizes.push(_claimer);
-            emit RafflePrizeClaimed(
-                raffleId, msg.sender, (raffles[raffleId].prizeWorth / raffles[raffleId].base.totalWinners)
-                );
-            IERC20(raffles[raffleId].base.feeTokenAddress).safeTransfer(
-                msg.sender, (raffles[raffleId].prizeWorth / raffles[raffleId].base.totalWinners)
-            );
+            emit RafflePrizeClaimed(raffleId, msg.sender, _total);
+            IERC20(raffles[raffleId].base.feeTokenAddress).safeTransfer(msg.sender, _total);
         } else if (raffles[raffleId].fee > 0) {
-            // transfer total prize div by total winners
+            // gas token transfer
             raffles[raffleId].prize.claimedPrizes.push(_claimer);
-            emit RafflePrizeClaimed(
-                raffleId, msg.sender, (raffles[raffleId].prizeWorth / raffles[raffleId].base.totalWinners)
-                );
-            payable(msg.sender).transfer(raffles[raffleId].prizeWorth / raffles[raffleId].base.totalWinners);
+            emit RafflePrizeClaimed(raffleId, msg.sender, _total);
+            payable(msg.sender).transfer(_total);
         }
     }
 
@@ -534,6 +532,7 @@ contract RaffleManager is
     function onTokenTransfer(address sender, uint256 value, bytes calldata raffleId) external {
         uint256 _raffle = abi.decode(raffleId, (uint256));
         require(sender == raffles[_raffle].owner, "Only owner can pick winner");
+        require(_eligableToEnd(_raffle), "Not enough contestants to pick winner");
         _pickWinner(_raffle, value);
     }
 
@@ -555,5 +554,17 @@ contract RaffleManager is
      */
     function claimableLink(uint256 raffleId) external view returns (uint256 claimable) {
         claimable = raffles[raffleId].requestStatus.totalLink - raffles[raffleId].requestStatus.paid;
+    }
+
+    /**
+     * @notice checks if raffle is eligable to end
+     * @param raffleId id of the raffle
+     * @return bool eligable to end
+     * @dev eligable to end is when the amount of contestants is greater than or equal to the amount of winners
+     * @dev this is used so there is not a div/modulo by 0 error
+     *
+     */
+    function _eligableToEnd(uint256 raffleId) internal view returns (bool) {
+        return raffles[raffleId].contestantsAddresses.length >= raffles[raffleId].base.totalWinners;
     }
 }

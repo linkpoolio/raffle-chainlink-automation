@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
 import "forge-std/StdJson.sol";
-import {RaffleManager} from "../src/RaffleManager.sol";
+import {RaffleManager} from "@src/RaffleManager.sol";
 
 contract RaffleManagerScript is Script {
     using stdJson for string;

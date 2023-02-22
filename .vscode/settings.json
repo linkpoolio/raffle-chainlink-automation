@@ -5,7 +5,9 @@
   "solidity.remappings": [
     "forge-std/=contracts/lib/forge-std/src/",
     "@openzeppelin/=contracts/lib/openzeppelin-contracts/",
-    "@chainlink=contracts/lib/chainlink/"
+    "@chainlink/=contracts/lib/chainlink/",
+    "@prb/math/=contracts/lib/prb-math/src/",
+    "@src=contracts/src/"
   ],
   "solidity.defaultCompiler": "remote"
 }
