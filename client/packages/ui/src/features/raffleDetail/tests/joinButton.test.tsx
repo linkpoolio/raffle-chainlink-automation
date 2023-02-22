@@ -7,7 +7,7 @@ const getProps = ({ type, status, address }) => ({
   raffle: {
     type,
     status,
-    contestantsAddresses: ['0x122']
+    contestantsAddresses: ['0x588d48a43dd2a9c301501b0c43fbe96b87dd688a32c6c9594a655ebb2f90a146']
   },
   address,
   identifier: address
@@ -62,7 +62,7 @@ describe('JoinButton', () => {
     const props = getProps({
       status: 1,
       type: 0,
-      address: '0x122'
+      address: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e'
     })
     render(getComponent(props))
 
@@ -74,7 +74,7 @@ describe('JoinButton', () => {
     const props = getProps({
       status: 1,
       type: 0,
-      address: '0x123'
+      address: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32f'
     })
     render(getComponent(props))
 

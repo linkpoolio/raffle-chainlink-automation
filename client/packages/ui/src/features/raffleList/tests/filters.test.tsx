@@ -40,7 +40,7 @@ describe('Filters', () => {
   })
 
   it('renders ownedByMe filter on connected', () => {
-    spy({ address: '0x123' })
+    spy({ address: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e' })
     render(getComponent())
 
     const select = screen.getByText(text)

@@ -25,8 +25,8 @@ describe('PickWinnersButton', () => {
   it('does not render pick winners button on status != live', () => {
     const props = getProps({
       status: '',
-      address: '0x123',
-      owner: '0x123',
+      address: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+      owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
       automation: true
     })
     render(getComponent(props))
@@ -38,8 +38,8 @@ describe('PickWinnersButton', () => {
   it('does not render pick winners button on !(status == staged && automation)', () => {
     const props = getProps({
       status: 0,
-      address: '0x123',
-      owner: '0x123',
+      address: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+      owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
       automation: false
     })
     render(getComponent(props))
@@ -52,7 +52,7 @@ describe('PickWinnersButton', () => {
     const props = getProps({
       status: 1,
       address: '',
-      owner: '0x123',
+      owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
       automation: true
     })
     render(getComponent(props))
@@ -65,7 +65,7 @@ describe('PickWinnersButton', () => {
     const props = getProps({
       status: 0,
       address: '',
-      owner: '0x123',
+      owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
       automation: true
     })
     render(getComponent(props))
@@ -77,8 +77,8 @@ describe('PickWinnersButton', () => {
   it('does not render pick winners button on live and not owner', () => {
     const props = getProps({
       status: 1,
-      address: '0x123',
-      owner: '0x124',
+      address: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+      owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32f',
       automation: true
     })
     render(getComponent(props))
@@ -90,8 +90,8 @@ describe('PickWinnersButton', () => {
   it('does not render pick winners button on staged automation and not owner', () => {
     const props = getProps({
       status: 0,
-      address: '0x123',
-      owner: '0x124',
+      address: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+      owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32f',
       automation: true
     })
     render(getComponent(props))
@@ -103,8 +103,8 @@ describe('PickWinnersButton', () => {
   it('renders pick winners button on live and owner', () => {
     const props = getProps({
       status: 1,
-      address: '0x123',
-      owner: '0x123',
+      address: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+      owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
       automation: true
     })
     render(getComponent(props))
@@ -116,8 +116,8 @@ describe('PickWinnersButton', () => {
   it('renders pick winners button on staged automation and owner', () => {
     const props = getProps({
       status: 0,
-      address: '0x123',
-      owner: '0x123',
+      address: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+      owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
       automation: true
     })
     render(getComponent(props))

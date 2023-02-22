@@ -26,8 +26,8 @@ describe('WithdrawButton', () => {
   it('does not render withdraw button on status != finished', () => {
     const props = getProps({
       status: '',
-      address: '0x123',
-      owner: '0x123',
+      address: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+      owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
       withdrawn: false
     })
     render(getComponent(props))
@@ -42,7 +42,7 @@ describe('WithdrawButton', () => {
     const props = getProps({
       status: 'FINISHED',
       address: '',
-      owner: '0x123',
+      owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
       withdrawn: false
     })
     render(getComponent(props))
@@ -56,8 +56,8 @@ describe('WithdrawButton', () => {
   it('does not render withdraw button on address != owner', () => {
     const props = getProps({
       status: 'FINISHED',
-      address: '0x123',
-      owner: '0x124',
+      address: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+      owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32f',
       withdrawn: false
     })
     render(getComponent(props))
@@ -71,8 +71,8 @@ describe('WithdrawButton', () => {
   it('does not render withdraw button on !canWithdraw', () => {
     const props = getProps({
       status: 'FINISHED',
-      address: '0x123',
-      owner: '0x123',
+      address: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+      owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
       withdrawn: false
     })
     render(getComponent(props))
@@ -87,8 +87,8 @@ describe('WithdrawButton', () => {
   // it('renders withdraw button on status = finished && address == owner && withdrawn = false && canWithdraw', () => {
   //   const props = getProps({
   //     status: 'FINISHED',
-  //     address: '0x123',
-  //     owner: '0x123',
+  //     address: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+  //     owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
   //     withdrawn: false,
   //   })
   //   render(getComponent(props))
