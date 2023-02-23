@@ -6,16 +6,56 @@ exports[`RaffleDetail matches snapshot 1`] = `
     className="chakra-container css-1sgxzlz"
   >
     <div
-      className="css-1tr0t8b"
+      className="css-3rvuii"
     >
       <h2
         className="chakra-heading css-1jg9pmt"
       />
-      <p
-        className="chakra-text css-19rlujp"
+    </div>
+    <div
+      className="css-1tr0t8b"
+    >
+      <div
+        className="chakra-stack css-1bmougq"
       >
-        View and manage raffle
-      </p>
+        <div
+          className="chakra-stack css-rmxdag"
+        >
+          <svg
+            fill="none"
+            height="11"
+            viewBox="0 0 11 11"
+            width="11"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="5.5"
+              cy="5.5"
+              fill="#CED0D5"
+              r="5.5"
+            />
+          </svg>
+          <p
+            className="chakra-text css-itvw0n"
+          >
+            Finished
+          </p>
+        </div>
+        <hr
+          aria-orientation="vertical"
+          className="chakra-divider css-tzco6l"
+        />
+        <div
+          className="chakra-stack css-rmxdag"
+        >
+          <p
+            className="chakra-text css-itvw0n"
+          >
+            Dynamic
+             Raffle
+          </p>
+        </div>
+      </div>
     </div>
     <div
       className="css-0"
@@ -59,6 +99,70 @@ exports[`RaffleDetail matches snapshot 1`] = `
         >
           Dynamic
         </p>
+      </div>
+      <div
+        className="css-z2pmpb"
+      >
+        <p
+          className="chakra-text css-0"
+        >
+          Start Date
+        </p>
+        <p
+          className="chakra-text css-0"
+        >
+          Jan 1, 1970, 1:00 AM
+        </p>
+      </div>
+      <div
+        className="css-z2pmpb"
+      >
+        <p
+          className="chakra-text css-0"
+        >
+          Permissioned
+        </p>
+        <p
+          className="chakra-text css-0"
+        >
+          No
+        </p>
+      </div>
+      <div
+        className="css-z2pmpb"
+      >
+        <p
+          className="chakra-text css-0"
+        >
+          Prize Name
+        </p>
+        <p
+          className="chakra-text css-0"
+        />
+      </div>
+      <div
+        className="css-z2pmpb"
+      >
+        <p
+          className="chakra-text css-0"
+        >
+          Prize Worth
+        </p>
+        <p
+          className="chakra-text css-0"
+        />
+      </div>
+      <div
+        className="css-z2pmpb"
+      >
+        <p
+          className="chakra-text css-0"
+        >
+          Contestants Number
+        </p>
+        <p
+          className="chakra-text css-0"
+        />
       </div>
       <div
         className="css-z2pmpb"

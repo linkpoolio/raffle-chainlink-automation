@@ -7,16 +7,24 @@ import {
   Text,
   Box,
   Flex,
-  HStack
+  HStack,
+  Divider
 } from '@chakra-ui/react'
 
-import { Loading, Pending, Error } from '@ui/components'
+import {
+  Loading,
+  Pending,
+  Error,
+  StatusIcons,
+  PermissionedIcon
+} from '@ui/components'
 import { useAsyncManager, useStore } from '@ui/hooks'
 import {
   RaffleType,
   isRaffleStatic,
   isRaffleLive,
-  isRaffleStaged
+  isRaffleStaged,
+  RaffleStatus
 } from '@ui/models'
 import {
   StepManager,
@@ -26,6 +34,7 @@ import {
   PickWinnersButton,
   WithdrawButton
 } from '@ui/features/raffleDetail'
+import { formatUnixTs, formatFinishDate } from '@ui/utils'
 
 export const initialState = {
   raffle: null,
@@ -78,7 +87,7 @@ export const RaffleDetail = ({ id }) => {
       <Loading asyncManager={asyncManager} />
       <Pending asyncManager={asyncManager} />
       <Error asyncManager={asyncManager} />
-      <Center flexDirection="column" mb="14">
+      <Center flexDirection="column" mb="6">
         <Heading
           size="xl"
           fontWeight="700"
@@ -87,9 +96,39 @@ export const RaffleDetail = ({ id }) => {
           textAlign="center">
           {raffle?.name}
         </Heading>
-        <Text fontSize="lg" color="brand.gray_70" fontWeight="600">
-          View and manage raffle
-        </Text>
+      </Center>
+      <Center flexDirection="column" mb="14">
+        <HStack bg="#F6F7FD" p="4" borderRadius="2xl" spacing="6">
+          <HStack spacing="3" alignItems={'center'}>
+            <StatusIcons status={raffle?.status} />
+            <Text fontSize={'sm'}>
+              {isRaffleStaged(raffle)
+                ? 'Staged'
+                : isRaffleLive(raffle)
+                ? 'Live'
+                : 'Finished'}
+            </Text>
+          </HStack>
+
+          <>
+            <Divider orientation="vertical" height="21px" />
+            <HStack spacing="3" alignItems={'center'}>
+              <Text fontSize="sm">
+                {isRaffleStatic(raffle) ? 'Static' : 'Dynamic'} Raffle
+              </Text>
+            </HStack>
+          </>
+
+          {raffle?.permissioned && (
+            <>
+              <Divider orientation="vertical" height="21px" />
+              <HStack spacing="3" alignItems={'center'}>
+                <PermissionedIcon />
+                <Text fontSize="sm">Private</Text>
+              </HStack>
+            </>
+          )}
+        </HStack>
       </Center>
 
       <Box>
@@ -108,7 +147,25 @@ export const RaffleDetail = ({ id }) => {
           name="Type"
           value={isRaffleStatic(raffle) ? 'Static' : 'Dynamic'}
         />
+        <Row name="Start Date" value={formatUnixTs(raffle?.startDate)} />
+
+        {raffle?.status !== RaffleStatus.FINISHED &&
+          raffle?.type === RaffleType.DYNAMIC && (
+            <Row
+              name="Active Until"
+              value={formatFinishDate(raffle?.startDate, raffle?.hours)}
+            />
+          )}
+
+        <Row name="Permissioned" value={raffle?.permissioned ? 'Yes' : 'No'} />
+        <Row name="Prize Name" value={raffle?.prizeName} />
+        <Row name="Prize Worth" value={raffle?.prizeWorth} />
+        <Row
+          name="Contestants Number"
+          value={raffle?.contestantsAddresses?.length}
+        />
         <Row name="Owner" value={raffle?.owner} />
+
         <Center>
           <HStack spacing="6">
             <JoinButton

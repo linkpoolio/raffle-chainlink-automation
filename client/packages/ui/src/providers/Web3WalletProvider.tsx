@@ -2,7 +2,7 @@ import React from 'react'
 import { WagmiConfig, createClient, configureChains } from 'wagmi'
 import { InjectedConnector } from 'wagmi/connectors/injected'
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
-import { mainnet, localhost, hardhat, goerli } from 'wagmi/chains'
+import { mainnet, localhost, hardhat, goerli, sepolia } from 'wagmi/chains'
 
 const DEFAULT_CHAIN_ID = goerli.id
 
@@ -30,7 +30,8 @@ export const CHAINS = [
     }
   },
   hardhat,
-  goerli
+  goerli,
+  sepolia
 ]
 
 const { chains, provider } = configureChains(

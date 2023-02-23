@@ -1,7 +1,7 @@
 import React from 'react'
 import { RaffleStatus } from '@ui/models'
 
-export const Circle = ({ fill }: { fill: string }) => {
+export const CircleIcon = ({ fill }: { fill: string }) => {
   return (
     <svg
       width="11"
@@ -14,7 +14,7 @@ export const Circle = ({ fill }: { fill: string }) => {
   )
 }
 
-export const Live = ({ fill }: { fill: string }) => {
+export const LiveIcon = ({ fill }: { fill: string }) => {
   return (
     <svg
       width="12"
@@ -30,7 +30,7 @@ export const Live = ({ fill }: { fill: string }) => {
   )
 }
 
-export const Permissioned = ({ fill = '#868A94' }: { fill?: string }) => {
+export const PermissionedIcon = ({ fill = '#868A94' }: { fill?: string }) => {
   return (
     <svg
       width="12"
@@ -46,7 +46,7 @@ export const Permissioned = ({ fill = '#868A94' }: { fill?: string }) => {
   )
 }
 
-export const Arrow = ({ fill = '#3F5ACB', ...props }) => {
+export const ArrowIcon = ({ fill = '#3F5ACB', ...props }) => {
   return (
     <svg
       width="19"
@@ -68,13 +68,13 @@ export const Arrow = ({ fill = '#3F5ACB', ...props }) => {
   )
 }
 
-export const Status = ({ status }: { status: RaffleStatus }) => {
+export const StatusIcons = ({ status }: { status: RaffleStatus }) => {
   switch (status) {
     case RaffleStatus.FINISHED:
-      return <Circle fill="#3F5ACB" />
+      return <CircleIcon fill="#3F5ACB" />
     case RaffleStatus.LIVE:
-      return <Live fill="#59C174" />
+      return <LiveIcon fill="#59C174" />
     default:
-      return <Circle fill="#CED0D5" />
+      return <CircleIcon fill="#CED0D5" />
   }
 }
