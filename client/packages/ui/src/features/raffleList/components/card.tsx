@@ -10,17 +10,16 @@ import {
   Heading
 } from '@chakra-ui/react'
 
-import { Status, Arrow, Permissioned } from './icons'
-
+import { StatusIcons, ArrowIcon, PermissionedIcon } from '@ui/components'
 import { Routes, createRoute } from '@ui/Routes'
 import {
   RaffleStatus,
   RaffleType,
   RaffleInstance,
-  isRaffleStatic,
   isRaffleLive,
   isRaffleStaged
 } from '@ui/models'
+import { formatUnixTs, formatFinishDate } from '@ui/utils'
 
 export const Card = (raffle: RaffleInstance) => {
   return (
@@ -65,7 +64,7 @@ export const Card = (raffle: RaffleInstance) => {
       <VStack spacing="6" mb="6" alignItems="start">
         <Flex justify="space-between" w="100%">
           <HStack spacing="3" alignItems={'center'}>
-            <Status status={raffle.status} />
+            <StatusIcons status={raffle.status} />
             <Text fontSize={'sm'}>
               {isRaffleStaged(raffle)
                 ? 'Staged'
@@ -76,7 +75,7 @@ export const Card = (raffle: RaffleInstance) => {
           </HStack>
           {raffle.permissioned && (
             <HStack spacing="3" alignItems={'center'}>
-              <Permissioned />
+              <PermissionedIcon />
               <Text fontSize="sm">Private</Text>
             </HStack>
           )}
@@ -90,39 +89,38 @@ export const Card = (raffle: RaffleInstance) => {
           wordBreak="break-all">
           {raffle.name}
         </Heading>
-        <Divider
-          display={
-            isRaffleLive(raffle) && isRaffleStatic(raffle) ? 'none' : 'block'
-          }
-          orientation="horizontal"
-        />
+        <Divider orientation="horizontal" />
+        {raffle.prizeName && (
+          <Flex justify="space-between" w="100%">
+            <Text fontSize={'sm'}>Prize:</Text>
+            <Text fontSize={'sm'}>{raffle.prizeName}</Text>
+          </Flex>
+        )}
+        {raffle.startDate && (
+          <Flex justify="space-between" w="100%">
+            <Text fontSize={'sm'}>Start Date:</Text>
+            <Text fontSize={'sm'}>{formatUnixTs(raffle.startDate)}</Text>
+          </Flex>
+        )}
 
         {raffle.status !== RaffleStatus.FINISHED &&
           raffle.type === RaffleType.DYNAMIC && (
             <Flex justify="space-between" w="100%">
               <Text fontSize={'sm'}>Active Until:</Text>
-              <Text fontSize={'sm'}>14.02.2023</Text>
+              <Text fontSize={'sm'}>
+                {formatFinishDate(raffle.startDate, raffle.hours)}
+              </Text>
             </Flex>
           )}
-        {raffle.status === RaffleStatus.FINISHED && (
-          <Flex justify="space-between" w="100%">
-            <Text fontSize={'sm'}>Completed at:</Text>
-            <Text fontSize={'sm'}>14.02.2023</Text>
-          </Flex>
-        )}
-        {raffle.prizeName && (
-          <Flex justify="space-between" w="100%">
-            <Text fontSize={'sm'}>Price:</Text>
-            <Text fontSize={'sm'}>{raffle.prizeName}</Text>
-          </Flex>
-        )}
       </VStack>
       <Box w="100%" mt="auto">
         <Divider orientation="horizontal" mb="6" />
         <Flex justify="end" w="100%">
-          <Arrow className="arrow" />
+          <ArrowIcon className="arrow" />
         </Flex>
       </Box>
     </Flex>
   )
 }
+
+// startDate

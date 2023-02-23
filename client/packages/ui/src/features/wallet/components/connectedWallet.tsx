@@ -3,7 +3,6 @@ import { useAccount, useDisconnect, useNetwork } from 'wagmi'
 
 import { shortenAddress } from '@ui/utils'
 import { WalletIcon } from './walletIcon'
-import { MetaMaskIcon } from './metaMaskIcon'
 import { ChevronDownIcon, ExternalLinkIcon } from '@chakra-ui/icons'
 import {
   Box,
@@ -24,6 +23,7 @@ export function ConnectedWallet() {
   const { address } = useAccount()
   const { disconnect } = useDisconnect()
   const { chain } = useNetwork()
+
   return (
     <Popover>
       <PopoverTrigger>
@@ -44,8 +44,9 @@ export function ConnectedWallet() {
         <PopoverArrow />
         <PopoverCloseButton />
         <PopoverHeader as={Flex} alignItems="center">
-          <Text mr="2">Connected with MetaMask</Text>
-          <MetaMaskIcon fontSize="1rem" />
+          <Text>
+            {chain?.name} ({chain?.id}) Chain Connected
+          </Text>
         </PopoverHeader>
         <PopoverBody>
           <Flex
