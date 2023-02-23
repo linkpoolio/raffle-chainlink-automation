@@ -32,7 +32,6 @@ contract RaffleManagerTest is Test {
     bytes32[] proofB = new bytes32[](2);
     uint96 BASE_FEE = 2500000000;
     uint96 GAS_PRICE_LINK = 1e9;
-    uint256 mainnetFork;
     string email;
 
     event RaffleCreated(
@@ -246,25 +245,6 @@ contract RaffleManagerTest is Test {
         });
     }
 
-    function mainnetForkRaffleFixture() public {
-        vm.selectFork(mainnetFork);
-        vm.expectEmit(true, true, true, true);
-        emit RaffleCreated("BigMac", 0, 1 ether, address(0), false);
-        vm.prank(raffleAdmin);
-        raffleManager.createRaffle({
-            prizeName: "BigMac",
-            timeLength: 0,
-            fee: 1 ether,
-            name: "Big Mac Contest",
-            feeToken: address(0),
-            merkleRoot: bytes32(""),
-            automation: false,
-            participants: new bytes32[](0),
-            totalWinners: 1,
-            entriesPerUser: 1
-        });
-    }
-
     function test_createRaffle_Success() public {
         successFixture();
     }
@@ -321,7 +301,7 @@ contract RaffleManagerTest is Test {
         emit RaffleJoined(0, keccak256(abi.encodePacked(user1)), 1);
         vm.prank(user1);
         raffleManager.enterRaffle(0, 1, new bytes32[](0));
-        bytes32 contestant = raffleManager.getRaffle(0).contestantsAddresses[0];
+        bytes32 contestant = raffleManager.getRaffle(0).contestants[0];
         assert(contestant == keccak256(abi.encodePacked(user1)));
     }
 

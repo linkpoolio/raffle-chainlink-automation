@@ -6,12 +6,13 @@ install:
 deploy:
 	forge script script/RaffleManager.s.sol:RaffleManagerScript --rpc-url ${RPC_URL} --etherscan-api-key ${EXPLORER_KEY} --broadcast --verify -vvvv
 
+
 deploy-local:
 	forge script script/RaffleManager.s.sol:RaffleManagerScript --rpc-url ${LOCAL_RPC_URL} --broadcast -vvvv
 
 # tests
 test-contracts-all:
-	forge test -vvvv
+	forge test -vvvvv
 
 test-contracts-offline:
 	forge test --no-match-test testFork -vvvv

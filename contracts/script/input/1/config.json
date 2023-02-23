@@ -4,5 +4,5 @@
   "wrapperAddress": "0x5A861794B927983406fCE1D062e00b9368d97Df6",
   "keepersRegistry": "0x02777053d6764996e594c3E88AF1D58D5363a2e6",
   "requestConfirmations": 3,
-  "callbackGasLimit": 10000000
+  "callbackGasLimit": 1000000
 }
