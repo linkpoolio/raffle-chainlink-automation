@@ -1,14 +1,16 @@
 import React from 'react'
 import { Button } from '@chakra-ui/react'
+import { getAccount } from '@wagmi/core'
 
 import { steps } from '@ui/features/raffleDetail'
 import {
   RaffleStatus,
   RaffleType,
-  isRaffleParticipant,
-  isRaffleWinner,
+  isRaffleParticipantDynamic,
   isRaffleClaimedPrize
 } from '@ui/models'
+
+const realIdentifier = getAccount().address
 
 const onParticipantStatusClick = async ({ update, raffle, identifier }) => {
   // Require user to provide unique identifier
@@ -16,8 +18,10 @@ const onParticipantStatusClick = async ({ update, raffle, identifier }) => {
     return update({ step: steps.PROVIDE_IDENTIFER })
   // Automatically use users wallet address as unique identifier
   if (raffle.type == RaffleType.DYNAMIC) {
-    const winner = isRaffleWinner(raffle, identifier)
-    const claimedPrize = isRaffleClaimedPrize(raffle, identifier)
+    console.log('raffle', raffle)
+    console.log('identifier', getAccount().address)
+    const winner = isRaffleParticipantDynamic(raffle, realIdentifier)
+    const claimedPrize = isRaffleClaimedPrize(raffle, realIdentifier)
 
     const participantStatus =
       winner && claimedPrize ? 'WON_CLAIMED' : winner ? 'WON_UNCLAIMED' : 'LOST'
@@ -33,8 +37,8 @@ const onParticipantStatusClick = async ({ update, raffle, identifier }) => {
 
 export const CheckStatusButton = (props) =>
   props.raffle?.status == RaffleStatus.FINISHED &&
-  (props.raffle?.type != RaffleType.DYNAMIC ||
-    isRaffleParticipant(props.raffle, props.identifier)) && (
+  isRaffleParticipantDynamic(props.raffle, realIdentifier) &&
+  !isRaffleClaimedPrize(props.raffle, realIdentifier) && (
     <Button onClick={() => onParticipantStatusClick(props)} variant="default">
       Did I win?
     </Button>

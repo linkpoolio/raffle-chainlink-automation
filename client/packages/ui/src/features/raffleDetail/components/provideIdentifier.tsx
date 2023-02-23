@@ -10,15 +10,17 @@ export const ProvideIdentifier = ({ store, asyncManager }) => {
   const [identifier, setIdentifier] = useState('')
 
   const onChange = (e) => {
+    // const hashedIdentifier = ethers.utils.solidityKeccak256(e.target.value)
     setIdentifier(e.target.value)
   }
 
   const onSubmit = () => {
     const { raffle } = store.state
 
-    const bytes32Identifier = ethers.utils.formatBytes32String(identifier)
-    const winner = isRaffleWinner(raffle, bytes32Identifier)
-    const claimedPrize = isRaffleClaimedPrize(raffle, bytes32Identifier)
+    console.log('raffle', raffle)
+
+    const winner = isRaffleWinner(raffle, identifier)
+    const claimedPrize = isRaffleClaimedPrize(raffle, identifier)
 
     const participantStatus =
       winner && claimedPrize ? 'WON_CLAIMED' : winner ? 'WON_UNCLAIMED' : 'LOST'

@@ -11,9 +11,9 @@ export const initialStaticState = {
 export const FormStatic = ({ update }) => {
   const onCsvUpload = (data) => {
     const flatten = ([value]) => value
-    const bytes32 = (participant) =>
-      ethers.utils.formatBytes32String(participant)
-    const participants = data.map(flatten).map(bytes32)
+    const hashed = (participant) =>
+      ethers.utils.solidityKeccak256(['string'], [participant])
+    const participants = data.map(flatten).map(hashed)
     update({ participants })
   }
 

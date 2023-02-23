@@ -46,7 +46,7 @@ export const FormDynamic = ({ state, onTextChange, onCheckboxChange }) => {
       </GridItem>
 
       <GridItem>
-        <Control label="Fee Token Amount" helper="Use Wei units">
+        <Control label="Fee Amount">
           <Input type="text" value={state.fee} onChange={onTextChange('fee')} />
         </Control>
       </GridItem>

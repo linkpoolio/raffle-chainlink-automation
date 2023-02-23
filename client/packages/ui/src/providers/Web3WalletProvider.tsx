@@ -2,9 +2,9 @@ import React from 'react'
 import { WagmiConfig, createClient, configureChains } from 'wagmi'
 import { InjectedConnector } from 'wagmi/connectors/injected'
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
-import { mainnet, localhost, hardhat, goerli } from 'wagmi/chains'
+import { mainnet, localhost, hardhat, goerli, sepolia } from 'wagmi/chains'
 
-const DEFAULT_CHAIN_ID = goerli.id
+const DEFAULT_CHAIN_ID = sepolia.id
 
 export const CHAINS = [
   {
@@ -30,7 +30,18 @@ export const CHAINS = [
     }
   },
   hardhat,
-  goerli
+  goerli,
+  {
+    ...sepolia,
+    rpcUrls: {
+      public: {
+        http: ['https://ethereum-sepolia-rpc.allthatnode.com']
+      },
+      default: {
+        http: ['https://ethereum-sepolia-rpc.allthatnode.com']
+      }
+    }
+  }
 ]
 
 const { chains, provider } = configureChains(

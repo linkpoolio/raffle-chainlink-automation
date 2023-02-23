@@ -9,9 +9,7 @@ const onJoinClick = ({ update }) => update({ step: steps.JOIN })
 export const JoinButton = ({ update, raffle, address, identifier }) =>
   raffle?.status == RaffleStatus.LIVE &&
   raffle?.type == RaffleType.DYNAMIC &&
-  address &&
-  identifier &&
-  !isRaffleParticipant(raffle, identifier) && (
+  address && (
     <Button onClick={() => onJoinClick({ update })} variant="default">
       Join Raffle
     </Button>

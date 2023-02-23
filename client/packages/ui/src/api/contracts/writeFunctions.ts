@@ -19,7 +19,7 @@ export const createRaffle = async (params: contracts.CreateRaffleParams) => {
       args: [
         params.prizeName,
         params.timeLength ? params.timeLength : 0,
-        params.fee ? params.fee : 0,
+        params.fee ? ethers.utils.parseEther(params.fee) : 0,
         params.name,
         params.feeToken ? params.feeToken : ethers.constants.AddressZero,
         params.merkleRoot
@@ -31,6 +31,7 @@ export const createRaffle = async (params: contracts.CreateRaffleParams) => {
         params.entriesPerUser ? params.entriesPerUser : 1
       ]
     })
+    console.log({ config })
     const data = await writeContract(config)
     return data
   } catch (error: any) {
@@ -82,6 +83,9 @@ export const resolveRaffle = async (params: contracts.ResolveRaffleParams) => {
       address: linkTokenContractAddress,
       abi: linkTokenABI,
       functionName: 'transferAndCall',
+      overrides: {
+        gasLimit: BigNumber.from(`500000`)
+      },
       args: [
         raffleManagerContractAddress,
         value,

@@ -52,7 +52,7 @@ const Row = ({ name, value }) => {
 export const RaffleDetail = ({ id }) => {
   const store = useStore(initialState)
   const asyncManager = useAsyncManager()
-  const { address } = useAccount()
+  const address = useAccount()
 
   const { raffle } = store.state
   const componentDidMount = () => {
@@ -60,11 +60,11 @@ export const RaffleDetail = ({ id }) => {
   }
   useEffect(componentDidMount, [])
 
-  const addressOrRafleDidChange = () => {
-    if (raffle?.type == RaffleType.DYNAMIC)
-      store.update({ identifier: address })
-  }
-  useEffect(addressOrRafleDidChange, [address, raffle])
+  // // const addressOrRafleDidChange = () => {
+  // //   if (raffle?.type == RaffleType.DYNAMIC)
+  // //     store.update({ identifier: address })
+  // // }
+  // useEffect(addressOrRafleDidChange, [address, raffle])
 
   return (
     <Container
@@ -104,6 +104,10 @@ export const RaffleDetail = ({ id }) => {
           }
         />
         <Row name="Name" value={raffle?.name} />
+        <Row
+          name="Type"
+          value={isRaffleStatic(raffle) ? 'Static' : 'Dynamic'}
+        />
         <Row
           name="Type"
           value={isRaffleStatic(raffle) ? 'Static' : 'Dynamic'}
