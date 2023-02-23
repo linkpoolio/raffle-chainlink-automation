@@ -98,7 +98,7 @@ export const RaffleDetail = ({ id }) => {
         </Heading>
       </Center>
       <Center flexDirection="column" mb="14">
-        <HStack bg="#F6F7FD" p="4" borderRadius="2xl" spacing="6">
+        <HStack bg="#F6F7FD" p="4" px="8" borderRadius="2xl" spacing="6">
           <HStack spacing="3" alignItems={'center'}>
             <StatusIcons status={raffle?.status} />
             <Text fontSize={'sm'}>
