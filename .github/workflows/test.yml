@@ -40,3 +40,5 @@ jobs:
           forge test -vvv
         id: test
         working-directory: contracts
+        env:
+          GOERLI_RPC_URL: 'https://ethereum-goerli-rpc.allthatnode.com'
