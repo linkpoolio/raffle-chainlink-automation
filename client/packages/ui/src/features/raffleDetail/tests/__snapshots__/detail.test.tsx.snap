@@ -111,7 +111,7 @@ exports[`RaffleDetail matches snapshot 1`] = `
         <p
           className="chakra-text css-0"
         >
-          Jan 1, 1970, 1:00 AM
+          Jan 1, 1970, 12:00 AM
         </p>
       </div>
       <div

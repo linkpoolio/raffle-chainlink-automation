@@ -14,6 +14,7 @@ module.exports = {
     'tsx',
   ],
   setupFilesAfterEnv: [`${__dirname}/src/setupTests.ts`],
+  globalSetup:  `${__dirname}/src/setupTestsGlobal.ts`,
   transform: {
     "^.+\\.[t|j]sx?$": "babel-jest",
     '^.+\\.tsx?$': [
