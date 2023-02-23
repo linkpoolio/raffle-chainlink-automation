@@ -24,7 +24,8 @@ const checkStatusText = 'Did I win?'
 describe('CheckStatusButton', () => {
   it('does not render check status button on status != finished', () => {
     const props = getProps({
-      status: null
+      status: null,
+      type: null
     })
     render(getComponent(props))
 
