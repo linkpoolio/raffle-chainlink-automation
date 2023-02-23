@@ -61,7 +61,7 @@ contract RaffleManager is
         RaffleBase base;
         address owner;
         string raffleName;
-        bytes32[] contestantsAddresses;
+        bytes32[] contestants;
         bytes32[] winners;
         UD60x18 prizeWorth;
         RequestStatus requestStatus;
@@ -194,7 +194,7 @@ contract RaffleManager is
             }),
             owner: msg.sender,
             raffleName: name,
-            contestantsAddresses: participants.length > 0 ? participants : new bytes32[](0),
+            contestants: participants.length > 0 ? participants : new bytes32[](0),
             winners: new bytes32[](0),
             prizeWorth: ud(msg.value),
             timeLength: timeLength,
@@ -248,7 +248,7 @@ contract RaffleManager is
             raffles[raffleId].prizeWorth = raffles[raffleId].prizeWorth.add(ud(msg.value));
         }
         for (uint256 i = 0; i < entries; i++) {
-            raffles[raffleId].contestantsAddresses.push(_userHash);
+            raffles[raffleId].contestants.push(_userHash);
         }
         userEntries[msg.sender][raffleId] += entries;
         emit RaffleJoined(raffleId, _userHash, entries);
@@ -265,7 +265,7 @@ contract RaffleManager is
         raffles[raffleId].raffleState = RaffleState.FINISHED;
         _requestRandomWords(raffleId, value);
 
-        emit RaffleClosed(raffleId, raffles[raffleId].contestantsAddresses);
+        emit RaffleClosed(raffleId, raffles[raffleId].contestants);
     }
 
     /**
@@ -326,12 +326,11 @@ contract RaffleManager is
         raffles[raffleIndexFromRequestId].requestStatus.randomWords = randomWords;
         raffles[raffleIndexFromRequestId].requestStatus.fulfilled = true;
         _updateLiveRaffles(raffleIndexFromRequestId);
-        uint256[] memory winners = _pickRandom(
-            randomWords[0], raffles[raffleIndexFromRequestId].contestantsAddresses.length, raffleIndexFromRequestId
-        );
+        uint256[] memory winners =
+            _pickRandom(randomWords[0], raffles[raffleIndexFromRequestId].contestants.length, raffleIndexFromRequestId);
         for (uint256 i = 0; i < winners.length; i++) {
             raffles[raffleIndexFromRequestId].winners.push(
-                raffles[raffleIndexFromRequestId].contestantsAddresses[winners[i] - 1]
+                raffles[raffleIndexFromRequestId].contestants[winners[i] - 1]
             );
         }
 
@@ -490,8 +489,8 @@ contract RaffleManager is
      */
     function getUserEntries(uint256 raffleId, address user) external view returns (uint256) {
         uint256 userEntriesCount = 0;
-        for (uint256 i = 0; i < raffles[raffleId].contestantsAddresses.length; i++) {
-            if (raffles[raffleId].contestantsAddresses[i] == keccak256(abi.encodePacked(user))) {
+        for (uint256 i = 0; i < raffles[raffleId].contestants.length; i++) {
+            if (raffles[raffleId].contestants[i] == keccak256(abi.encodePacked(user))) {
                 userEntriesCount++;
             }
         }
@@ -565,6 +564,6 @@ contract RaffleManager is
      *
      */
     function _eligableToEnd(uint256 raffleId) internal view returns (bool) {
-        return raffles[raffleId].contestantsAddresses.length >= raffles[raffleId].base.totalWinners;
+        return raffles[raffleId].contestants.length >= raffles[raffleId].base.totalWinners;
     }
 }
