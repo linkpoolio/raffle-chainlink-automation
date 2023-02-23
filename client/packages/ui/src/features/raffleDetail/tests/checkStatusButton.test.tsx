@@ -3,10 +3,11 @@ import { render, screen } from '@testing-library/react'
 
 import { CheckStatusButton } from '../'
 
-const getProps = ({ status }) => ({
+const getProps = ({ status, type }) => ({
   update: () => {},
   raffle: {
-    status
+    status,
+    type
   },
   asyncManager: null,
   identifier: null
@@ -31,9 +32,10 @@ describe('CheckStatusButton', () => {
     expect(button).toBeNull()
   })
 
-  it('renders check status button on status == finished', () => {
+  it('renders check status button on status == finished && type == static', () => {
     const props = getProps({
-      status: 2
+      status: 2,
+      type: 1
     })
     render(getComponent(props))
 

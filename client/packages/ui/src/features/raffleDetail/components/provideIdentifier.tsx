@@ -4,7 +4,7 @@ import { Button, Flex, Input, Heading } from '@chakra-ui/react'
 
 import { Control } from '@ui/components'
 import { steps } from '@ui/features/raffleDetail'
-import { isRaffleClaimedPrize, isRaffleWinner } from '@ui/models'
+import { isRaffleWinner } from '@ui/models'
 
 export const ProvideIdentifier = ({ store, asyncManager }) => {
   const [identifier, setIdentifier] = useState('')
@@ -16,16 +16,19 @@ export const ProvideIdentifier = ({ store, asyncManager }) => {
   const onSubmit = () => {
     const { raffle } = store.state
 
-    const bytes32Identifier = ethers.utils.formatBytes32String(identifier)
-    const winner = isRaffleWinner(raffle, bytes32Identifier)
-    const claimedPrize = isRaffleClaimedPrize(raffle, bytes32Identifier)
+    const keccakIdentifier = ethers.utils.solidityKeccak256(
+      ['string'],
+      [identifier]
+    )
 
-    const participantStatus =
-      winner && claimedPrize ? 'WON_CLAIMED' : winner ? 'WON_UNCLAIMED' : 'LOST'
+    // TODO: marc to update this selector to the static selectors for raffle winner
+    const winner = isRaffleWinner(raffle, keccakIdentifier)
+
+    const participantStatus = winner ? 'WON_UNCLAIMED' : 'LOST'
 
     if (participantStatus)
       store.update({
-        identifier,
+        identifier: keccakIdentifier,
         participantStatus,
         step: steps.PARTICIPANT_STATUS
       })

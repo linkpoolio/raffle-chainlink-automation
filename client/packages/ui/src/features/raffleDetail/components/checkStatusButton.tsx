@@ -33,8 +33,9 @@ const onParticipantStatusClick = async ({ update, raffle, identifier }) => {
 
 export const CheckStatusButton = (props) =>
   props.raffle?.status == RaffleStatus.FINISHED &&
-  (props.raffle?.type != RaffleType.DYNAMIC ||
-    isRaffleParticipant(props.raffle, props.identifier)) && (
+  (props.raffle?.type == RaffleType.STATIC ||
+    (props.identifer &&
+      isRaffleParticipant(props.raffle, props.identifier))) && (
     <Button onClick={() => onParticipantStatusClick(props)} variant="default">
       Did I win?
     </Button>
