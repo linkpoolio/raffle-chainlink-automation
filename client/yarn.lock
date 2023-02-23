@@ -3673,6 +3673,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fireworks-js/react@npm:^2.10.2":
+  version: 2.10.2
+  resolution: "@fireworks-js/react@npm:2.10.2"
+  dependencies:
+    fireworks-js: 2.10.2
+  peerDependencies:
+    "@types/react": ">=16.8.0"
+    react: ">=16.8.0"
+  checksum: 93ecf9f579d557c425992de3a87b711cb5061745c436b2a5e47e64de2cc44eb72babb35f53b2347990a488d8e6688101bf57185b3963976cbf476afa1c72337c
+  languageName: node
+  linkType: hard
+
 "@gar/promisify@npm:^1.1.3":
   version: 1.1.3
   resolution: "@gar/promisify@npm:1.1.3"
@@ -8326,6 +8338,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fireworks-js@npm:2.10.2":
+  version: 2.10.2
+  resolution: "fireworks-js@npm:2.10.2"
+  checksum: 432cf2c45224b1b0cd4616bceff69a299a606c6b60434befd995edc047ca2c4f592069dda7e3e08e073a2d0e54ec41052af71f651a457a68571ceb6299a31d59
+  languageName: node
+  linkType: hard
+
 "flat-cache@npm:^3.0.4":
   version: 3.0.4
   resolution: "flat-cache@npm:3.0.4"
@@ -11467,6 +11486,7 @@ __metadata:
     "@emotion/react": ^11.10.6
     "@emotion/styled": ^11.10.6
     "@esbuild-plugins/node-globals-polyfill": ^0.1.1
+    "@fireworks-js/react": ^2.10.2
     "@testing-library/react": ^14.0.0
     "@testing-library/user-event": ^14.4.3
     "@types/jest": ^29.1.2
