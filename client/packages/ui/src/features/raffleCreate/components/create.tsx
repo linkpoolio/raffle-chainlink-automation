@@ -94,11 +94,12 @@ export const RaffleCreate = () => {
     return (
       invalidList.filter((key) => {
         if (type == RaffleType.DYNAMIC) {
-          !Object.keys(initialStaticState).includes(key)
+          return !Object.keys(initialStaticState).includes(key)
         }
         if (type == RaffleType.STATIC) {
-          !Object.keys(initialDynamicState).includes(key)
+          return !Object.keys(initialDynamicState).includes(key)
         }
+        return key
       }).length === 0
     )
   }
@@ -113,7 +114,6 @@ export const RaffleCreate = () => {
     }
   }
 
-  // TODO: add styles for form validation -- currently is validation fails there's no visual indicator of why you cannot create
   return (
     <Container
       maxW="container.xl"
