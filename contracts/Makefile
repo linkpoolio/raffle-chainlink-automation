@@ -20,6 +20,9 @@ test-contracts-offline:
 test-contracts-online:
 	forge test --match-test testFork -vvvv
 
+test-contracts-invariant:
+	forge test --match-test invariant -vvvvv
+
 # docs
 gen-docs:
 	forge doc
