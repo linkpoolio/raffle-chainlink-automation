@@ -8,15 +8,13 @@ export const initialStaticState = {
   participants: []
 }
 
-const filterNull = (i) => i !== ''
-
 export const FormStatic = ({ update }) => {
   const onCsvUpload = (data) => {
     const flatten = ([value]) => value
-    const bytes32 = (participant) =>
-      ethers.utils.formatBytes32String(participant)
-    const participants = data.map(flatten).filter(filterNull).map(bytes32)
-
+    const removeNull = (value) => value !== ''
+    const hash = (participant) =>
+      ethers.utils.solidityKeccak256(['string'], [participant])
+    const participants = data.map(flatten).filter(removeNull).map(hash)
     update({ participants })
   }
 

@@ -16,19 +16,18 @@ export const ProvideIdentifier = ({ store, asyncManager }) => {
   const onSubmit = () => {
     const { raffle } = store.state
 
-    const keccakIdentifier = ethers.utils.solidityKeccak256(
+    const hashedIdentifier = ethers.utils.solidityKeccak256(
       ['string'],
       [identifier]
     )
 
-    // TODO: marc to update this selector to the static selectors for raffle winner
-    const winner = isRaffleWinner(raffle, keccakIdentifier)
+    const winner = isRaffleWinner(raffle, hashedIdentifier)
 
     const participantStatus = winner ? 'WON_UNCLAIMED' : 'LOST'
 
     if (participantStatus)
       store.update({
-        identifier: keccakIdentifier,
+        identifier: hashedIdentifier,
         participantStatus,
         step: steps.PARTICIPANT_STATUS
       })

@@ -19,7 +19,7 @@ export const createRaffle = async (params: contracts.CreateRaffleParams) => {
       args: [
         params.prizeName,
         params.timeLength ? params.timeLength : 0,
-        params.fee ? params.fee : 0,
+        params.fee ? ethers.utils.parseEther(params.fee) : 0,
         params.name,
         params.feeToken ? params.feeToken : ethers.constants.AddressZero,
         params.merkleRoot
@@ -46,7 +46,7 @@ export const enterRaffle = async (params: contracts.EnterRaffleParams) => {
       abi: raffleManagerABI,
       functionName: 'enterRaffle',
       overrides: {
-        value: BigNumber.from(fee)
+        value: ethers.utils.parseEther(fee)
       },
       args: [id, params.entries ? params.entries : 1, proof ? proof : []]
     })
@@ -77,11 +77,13 @@ export const resolveRaffle = async (params: contracts.ResolveRaffleParams) => {
   try {
     const { value, id } = params
 
-    // TODO: debug why this txn is auto reverting
     const paramsConfig = {
       address: linkTokenContractAddress,
       abi: linkTokenABI,
       functionName: 'transferAndCall',
+      overrides: {
+        gasLimit: BigNumber.from(`500000`) // 500k gas limit
+      },
       args: [
         raffleManagerContractAddress,
         value,

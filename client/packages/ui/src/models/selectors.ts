@@ -1,5 +1,4 @@
 import { RaffleInstance, RaffleType, RaffleStatus } from '@ui/models'
-import { ethers } from 'ethers'
 
 export const filterRaffleList = (list, filters): RaffleInstance[] =>
   list.filter((raffle) => filters.every((filter) => filter(raffle)))
@@ -7,14 +6,15 @@ export const filterRaffleList = (list, filters): RaffleInstance[] =>
 export const isRaffleOwner = (raffle, account): boolean =>
   raffle?.owner === account
 
-export const isRaffleParticipant = (raffle, account): boolean =>
-  raffle?.contestantsAddresses.includes(ethers.utils.keccak256(account))
+export const isRaffleParticipant = (raffle, account): boolean => {
+  return raffle?.contestantsAddresses.includes(account)
+}
 
 export const isRaffleWinner = (raffle, account): boolean =>
-  raffle?.winners.includes(ethers.utils.keccak256(account))
+  raffle?.winners.includes(account)
 
 export const isRaffleClaimedPrize = (raffle, account): boolean =>
-  raffle?.claimedPrizes.includes(ethers.utils.keccak256(account))
+  raffle?.claimedPrizes.includes(account)
 
 export const isRaffleStatic = (raffle): boolean =>
   raffle?.type === RaffleType.STATIC

@@ -1,13 +1,12 @@
 import { Routes } from '@ui/Routes'
 import { contracts } from '@ui/api'
 
-// TODO: everywhere we check `isSuccess` needs updated
-
 export const createRaffle = async ({ state, asyncManager, history }) => {
   try {
     asyncManager.start()
     const payload: contracts.CreateRaffleParams = {
       ...state,
+      feeToken: null, // Temporary until we have a way to get the fee token
       timeLength: state.hours * 60 * 60
     }
     const { wait } = await contracts.createRaffle(payload)
