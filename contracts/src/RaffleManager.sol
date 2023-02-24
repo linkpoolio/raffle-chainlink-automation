@@ -50,7 +50,8 @@ contract RaffleManager is
     enum RaffleState {
         STAGED,
         LIVE,
-        FINISHED
+        FINISHED,
+        RESOLVING
     }
     enum RaffleType {
         DYNAMIC,
@@ -247,7 +248,7 @@ contract RaffleManager is
             );
             raffles[raffleId].prizeWorth = raffles[raffleId].prizeWorth.add(ud(raffles[raffleId].fee * entries));
         } else if (raffles[raffleId].paymentNeeded) {
-            require(msg.value >= (raffles[raffleId].fee * entries), "Not enough ETH to join raffle");
+            require(msg.value >= (raffles[raffleId].fee * entries), "Not enough gas token to join raffle");
             raffles[raffleId].prizeWorth = raffles[raffleId].prizeWorth.add(ud(msg.value));
         }
         for (uint256 i = 0; i < entries; i++) {
@@ -312,6 +313,7 @@ contract RaffleManager is
         uint256 _raffle = abi.decode(raffleId, (uint256));
         require(sender == raffles[_raffle].owner, "Only owner can pick winner");
         require(_eligableToEnd(_raffle), "Not enough contestants to pick winner");
+        require(raffles[_raffle].raffleState != RaffleState.FINISHED, "Raffle is already finished");
         _pickWinner(_raffle, value);
     }
 
@@ -441,7 +443,7 @@ contract RaffleManager is
      */
     function _pickWinner(uint256 raffleId, uint256 value) internal {
         raffles[raffleId].requestStatus.totalLink += value;
-        raffles[raffleId].raffleState = RaffleState.FINISHED;
+        raffles[raffleId].raffleState = RaffleState.RESOLVING;
         _requestRandomWords(raffleId, value);
 
         emit RaffleClosed(raffleId, raffles[raffleId].contestants);

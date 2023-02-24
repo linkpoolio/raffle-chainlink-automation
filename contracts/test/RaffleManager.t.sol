@@ -374,7 +374,7 @@ contract RaffleManagerTest is Test {
         gasTokenRaffleFixture();
         vm.deal(user1, 0.1 ether);
         vm.startPrank(user1);
-        vm.expectRevert("Not enough ETH to join raffle");
+        vm.expectRevert("Not enough gas token to join raffle");
         raffleManager.enterRaffle{value: 0.1 ether}(0, 1, new bytes32[](0));
         vm.stopPrank();
     }
