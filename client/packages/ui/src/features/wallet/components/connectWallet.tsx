@@ -4,6 +4,7 @@ import { InjectedConnector } from 'wagmi/connectors/injected'
 
 import { WalletIcon } from './walletIcon'
 import { MetaMaskIcon } from './metaMaskIcon'
+import { sepolia } from 'wagmi/chains'
 
 import {
   useDisclosure,
@@ -26,7 +27,8 @@ export function ConnectWallet() {
   const { address } = useAccount()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const { connect, connectors, error } = useConnect({
-    connector: new InjectedConnector()
+    connector: new InjectedConnector(),
+    chainId: sepolia.id
   })
 
   const addressDidChange = () => {

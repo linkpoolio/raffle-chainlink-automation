@@ -7,6 +7,8 @@ export const getRaffleList = async ({ asyncManager, update }) => {
     asyncManager.success()
     update({ list })
   } catch (error) {
-    asyncManager.fail(`Could not get raffle list`)
+    asyncManager.fail(
+      `Could not get raffle list, please check your're connected to the correct network.`
+    )
   }
 }
