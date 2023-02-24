@@ -20,11 +20,7 @@ export const Withdraw = ({ id, reset, asyncManager, store }) => {
 
   const componentDidMount = () => {
     getClaimableLink({ id, asyncManager, update: store.update })
-    return () => {
-      setWithdrawSuccess(false)
-      store.update({ claimableLink: null })
-      reset()
-    }
+    return () => setWithdrawSuccess(false)
   }
   useEffect(componentDidMount, [])
 
@@ -41,9 +37,12 @@ export const Withdraw = ({ id, reset, asyncManager, store }) => {
       )}
       {didFetchClaimable && !withdrawSuccess && (
         <>
-          <Text>You have {claimableLink} LINK in available to withdraw.</Text>
+          <Text>You have {claimableLink} LINK is available to withdraw.</Text>
           <Flex mt="2" justify="end">
-            <Button variant="default" onClick={onWithdraw}>
+            <Button
+              variant="default"
+              isDisabled={asyncManager.loading || asyncManager.pending}
+              onClick={onWithdraw}>
               Withdraw
             </Button>
           </Flex>

@@ -90,7 +90,17 @@ export const RaffleCreate = () => {
       }
       return false
     })
-    return invalidList.length === 0
+
+    return (
+      invalidList.filter((key) => {
+        if (type == RaffleType.DYNAMIC) {
+          !Object.keys(initialStaticState).includes(key)
+        }
+        if (type == RaffleType.STATIC) {
+          !Object.keys(initialDynamicState).includes(key)
+        }
+      }).length === 0
+    )
   }
 
   const onTextChange = (key) => (e) => update({ [key]: e.target.value })
@@ -103,6 +113,7 @@ export const RaffleCreate = () => {
     }
   }
 
+  // TODO: add styles for form validation -- currently is validation fails there's no visual indicator of why you cannot create
   return (
     <Container
       maxW="container.xl"
@@ -196,7 +207,6 @@ export const RaffleCreate = () => {
       <Center>
         <Button
           variant="default"
-          disabled={asyncManager.loading || asyncManager.pending}
           onClick={onSubmit}
           isLoading={asyncManager.loading || asyncManager.pending}
           loadingText={

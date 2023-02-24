@@ -6,7 +6,6 @@ import { Control } from '@ui/components'
 export const initialDynamicState = {
   hours: 24,
   automation: false,
-  feeToken: '',
   fee: 0
 }
 
@@ -57,7 +56,7 @@ export const FormDynamic = ({
 
       <GridItem>
         <Control
-          label="Fee Amount"
+          label="Fee Amount (ETH)"
           isInvalid={!!validation['fee']}
           errorMessage={validation['fee']}>
           <Input

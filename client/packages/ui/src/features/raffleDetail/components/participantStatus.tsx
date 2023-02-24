@@ -44,25 +44,26 @@ const WonUnclaimed = ({ id, store, asyncManager }) => {
       <Heading size="md" mb="6">
         Did I win?
       </Heading>
-      <Fireworks
-        options={{ opacity: 1 }}
-        style={{
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          position: 'fixed',
-          background: 'transparent',
-          zIndex: -1
-        }}
-      />
+      {!asyncManager.loading && !asyncManager.pending && (
+        <Fireworks
+          options={{ opacity: 1 }}
+          style={{
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            position: 'fixed',
+            background: 'transparent',
+            zIndex: -1
+          }}
+        />
+      )}
       <Text>You won!</Text>
       {store.state.raffle.type == RaffleType.DYNAMIC && (
         <Flex mt="2" justify="end">
           <Button
             variant="default"
-            disabled={asyncManager.loading || asyncManager.pending}
-            isLoading={asyncManager.loading || asyncManager.pending}
+            isDisabled={asyncManager.loading || asyncManager.pending}
             onClick={onClaim}
             loadingText={
               asyncManager.loading
