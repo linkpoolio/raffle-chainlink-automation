@@ -38,9 +38,11 @@ export const RaffleCreate = () => {
     ...baseInitialState,
     ...initialStaticState
   })
+
   const asyncManager = useAsyncManager()
   const history = useHistory()
   const [type, setType] = useState(RaffleType.STATIC)
+  const [validation, setValidation] = useState({})
 
   const { state, update } = store
 
@@ -54,6 +56,7 @@ export const RaffleCreate = () => {
   useEffect(componentDidUnmount, [])
 
   const onTypeChange = (e) => {
+    resetFormValidation()
     if (e.target.value == RaffleType.STATIC) {
       setType(RaffleType.STATIC)
       update({
@@ -70,11 +73,35 @@ export const RaffleCreate = () => {
     }
   }
 
+  const resetFormValidation = () => {
+    setValidation({})
+  }
+
+  const isFormValid = () => {
+    resetFormValidation()
+    const invalidList = Object.keys(state).filter((name) => {
+      if (
+        (Array.isArray(state[name]) && state[name].length === 0) ||
+        ((typeof state[name] === 'string' || state[name] instanceof String) &&
+          state[name].trim().length === 0)
+      ) {
+        setValidation((state) => ({ ...state, [name]: 'Required Field' }))
+        return true
+      }
+      return false
+    })
+    return invalidList.length === 0
+  }
+
   const onTextChange = (key) => (e) => update({ [key]: e.target.value })
 
   const onCheckboxChange = (key) => () => update({ [key]: !state[key] })
 
-  const onSubmit = () => createRaffle({ state, asyncManager, history })
+  const onSubmit = () => {
+    if (isFormValid()) {
+      createRaffle({ state, asyncManager, history })
+    }
+  }
 
   return (
     <Container
@@ -109,8 +136,13 @@ export const RaffleCreate = () => {
         </GridItem>
 
         <GridItem>
-          <Control label="Raffle Name" helper="Max 40 characters">
+          <Control
+            label="Raffle Name"
+            helper="Max 40 characters"
+            isInvalid={!!validation['name']}
+            errorMessage={validation['name']}>
             <Input
+              isInvalid={!!validation['name']}
               type="text"
               placeholder="Name"
               value={state.name}
@@ -120,8 +152,13 @@ export const RaffleCreate = () => {
         </GridItem>
 
         <GridItem>
-          <Control label="Number of winners" helper="Max 120 winners">
+          <Control
+            label="Number of winners"
+            helper="Max 120 winners"
+            isInvalid={!!validation['totalWinners']}
+            errorMessage={validation['totalWinners']}>
             <Input
+              isInvalid={!!validation['totalWinners']}
               type="text"
               placeholder="Number"
               value={state.totalWinners}
@@ -131,8 +168,13 @@ export const RaffleCreate = () => {
         </GridItem>
 
         <GridItem>
-          <Control label="Prize description" helper="Max 40 charcters">
+          <Control
+            label="Prize description"
+            helper="Max 40 charcters"
+            isInvalid={!!validation['prizeName']}
+            errorMessage={validation['prizeName']}>
             <Input
+              isInvalid={!!validation['prizeName']}
               type="text"
               placeholder="Name"
               value={state.prizeName}
@@ -141,9 +183,10 @@ export const RaffleCreate = () => {
           </Control>
         </GridItem>
         {type == RaffleType.STATIC ? (
-          <FormStatic update={update} />
+          <FormStatic update={update} validation={validation} />
         ) : (
           <FormDynamic
+            validation={validation}
             state={state}
             onTextChange={onTextChange}
             onCheckboxChange={onCheckboxChange}

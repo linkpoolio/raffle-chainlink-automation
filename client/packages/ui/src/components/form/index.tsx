@@ -10,15 +10,17 @@ export const Control = ({
   label,
   errorMessage,
   helper,
+  isInvalid,
   children
 }: {
   label: string
   errorMessage?: string
   helper?: string | JSX.Element
+  isInvalid?: boolean
   children: JSX.Element
 }) => {
   return (
-    <FormControl>
+    <FormControl isInvalid={isInvalid}>
       <FormLabel>{label}</FormLabel>
       {children}
       {!errorMessage ? (

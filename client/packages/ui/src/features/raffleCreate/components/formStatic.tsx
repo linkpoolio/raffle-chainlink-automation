@@ -8,7 +8,7 @@ export const initialStaticState = {
   participants: []
 }
 
-export const FormStatic = ({ update }) => {
+export const FormStatic = ({ update, validation }) => {
   const onCsvUpload = (data) => {
     const flatten = ([value]) => value
     const removeNull = (value) => value !== ''
@@ -22,12 +22,17 @@ export const FormStatic = ({ update }) => {
     <GridItem colSpan={2}>
       <Control
         label="Participants"
+        isInvalid={!!validation['participants']}
+        errorMessage={validation['participants']}
         helper={
           <>
             <button>Click here to download</button> CSV file example
           </>
         }>
-        <CSVUpload callback={onCsvUpload} />
+        <CSVUpload
+          callback={onCsvUpload}
+          isInvalid={!!validation['participants']}
+        />
       </Control>
     </GridItem>
   )

@@ -10,12 +10,22 @@ export const initialDynamicState = {
   fee: 0
 }
 
-export const FormDynamic = ({ state, onTextChange, onCheckboxChange }) => {
+export const FormDynamic = ({
+  state,
+  onTextChange,
+  onCheckboxChange,
+  validation
+}) => {
   return (
     <>
       <GridItem>
-        <Control label="Duration (hours)" helper="Description">
+        <Control
+          label="Duration (hours)"
+          helper="Description"
+          isInvalid={!!validation['hours']}
+          errorMessage={validation['hours']}>
           <Input
+            isInvalid={!!validation['hours']}
             type="number"
             value={state.hours}
             onChange={onTextChange('hours')}
@@ -46,8 +56,16 @@ export const FormDynamic = ({ state, onTextChange, onCheckboxChange }) => {
       </GridItem> */}
 
       <GridItem>
-        <Control label="Fee Amount">
-          <Input type="text" value={state.fee} onChange={onTextChange('fee')} />
+        <Control
+          label="Fee Amount"
+          isInvalid={!!validation['fee']}
+          errorMessage={validation['fee']}>
+          <Input
+            type="text"
+            value={state.fee}
+            onChange={onTextChange('fee')}
+            isInvalid={!!validation['fee']}
+          />
         </Control>
       </GridItem>
     </>
