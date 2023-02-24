@@ -89,6 +89,7 @@ export const RaffleCreate = () => {
         setValidation((state) => ({ ...state, [name]: 'Required Field' }))
         return true
       }
+      return false
     })
     return invalidList.length === 0
   }
