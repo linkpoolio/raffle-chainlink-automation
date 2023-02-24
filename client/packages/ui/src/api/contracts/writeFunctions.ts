@@ -88,10 +88,7 @@ export const resolveRaffle = async (params: contracts.ResolveRaffleParams) => {
         raffleManagerContractAddress,
         value,
         ethers.utils.solidityPack(['uint256'], [id])
-      ],
-      overrides: {
-        gasLimit: BigNumber.from(`500000`)
-      }
+      ]
     }
     const config = await prepareWriteContract(paramsConfig)
     const data = await writeContract(config)
