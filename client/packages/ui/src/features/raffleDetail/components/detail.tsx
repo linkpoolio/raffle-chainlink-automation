@@ -35,7 +35,6 @@ import {
   WithdrawButton
 } from '@ui/features/raffleDetail'
 import { formatUnixTs, formatFinishDate } from '@ui/utils'
-import { ethers } from 'ethers'
 
 export const initialState = {
   raffle: null,
