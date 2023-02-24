@@ -1,7 +1,8 @@
 export enum RaffleStatus {
   STAGED = 0,
   LIVE = 1,
-  FINISHED = 2
+  FINISHED = 2,
+  RESOLVING = 3
 }
 
 export enum RaffleType {

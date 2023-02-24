@@ -24,6 +24,7 @@ import {
   isRaffleStatic,
   isRaffleLive,
   isRaffleStaged,
+  isRaffleFinished,
   RaffleStatus
 } from '@ui/models'
 import {
@@ -110,7 +111,9 @@ export const RaffleDetail = ({ id }) => {
                   ? 'Staged'
                   : isRaffleLive(raffle)
                   ? 'Live'
-                  : 'Finished'}
+                  : isRaffleFinished(raffle)
+                  ? 'Finished'
+                  : 'Resolving'}
               </Text>
             </HStack>
 
@@ -171,32 +174,34 @@ export const RaffleDetail = ({ id }) => {
           />
           <Row name="Owner" value={raffle.owner} />
 
-          <Center>
-            <HStack spacing="6">
-              <JoinButton
-                update={store.update}
-                raffle={raffle}
-                address={address}
-                identifier={store.state.identifier}
-              />
-              <CheckStatusButton
-                update={store.update}
-                raffle={raffle}
-                identifier={store.state.identifier}
-              />
-              <PickWinnersButton
-                raffle={raffle}
-                update={store.update}
-                address={address}
-              />
-              <WithdrawButton
-                raffle={raffle}
-                update={store.update}
-                address={address}
-              />
-              <StepManager id={id} store={store} />
-            </HStack>
-          </Center>
+          {raffle.status !== RaffleStatus.RESOLVING && (
+            <Center>
+              <HStack spacing="6">
+                <JoinButton
+                  update={store.update}
+                  raffle={raffle}
+                  address={address}
+                  identifier={store.state.identifier}
+                />
+                <CheckStatusButton
+                  update={store.update}
+                  raffle={raffle}
+                  identifier={store.state.identifier}
+                />
+                <PickWinnersButton
+                  raffle={raffle}
+                  update={store.update}
+                  address={address}
+                />
+                <WithdrawButton
+                  raffle={raffle}
+                  update={store.update}
+                  address={address}
+                />
+                <StepManager id={id} store={store} />
+              </HStack>
+            </Center>
+          )}
         </Box>
       </Container>
     )

@@ -17,7 +17,8 @@ import {
   RaffleType,
   RaffleInstance,
   isRaffleLive,
-  isRaffleStaged
+  isRaffleStaged,
+  isRaffleFinished
 } from '@ui/models'
 import { formatUnixTs, formatFinishDate } from '@ui/utils'
 
@@ -70,7 +71,9 @@ export const Card = (raffle: RaffleInstance) => {
                 ? 'Staged'
                 : isRaffleLive(raffle)
                 ? 'Live'
-                : 'Finished'}
+                : isRaffleFinished(raffle)
+                ? 'Finished'
+                : 'Resolving'}
             </Text>
           </HStack>
           {raffle.permissioned && (

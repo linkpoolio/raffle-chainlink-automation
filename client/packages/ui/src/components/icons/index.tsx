@@ -99,6 +99,8 @@ export const ArrowIcon = ({ fill = '#3F5ACB', ...props }) => {
 
 export const StatusIcons = ({ status }: { status: RaffleStatus }) => {
   switch (status) {
+    case RaffleStatus.RESOLVING:
+      return <CircleIcon fill="#FFB438" />
     case RaffleStatus.FINISHED:
       return <CircleIcon fill="#3F5ACB" />
     case RaffleStatus.LIVE:

@@ -37,6 +37,11 @@ exports[`RaffleList matches snapshot 1`] = `
               Live
             </option>
             <option
+              value={3}
+            >
+              Resolving
+            </option>
+            <option
               value={2}
             >
               Finished

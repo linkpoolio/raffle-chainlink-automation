@@ -30,3 +30,6 @@ export const isRaffleLive = (raffle): boolean =>
 
 export const isRaffleFinished = (raffle): boolean =>
   raffle?.status === RaffleStatus.FINISHED
+
+export const isRaffleResolving = (raffle): boolean =>
+  raffle?.status === RaffleStatus.RESOLVING
