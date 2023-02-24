@@ -39,7 +39,6 @@ export const RaffleCreate = () => {
     ...initialStaticState
   })
 
-  // const { state:  validationState, update: validationUpdate } = useStore({})
   const asyncManager = useAsyncManager()
   const history = useHistory()
   const [type, setType] = useState(RaffleType.STATIC)
