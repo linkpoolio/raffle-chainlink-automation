@@ -3,11 +3,12 @@ import { render, screen } from '@testing-library/react'
 
 import { WithdrawButton } from '../'
 
-const getProps = ({ status, address, owner, withdrawn }) => ({
+const getProps = ({ status, type, address, owner, withdrawn }) => ({
   update: () => {},
   raffle: {
     id: 1,
     status,
+    type,
     owner,
     withdrawn
   },
@@ -95,7 +96,6 @@ describe('WithdrawButton', () => {
     expect(button).toBeNull()
   })
 
-  // TODO: this test is unexpectedly failing. Could it have to do with address encoding?
   it('renders withdraw button on status == finished && address == owner && withdrawn == false && type == dynamic', () => {
     const props = getProps({
       status: 2,
