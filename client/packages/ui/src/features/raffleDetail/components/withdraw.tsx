@@ -3,14 +3,15 @@ import { Button, Text, Flex, Heading } from '@chakra-ui/react'
 
 import { withdrawLink } from '@ui/features/raffleDetail'
 
-export const Withdraw = ({ id, reset, asyncManager }) => {
-  const [success, update] = useState(false)
+export const Withdraw = ({ id, reset, asyncManager, store }) => {
+  const [success, setSuccess] = useState(false)
 
   const componentDidMount = () => {
     withdrawLink({
       id,
       asyncManager,
-      update
+      success: setSuccess,
+      update: store.update
     })
   }
   useEffect(componentDidMount, [])

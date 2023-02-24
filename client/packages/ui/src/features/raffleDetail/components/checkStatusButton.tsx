@@ -42,7 +42,8 @@ export const CheckStatusButton = (props) => {
   if (
     props.raffle?.status === RaffleStatus.FINISHED &&
     (props.raffle?.type === RaffleType.STATIC ||
-      isRaffleParticipant(props.raffle, hashedUserAddress))
+      (props.identifier &&
+        isRaffleParticipant(props.raffle, hashedUserAddress(props.identifier))))
   ) {
     return (
       <Button onClick={() => onParticipantStatusClick(props)} variant="default">

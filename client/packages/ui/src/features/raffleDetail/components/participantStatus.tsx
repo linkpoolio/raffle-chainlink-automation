@@ -29,7 +29,8 @@ const WonUnclaimed = ({ id, store, asyncManager }) => {
   const onClaim = async () => {
     const response = await claimPrize({
       id,
-      asyncManager
+      asyncManager,
+      update: store.update
     })
 
     if (response)

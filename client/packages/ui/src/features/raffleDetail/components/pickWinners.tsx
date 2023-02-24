@@ -3,14 +3,15 @@ import { Button, Text, Flex, Heading } from '@chakra-ui/react'
 
 import { pickWinners } from '@ui/features/raffleDetail'
 
-export const PickWinners = ({ id, reset, asyncManager }) => {
-  const [success, update] = useState(false)
+export const PickWinners = ({ id, reset, asyncManager, store }) => {
+  const [success, setSuccess] = useState(false)
 
   const componentDidMount = () => {
     pickWinners({
       id,
       asyncManager,
-      update
+      success: setSuccess,
+      update: store.update
     })
   }
   useEffect(componentDidMount, [])
