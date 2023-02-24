@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useCSVReader, formatFileSize } from 'react-papaparse'
 import { Flex, Text, Box } from '@chakra-ui/react'
 
-export const CSVUpload = ({ callback }) => {
+export const CSVUpload = ({ callback, isInvalid }) => {
   const { CSVReader } = useCSVReader()
   const [zoneHover, setZoneHover] = useState(false)
 
@@ -33,7 +33,11 @@ export const CSVUpload = ({ callback }) => {
             borderWidth={2}
             borderStyle="dashed"
             borderColor={
-              zoneHover || acceptedFile ? 'brand.primary' : 'brand.gray_40'
+              isInvalid
+                ? 'brand.red'
+                : zoneHover || acceptedFile
+                ? 'brand.primary'
+                : 'brand.gray_40'
             }
             borderRadius="base"
             direction="column"
