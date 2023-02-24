@@ -9,8 +9,6 @@ const onWithdrawClick = ({ update }) => update({ step: steps.WITHDRAW })
 export const WithdrawButton = ({ update, raffle, address }) => {
   const [hasPermission, setHasPermission] = useState(false)
 
-  console.log({ raffle })
-
   const checkCanWithdraw = () => {
     const validStatus =
       raffle?.status == RaffleStatus.FINISHED &&

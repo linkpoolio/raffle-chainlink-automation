@@ -1,6 +1,5 @@
 import React from 'react'
 import { Button } from '@chakra-ui/react'
-import { getAccount } from '@wagmi/core'
 
 import { steps } from '@ui/features/raffleDetail'
 import {
@@ -12,10 +11,8 @@ import {
 } from '@ui/models'
 import { ethers } from 'ethers'
 
-const hashedUserAddress = ethers.utils.solidityKeccak256(
-  ['address'],
-  [getAccount().address]
-)
+const hashedUserAddress = (identifier) =>
+  ethers.utils.solidityKeccak256(['address'], [identifier])
 
 const onParticipantStatusClick = async ({ update, raffle, identifier }) => {
   // Require user to provide unique identifier
@@ -23,8 +20,11 @@ const onParticipantStatusClick = async ({ update, raffle, identifier }) => {
     return update({ step: steps.PROVIDE_IDENTIFER })
   // Automatically use users wallet address as unique identifier
   if (raffle.type == RaffleType.DYNAMIC) {
-    const winner = isRaffleWinner(raffle, hashedUserAddress)
-    const claimedPrize = isRaffleClaimedPrize(raffle, hashedUserAddress)
+    const winner = isRaffleWinner(raffle, hashedUserAddress(identifier))
+    const claimedPrize = isRaffleClaimedPrize(
+      raffle,
+      hashedUserAddress(identifier)
+    )
 
     const participantStatus =
       winner && claimedPrize ? 'WON_CLAIMED' : winner ? 'WON_UNCLAIMED' : 'LOST'

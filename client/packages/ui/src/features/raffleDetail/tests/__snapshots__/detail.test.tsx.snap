@@ -150,7 +150,23 @@ exports[`RaffleDetail matches snapshot 1`] = `
         </p>
         <p
           className="chakra-text css-0"
-        />
+        >
+          undefined ETH
+        </p>
+      </div>
+      <div
+        className="css-z2pmpb"
+      >
+        <p
+          className="chakra-text css-0"
+        >
+          Entrance Fee
+        </p>
+        <p
+          className="chakra-text css-0"
+        >
+          undefined ETH
+        </p>
       </div>
       <div
         className="css-z2pmpb"
