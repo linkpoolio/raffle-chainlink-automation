@@ -34,7 +34,10 @@ export const FormDynamic = ({
         <Control
           label="Automation"
           helper={
-            <a href="https://automation.chain.link/" target="_blank">
+            <a
+              href="https://automation.chain.link/"
+              target="_blank"
+              rel="noreferrer">
               What is Automation?
             </a>
           }>
