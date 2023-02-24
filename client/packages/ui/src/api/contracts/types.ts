@@ -14,7 +14,7 @@ export interface EnterRaffleParams {
 export interface CreateRaffleParams {
   prizeName: string
   timeLength?: number // time length
-  fee: number
+  fee: string
   name: string
   feeToken: string
   merkleRoot?: string // merkle root bytes32 hexadicimal

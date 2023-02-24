@@ -159,7 +159,9 @@ export const RaffleDetail = ({ id }) => {
 
         <Row name="Permissioned" value={raffle?.permissioned ? 'Yes' : 'No'} />
         <Row name="Prize Name" value={raffle?.prizeName} />
-        <Row name="Prize Worth" value={raffle?.prizeWorth} />
+        {/* TODO: ADD Dynamic Token Symbol */}
+        <Row name="Prize Worth" value={raffle?.prizeWorth + ' ETH'} />
+        <Row name="Entrance Fee" value={raffle?.fee + ' ETH'} />
         <Row
           name="Contestants Number"
           value={raffle?.contestantsAddresses?.length}
