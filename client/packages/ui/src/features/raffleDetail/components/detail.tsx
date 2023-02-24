@@ -41,7 +41,8 @@ export const initialState = {
   step: null,
   identifier: null,
   participantStatus: null,
-  isParticipant: null
+  isParticipant: null,
+  claimableLink: null
 }
 
 const Row = ({ name, value }) => {
@@ -59,9 +60,12 @@ const Row = ({ name, value }) => {
 }
 
 export const RaffleDetail = ({ id }) => {
-  const store = useStore(initialState)
-  const asyncManager = useAsyncManager()
   const { address } = useAccount()
+  const store = useStore({
+    ...initialState,
+    identifier: address ? address : initialState.identifier
+  })
+  const asyncManager = useAsyncManager()
 
   const { raffle } = store.state
   const componentDidMount = () => {

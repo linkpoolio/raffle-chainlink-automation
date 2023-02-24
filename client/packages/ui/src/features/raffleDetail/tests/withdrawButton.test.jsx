@@ -25,14 +25,13 @@ const checkStatusText = 'Withdraw LINK'
 describe('WithdrawButton', () => {
   it('does not render withdraw button on status != finished', () => {
     const props = getProps({
-      status: '',
+      status: 0,
       address: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
       owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
-      withdrawn: false
+      withdrawn: false,
+      type: 0
     })
     render(getComponent(props))
-
-    // TODO: canWithdraw true
 
     const button = screen.queryByText(checkStatusText)
     expect(button).toBeNull()
@@ -40,14 +39,13 @@ describe('WithdrawButton', () => {
 
   it('does not render withdraw button on !address', () => {
     const props = getProps({
-      status: 'FINISHED',
+      status: 2,
       address: '',
       owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
-      withdrawn: false
+      withdrawn: false,
+      type: 0
     })
     render(getComponent(props))
-
-    // TODO: canWithdraw true
 
     const button = screen.queryByText(checkStatusText)
     expect(button).toBeNull()
@@ -55,25 +53,25 @@ describe('WithdrawButton', () => {
 
   it('does not render withdraw button on address != owner', () => {
     const props = getProps({
-      status: 'FINISHED',
+      status: 2,
       address: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
       owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32f',
-      withdrawn: false
+      withdrawn: false,
+      type: 0
     })
     render(getComponent(props))
-
-    // TODO: canWithdraw true
 
     const button = screen.queryByText(checkStatusText)
     expect(button).toBeNull()
   })
 
-  it('does not render withdraw button on !canWithdraw', () => {
+  it('does not render withdraw button on type != dynamic', () => {
     const props = getProps({
-      status: 'FINISHED',
+      status: 2,
       address: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
       owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
-      withdrawn: false
+      withdrawn: false,
+      type: 1
     })
     render(getComponent(props))
 
@@ -83,19 +81,32 @@ describe('WithdrawButton', () => {
     expect(button).toBeNull()
   })
 
-  // TODO: enable this test after figuring out how to mock intercept canWithdraw to true
-  // it('renders withdraw button on status = finished && address == owner && withdrawn = false && canWithdraw', () => {
-  //   const props = getProps({
-  //     status: 'FINISHED',
-  //     address: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
-  //     owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
-  //     withdrawn: false,
-  //   })
-  //   render(getComponent(props))
+  it('does not render withdraw button on withdrawn == true', () => {
+    const props = getProps({
+      status: 2,
+      address: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+      owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+      withdrawn: true,
+      type: 0
+    })
+    render(getComponent(props))
 
-  //   // TODO: canWithdraw true
+    const button = screen.queryByText(checkStatusText)
+    expect(button).toBeNull()
+  })
 
-  //   const button = screen.queryByText(checkStatusText)
-  //   expect(button).toBeTruthy()
-  // })
+  // TODO: this test is unexpectedly failing. Could it have to do with address encoding?
+  it('renders withdraw button on status == finished && address == owner && withdrawn == false && type == dynamic', () => {
+    const props = getProps({
+      status: 2,
+      address: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+      owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+      withdrawn: false,
+      type: 0
+    })
+    render(getComponent(props))
+
+    const button = screen.queryByText(checkStatusText)
+    expect(button).toBeTruthy()
+  })
 })
