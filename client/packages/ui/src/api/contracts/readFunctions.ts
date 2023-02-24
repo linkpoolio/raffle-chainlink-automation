@@ -39,7 +39,6 @@ export const getRaffle = async (id: number): Promise<RaffleInstance> => {
   }
 }
 
-// TODO: update abi
 export const getClaimableLink = async (id: number): Promise<number> => {
   try {
     const data = await readContract({

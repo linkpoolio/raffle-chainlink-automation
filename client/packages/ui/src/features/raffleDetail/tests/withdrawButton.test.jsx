@@ -76,8 +76,6 @@ describe('WithdrawButton', () => {
     })
     render(getComponent(props))
 
-    // TODO: canWithdraw false
-
     const button = screen.queryByText(checkStatusText)
     expect(button).toBeNull()
   })
