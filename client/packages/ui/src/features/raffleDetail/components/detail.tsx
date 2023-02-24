@@ -160,7 +160,11 @@ export const RaffleDetail = ({ id }) => {
             raffle.type === RaffleType.DYNAMIC && (
               <Row
                 name="Active Until"
-                value={formatFinishDate(raffle.startDate, raffle.hours)}
+                value={
+                  raffle.automation
+                    ? formatFinishDate(raffle.startDate, raffle.hours)
+                    : 'Open-Ended'
+                }
               />
             )}
 
@@ -168,10 +172,7 @@ export const RaffleDetail = ({ id }) => {
           <Row name="Prize Name" value={raffle.prizeName} />
           <Row name="Prize Worth" value={raffle.prizeWorth + ' ETH'} />
           <Row name="Entrance Fee" value={raffle.fee + ' ETH'} />
-          <Row
-            name="Contestants Number"
-            value={raffle.contestantsAddresses?.length}
-          />
+          <Row name="Contestants" value={raffle.contestantsAddresses?.length} />
           <Row name="Owner" value={raffle.owner} />
 
           {raffle.status !== RaffleStatus.RESOLVING && (

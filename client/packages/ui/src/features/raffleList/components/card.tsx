@@ -111,7 +111,9 @@ export const Card = (raffle: RaffleInstance) => {
             <Flex justify="space-between" w="100%">
               <Text fontSize={'sm'}>Active Until:</Text>
               <Text fontSize={'sm'}>
-                {formatFinishDate(raffle.startDate, raffle.hours)}
+                {raffle.automation
+                  ? formatFinishDate(raffle.startDate, raffle.hours)
+                  : 'Open-Ended'}
               </Text>
             </Flex>
           )}
