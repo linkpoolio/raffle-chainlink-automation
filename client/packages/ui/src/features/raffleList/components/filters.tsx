@@ -51,6 +51,7 @@ export const Filters = ({ store }) => {
             <option value="">All</option>
             <option value={RaffleStatus.STAGED}>Staged</option>
             <option value={RaffleStatus.LIVE}>Live</option>
+            <option value={RaffleStatus.RESOLVING}>Resolving</option>
             <option value={RaffleStatus.FINISHED}>Finished</option>
           </Select>
         </HStack>

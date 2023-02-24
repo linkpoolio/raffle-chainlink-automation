@@ -1,7 +1,5 @@
 import { contracts } from '@ui/api'
 
-// TODO: everywhere we check `isSuccess` needs updated
-
 export const getRaffleList = async ({ asyncManager, update }) => {
   try {
     asyncManager.start()

@@ -127,14 +127,20 @@ export const withdrawLink = async ({ id, asyncManager, success, update }) => {
   }
 }
 
-// TODO: need to hook this up to the contract method for checking if excess LINK is available to withdraw
-export const canWithdraw = async ({ id, update }) => {
+export const getClaimableLink = async ({ id, asyncManager, update }) => {
   try {
-    // const response: bool = await contracts.canWithdraw(id)
-    const response = true || id // TODO: remove mock response
-    update(response)
+    asyncManager.start()
+
+    const claimableLink: number = await contracts.getClaimableLink(id)
+
+    asyncManager.success()
+
+    update({ claimableLink })
     return true
   } catch (error) {
+    asyncManager.fail(
+      `Could not determine how much LINK is able to be withdrawn for raffle id \`${id}\`.`
+    )
     return false
   }
 }

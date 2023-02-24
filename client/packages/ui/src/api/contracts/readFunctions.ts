@@ -4,6 +4,7 @@ import { env } from '@ui/config'
 import {
   transformRaffleItem,
   transformRaffleList,
+  transformClaimable,
   RaffleInstance
 } from '@ui/models'
 import abi from './abi/RaffleManager.json'
@@ -35,5 +36,18 @@ export const getRaffle = async (id: number): Promise<RaffleInstance> => {
     return transformRaffleItem(data)
   } catch (error: any) {
     throw new Error(`Error fetching raffle from contract: ${error.message}`)
+  }
+}
+
+export const getClaimableLink = async (id: number): Promise<number> => {
+  try {
+    const data = await readContract({
+      ...defaultOptions,
+      functionName: 'claimableLink',
+      args: [id]
+    })
+    return transformClaimable(data)
+  } catch (error: any) {
+    throw new Error(`Error getting claimable link: ${error.message}`)
   }
 }

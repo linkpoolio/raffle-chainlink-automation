@@ -47,7 +47,7 @@ export const ProvideIdentifier = ({ store, asyncManager }) => {
       <Flex mt="2" justify="end">
         <Button
           variant="default"
-          disabled={
+          isDisabled={
             asyncManager.loading || asyncManager.pending || identifier == ''
           }
           onClick={onSubmit}>

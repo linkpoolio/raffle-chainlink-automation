@@ -90,7 +90,18 @@ export const RaffleCreate = () => {
       }
       return false
     })
-    return invalidList.length === 0
+
+    return (
+      invalidList.filter((key) => {
+        if (type == RaffleType.DYNAMIC) {
+          return !Object.keys(initialStaticState).includes(key)
+        }
+        if (type == RaffleType.STATIC) {
+          return !Object.keys(initialDynamicState).includes(key)
+        }
+        return key
+      }).length === 0
+    )
   }
 
   const onTextChange = (key) => (e) => update({ [key]: e.target.value })
@@ -196,7 +207,6 @@ export const RaffleCreate = () => {
       <Center>
         <Button
           variant="default"
-          disabled={asyncManager.loading || asyncManager.pending}
           onClick={onSubmit}
           isLoading={asyncManager.loading || asyncManager.pending}
           loadingText={

@@ -9,7 +9,7 @@ export const transformRaffleItem = (raffle): RaffleInstance => {
       type: raffle.base.raffleType,
       status: raffle.raffleState,
       owner: raffle.owner,
-      startDate: raffle.base.startDate.toString(), // consider converting unix timestamp to new date format
+      startDate: raffle.base.startDate.toString(),
       hours: raffle.timeLength.toString() / 60 / 60,
       entriesPerUser: raffle.base.entriesPerUser,
       totalWinners: raffle.base.totalWinners,
@@ -37,3 +37,6 @@ export const transformRaffleList = (raffleList): RaffleInstance[] => {
     return transformRaffleItem(raffleInstance)
   })
 }
+
+export const transformClaimable = (data): number =>
+  parseFloat(ethers.utils.formatEther(data?._hex))
