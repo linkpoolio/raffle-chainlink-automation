@@ -57,6 +57,7 @@ export const RaffleCreate = () => {
   useEffect(componentDidUnmount, [])
 
   const onTypeChange = (e) => {
+    resetFormValidation()
     if (e.target.value == RaffleType.STATIC) {
       setType(RaffleType.STATIC)
       update({
@@ -73,8 +74,12 @@ export const RaffleCreate = () => {
     }
   }
 
-  const isFormValid = () => {
+  const resetFormValidation = () => {
     setValidation({})
+  }
+
+  const isFormValid = () => {
+    resetFormValidation()
     const invalidList = Object.keys(state).filter((name) => {
       if (
         (Array.isArray(state[name]) && state[name].length === 0) ||
