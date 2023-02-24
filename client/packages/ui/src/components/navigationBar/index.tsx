@@ -1,16 +1,9 @@
 import React from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import { useAccount } from 'wagmi'
-import {
-  Heading,
-  Box,
-  Container,
-  Flex,
-  Link,
-  Circle,
-  Button
-} from '@chakra-ui/react'
+import { Heading, Box, Container, Flex, Link, Button } from '@chakra-ui/react'
 
+import { FairChance } from '@ui/components'
 import { Routes } from '@ui/Routes'
 import { Wallet } from '@ui/features/wallet'
 
@@ -30,15 +23,15 @@ export const NavigationBar = () => {
             display="flex"
             alignItems="center"
             gap="3">
-            <Circle size="18px" bg="brand.primary" color="white"></Circle>
+            <FairChance width="32px" height="32px" />
             <Heading
               display={{ base: 'none', md: 'inline' }}
               as="h1"
               size="md"
               color="brand.primary"
               fontSize="lg"
-              fontWeight="700">
-              Chainlink Raffles
+              fontWeight="800">
+              Fair Chance
             </Heading>
           </Link>
           <Flex alignItems="center" justifyContent="space-between" flex="1">

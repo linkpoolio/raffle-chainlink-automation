@@ -24,7 +24,6 @@ export const FormStatic = ({ update }) => {
         label="Participants"
         helper={
           <>
-            {' '}
             <button>Click here to download</button> CSV file example
           </>
         }>

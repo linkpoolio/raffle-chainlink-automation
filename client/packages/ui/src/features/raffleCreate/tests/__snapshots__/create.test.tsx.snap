@@ -243,7 +243,6 @@ exports[`RaffleCreate matches snapshot 1`] = `
             className="chakra-form__helper-text css-1w3rar9"
             id="field-:r4:-helptext"
           >
-             
             <button>
               Click here to download
             </button>
