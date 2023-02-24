@@ -62,7 +62,7 @@ export const pickWinners = async ({ id, asyncManager, update }) => {
      * The risk of a high fixed amount is offset both by (a) initial deployment is on eth goerli
      * and (b) the owner can withdraw excess link amount after the raffle has been resolved.
      */
-    const value = BigNumber.from('500000000000000000') // 0.5 LINK
+    const value = BigNumber.from('1000000000000000000') // 1 LINK
     asyncManager.start()
     const payload: contracts.ResolveRaffleParams = { id, value }
     const { wait } = await contracts.resolveRaffle(payload)

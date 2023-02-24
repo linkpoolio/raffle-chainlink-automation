@@ -3,6 +3,7 @@ import { Button, Text, Flex, Heading } from '@chakra-ui/react'
 
 import { participantStatus, claimPrize } from '@ui/features/raffleDetail'
 import { RaffleType } from '@ui/models'
+import { Fireworks } from '@fireworks-js/react'
 
 const Close = ({ reset }) => (
   <Flex mt="2" justify="end">
@@ -42,6 +43,18 @@ const WonUnclaimed = ({ id, store, asyncManager }) => {
       <Heading size="md" mb="6">
         Did I win?
       </Heading>
+      <Fireworks
+        options={{ opacity: 1 }}
+        style={{
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          position: 'fixed',
+          background: 'transparent',
+          zIndex: -1
+        }}
+      />
       <Text>You won!</Text>
       <Flex mt="2" justify="end">
         <Button
