@@ -25,7 +25,7 @@ export const Join = ({ id, store, reset, asyncManager }) => {
         </Heading>
         <Text>Successfully joined raffle id `{id}`.</Text>
         <Flex mt="2" justify="end">
-          <Button variant="default" onClick={reset}>
+          <Button variant="default" onClick={() => reset(store)}>
             Close
           </Button>
         </Flex>

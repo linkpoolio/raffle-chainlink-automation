@@ -24,7 +24,7 @@ export const PickWinners = ({ id, reset, asyncManager, store }) => {
         </Heading>
         <Text>Successfully picked winners for raffle id `{id}`.</Text>
         <Flex mt="2" justify="end">
-          <Button variant="default" onClick={reset}>
+          <Button variant="default" onClick={() => reset(store)}>
             Close
           </Button>
         </Flex>
