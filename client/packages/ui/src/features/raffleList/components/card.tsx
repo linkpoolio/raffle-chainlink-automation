@@ -25,6 +25,7 @@ import { formatUnixTs, formatFinishDate } from '@ui/utils'
 export const Card = (raffle: RaffleInstance) => {
   return (
     <Flex
+      data-testid="raffle-card"
       sx={{
         transform:
           'translate3d(0px, 0px, 0px) scale3d(1, 1, 1) rotateX(0deg) rotateY(0deg) rotateZ(0deg) skew(0deg)',
@@ -127,5 +128,3 @@ export const Card = (raffle: RaffleInstance) => {
     </Flex>
   )
 }
-
-// startDate

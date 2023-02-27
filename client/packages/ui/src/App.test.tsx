@@ -18,13 +18,13 @@ const getComponent = () => {
 }
 
 describe('App', () => {
-  it('renders the App.', () => {
+  it('renders the App.', async () => {
     const container = document.createElement('div')
     document.body.appendChild(container)
 
     const root = createRoot(container)
 
-    act(() => root.render(getComponent()))
+    await act(() => root.render(getComponent()))
 
     expect(document.body.textContent).toBeTruthy()
   })
