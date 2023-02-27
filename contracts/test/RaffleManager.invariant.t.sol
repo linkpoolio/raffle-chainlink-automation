@@ -7,9 +7,12 @@ import "@src/RaffleManager.sol";
 import {ERC20Mock} from "@src/mock/ERC20Mock.sol";
 import {ERC677Mock} from "@src/mock/ERC677Mock.sol";
 import {VRFV2WrapperMock} from "@src/mock/VRFV2WrapperMock.sol";
+import {Handler} from "./handlers/Handler.sol";
+import {UD60x18, ud, intoUint256} from "@prb/math/UD60x18.sol";
 
 contract RaffleManagerInvariants is Test {
     RaffleManager raffleManager;
+    Handler handler;
     ERC20Mock customToken;
     VRFV2WrapperMock vrfMock;
     address wrapperAddress;
@@ -42,6 +45,7 @@ contract RaffleManagerInvariants is Test {
         user3 = makeAddr("user3");
         user4 = makeAddr("user4");
         user5 = makeAddr("user5");
+        customLINK = new ERC677Mock("Chainlink", "LINK", 1000000 ether);
         wrapperAddress = address(0x1);
         requestConfirmations = 3;
         callbackGasLimit = 100000;
@@ -63,11 +67,69 @@ contract RaffleManagerInvariants is Test {
             keeperAddress,
             address(customLINK)
         );
+
+        // handler now acts as entry point for invariant tests
+        handler = new Handler(raffleManager, address(customLINK));
+        bytes4[] memory selectors = new bytes4[](3);
+        selectors[0] = Handler.enterRaffle.selector;
+        selectors[1] = Handler.createRaffle.selector;
+        selectors[2] = Handler.transferAndCall.selector;
+
+        targetSelector(FuzzSelector({addr: address(handler), selectors: selectors}));
+        targetContract(address(handler));
+
         vm.stopPrank();
+        // successFixtureWithETH();
     }
 
-    function invariant_A() external {
-        (uint32 gas,,) = raffleManager.requestConfig();
-        assertEq(gas, 100000);
+    function successFixtureWithETH() public {
+        vm.prank(raffleAdmin);
+        raffleManager.createRaffle({
+            prizeName: "BigMac",
+            timeLength: 0,
+            fee: 1 ether,
+            name: "Big Mac Contest",
+            feeToken: address(0),
+            merkleRoot: bytes32(""),
+            automation: false,
+            participants: new bytes32[](0),
+            totalWinners: 1,
+            entriesPerUser: 5
+        });
+    }
+
+    function successFixture() public {
+        vm.prank(raffleAdmin);
+        raffleManager.createRaffle({
+            prizeName: "BigMac",
+            timeLength: 30,
+            fee: 0,
+            name: "Big Mac Contest",
+            feeToken: address(0),
+            merkleRoot: bytes32(""),
+            automation: false,
+            participants: new bytes32[](0),
+            totalWinners: 1,
+            entriesPerUser: 100
+        });
+    }
+
+    function invariant_enterRaffle_checkEthToEntries() public {
+        for (uint256 i = 0; i < handler.ghost_totalRaffles(); i++) {
+            assertEq(intoUint256(raffleManager.getRaffle(i).prizeWorth), (handler.totalEntries(i) * 1 ether));
+        }
+    }
+
+    function invariant_transferAndCall_checkLINKBalanceMatches() public {
+        for (uint256 i = 0; i < handler.ghost_totalLinkTransfered(); i++) {
+            assertEq(raffleManager.getRaffle(handler.linkArray(i)).requestStatus.totalLink, 1 ether);
+        }
+    }
+
+    /**
+     * @notice Used to log different state variables during invariant testing
+     */
+    function invariant_callSummary() public view {
+        handler.callSummary();
     }
 }

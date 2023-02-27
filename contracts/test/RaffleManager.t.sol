@@ -241,7 +241,7 @@ contract RaffleManagerTest is Test {
             automation: false,
             participants: new bytes32[](0),
             totalWinners: 1,
-            entriesPerUser: 1
+            entriesPerUser: 100
         });
     }
 
@@ -367,6 +367,14 @@ contract RaffleManagerTest is Test {
         vm.deal(user1, 1 ether);
         vm.startPrank(user1);
         raffleManager.enterRaffle{value: 1 ether}(0, 1, new bytes32[](0));
+        vm.stopPrank();
+    }
+
+    function test_enterRaffle_GasToken100Entries() public {
+        gasTokenRaffleFixture();
+        vm.deal(user1, 100 ether);
+        vm.startPrank(user1);
+        raffleManager.enterRaffle{value: 100 ether}(0, 100, new bytes32[](0));
         vm.stopPrank();
     }
 

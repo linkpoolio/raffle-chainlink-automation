@@ -300,7 +300,8 @@ contract RaffleManager is
             // gas token transfer
             raffles[raffleId].prize.claimedPrizes.push(_claimer);
             emit RafflePrizeClaimed(raffleId, msg.sender, _total);
-            payable(msg.sender).transfer(_total);
+            (bool success,) = msg.sender.call{value: _total}("");
+            require(success, "Transfer failed.");
         }
     }
 
