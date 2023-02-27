@@ -8,3 +8,12 @@ fs_permissions = [{ access = "read", path = "./"}]
 mainnet = "${MAINNET_RPC_URL}"
 goerli = "${GOERLI_RPC_URL}"
 local = "${LOCAL_RPC_URL}"
+
+[invariant]
+runs = 500
+depth = 75
+fail_on_revert = false
+call_override = false
+dictionary_weight = 80
+include_storage = true
+include_push_bytes = true
