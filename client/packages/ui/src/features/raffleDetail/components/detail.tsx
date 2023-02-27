@@ -8,7 +8,8 @@ import {
   Box,
   Flex,
   HStack,
-  Divider
+  Divider,
+  useMediaQuery
 } from '@chakra-ui/react'
 
 import {
@@ -35,7 +36,7 @@ import {
   PickWinnersButton,
   WithdrawButton
 } from '@ui/features/raffleDetail'
-import { formatUnixTs, formatFinishDate } from '@ui/utils'
+import { formatUnixTs, formatFinishDate, shortenAddress } from '@ui/utils'
 
 export const initialState = {
   raffle: null,
@@ -61,6 +62,7 @@ const Row = ({ name, value }) => {
 }
 
 export const RaffleDetail = ({ id }) => {
+  const [isLargerThanMd] = useMediaQuery('(min-width: 48em)')
   const { address } = useAccount()
   const store = useStore({
     ...initialState,
@@ -173,7 +175,10 @@ export const RaffleDetail = ({ id }) => {
           <Row name="Prize Worth" value={raffle.prizeWorth + ' ETH'} />
           <Row name="Entrance Fee" value={raffle.fee + ' ETH'} />
           <Row name="Contestants" value={raffle.contestantsAddresses?.length} />
-          <Row name="Owner" value={raffle.owner} />
+          <Row
+            name="Owner"
+            value={isLargerThanMd ? raffle.owner : shortenAddress(raffle.owner)}
+          />
 
           {raffle.status !== RaffleStatus.RESOLVING && (
             <Center>
