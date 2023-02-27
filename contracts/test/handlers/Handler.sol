@@ -36,7 +36,6 @@ contract Handler is Test {
     struct Raffle {
         uint256 id;
         bool live;
-        bool called;
     }
 
     modifier createActor() {
@@ -91,17 +90,14 @@ contract Handler is Test {
                 totalWinners: totalWinners,
                 entriesPerUser: uint8(_entries)
             });
-            raffles[currentRaffleAdmin] = Raffle(raffleManager.raffleCounter() - 1, true, false);
+            raffles[currentRaffleAdmin] = Raffle(raffleManager.raffleCounter() - 1, true);
             ghost_totalRaffles++;
         }
     }
 
     function transferAndCall(uint256 seed) public countCall("transferLINK") {
         address caller = _raffleAdmins.rand(seed);
-        if (
-            !raffles[caller].called && raffleManager.getRaffle(raffles[caller].id).contestants.length > 0
-                && !_raffleAdmins.depositLink[caller]
-        ) {
+        if (raffleManager.getRaffle(raffles[caller].id).contestants.length > 0 && !_raffleAdmins.depositLink[caller]) {
             address admin = makeAddr("admin");
             vm.prank(admin);
             LinkTokenInterface(linkAddress).transfer(caller, 1 ether);
@@ -113,7 +109,6 @@ contract Handler is Test {
             _raffleAdmins.depositLink[caller] = true;
             linkArray.push(raffles[caller].id);
             ghost_totalLinkTransfered++;
-            raffles[caller].called = true;
         }
     }
 

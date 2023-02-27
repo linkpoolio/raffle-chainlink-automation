@@ -484,8 +484,10 @@ contract RaffleManagerTest is Test {
         vm.prank(raffleAdmin);
         vrfMock.fulfillRandomWords(1, address(raffleManager));
 
+        assertEq(user1.balance, 0 ether);
         vm.prank(user1);
         raffleManager.claimPrize(0);
+        assertEq(user1.balance, 1 ether);
     }
 
     function test_claimPrize_successCustomToken() public {
