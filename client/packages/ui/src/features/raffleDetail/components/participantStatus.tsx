@@ -5,22 +5,22 @@ import { participantStatus, claimPrize } from '@ui/features/raffleDetail'
 import { RaffleType } from '@ui/models'
 import { Fireworks } from '@fireworks-js/react'
 
-const Close = ({ reset }) => (
+const Close = ({ reset, store }) => (
   <Flex mt="2" justify="end">
-    <Button variant="default" onClick={reset}>
+    <Button variant="default" onClick={() => reset(store)}>
       Close
     </Button>
   </Flex>
 )
 
-const Lost = ({ reset }) => {
+const Lost = ({ reset, store }) => {
   return (
     <>
       <Heading size="md" mb="6">
         Did I win?
       </Heading>
       <Text>Sorry, no luck this time! Try again soon.</Text>
-      <Close reset={reset} />
+      <Close reset={reset} store={store} />
     </>
   )
 }
@@ -33,10 +33,12 @@ const WonUnclaimed = ({ id, store, asyncManager }) => {
       update: store.update
     })
 
-    if (response)
+    if (response?.raffle) {
       store.update({
-        participantStatus: participantStatus.WON_CLAIMED
+        participantStatus: participantStatus.WON_CLAIMED,
+        raffle: response.raffle
       })
+    }
   }
 
   return (
@@ -90,7 +92,7 @@ const WonClaimed = ({ store, reset }) => {
         {store.state.raffle.type == RaffleType.DYNAMIC &&
           ` (and you successfully claimed your prize)`}
       </Text>
-      <Close reset={reset} />
+      <Close reset={reset} store={store} />
     </>
   )
 }

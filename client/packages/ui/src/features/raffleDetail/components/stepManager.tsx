@@ -32,10 +32,10 @@ export const StepManager = ({ id, store }) => {
   const asyncManager = useAsyncManager()
   const { step } = store.state
 
-  const reset = () => store.update({ step: null })
+  const reset = (_store) => _store.update({ step: null })
 
   return (
-    <Modal onClose={reset} isOpen={!!step}>
+    <Modal onClose={() => reset(store)} isOpen={!!step}>
       <Loading asyncManager={asyncManager} />
       <Pending asyncManager={asyncManager} />
       <Error asyncManager={asyncManager} />

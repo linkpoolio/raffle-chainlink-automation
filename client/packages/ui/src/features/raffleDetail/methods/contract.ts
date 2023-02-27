@@ -2,7 +2,10 @@ import { BigNumber } from 'ethers'
 
 import { contracts } from '@ui/api'
 
-export const getRaffle = async ({ id, asyncManager, update }) => {
+export const getRaffle = async (
+  { id, asyncManager, update },
+  returnRaffle = false
+) => {
   try {
     asyncManager.start()
 
@@ -10,9 +13,14 @@ export const getRaffle = async ({ id, asyncManager, update }) => {
 
     asyncManager.success()
 
+    if (returnRaffle) return raffle
+
     update({ raffle })
+    return true
   } catch (error) {
     asyncManager.fail(`Could not get raffle id \`${id}\``)
+    if (returnRaffle) return null
+    return false
   }
 }
 
@@ -30,12 +38,12 @@ export const claimPrize = async ({ id, asyncManager, update }) => {
 
     asyncManager.success()
 
-    await getRaffle({ id, asyncManager, update })
+    const raffle = await getRaffle({ id, asyncManager, update }, true)
 
-    return true
+    return { raffle }
   } catch (error) {
     asyncManager.fail(`Could not claim prize on raffle id \`${id}\``)
-    return false
+    return {}
   }
 }
 

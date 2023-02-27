@@ -52,7 +52,7 @@ export const Withdraw = ({ id, reset, asyncManager, store }) => {
         <>
           <Text>You successfully withdrew {claimableLink} LINK.</Text>
           <Flex mt="2" justify="end">
-            <Button variant="default" onClick={reset}>
+            <Button variant="default" onClick={() => reset(store)}>
               Close
             </Button>
           </Flex>
