@@ -120,7 +120,7 @@ contract VRFV2WrapperMock is VRFCoordinatorV2Interface {
 
         VRFConsumerBaseV2 v;
         bytes memory callReq = abi.encodeWithSelector(v.rawFulfillRandomWords.selector, _requestId, _words);
-        (bool success,) = _consumer.call{gas: 200000}(callReq);
+        (bool success,) = _consumer.call{gas: 100_000}(callReq);
 
         // uint96 payment = uint96(BASE_FEE + ((startGas - gasleft()) * GAS_PRICE_LINK));
         // if (s_subscriptions[req.subId].balance < payment) {

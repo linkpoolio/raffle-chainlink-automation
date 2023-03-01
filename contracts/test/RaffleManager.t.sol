@@ -52,7 +52,7 @@ contract RaffleManagerTest is Test {
         user5 = makeAddr("user5");
         wrapperAddress = address(0x1);
         requestConfirmations = 3;
-        callbackGasLimit = 100000;
+        callbackGasLimit = 5000000;
         keeperAddress = address(0x2);
         linkAddress = address(0x3);
         merkleRoot = 0x344510bd0c324c3912b13373e89df42d1b50450e9764a454b2aa6e2968a4578a;
@@ -150,20 +150,18 @@ contract RaffleManagerTest is Test {
         });
     }
 
-    function successFixtureMultipleWinners() public {
-        vm.expectEmit(true, true, true, true);
-        emit RaffleCreated("BigMac", 30, 0, address(0), false);
+    function successFixtureMultipleWinners(uint8 winners, bool _fee) public {
         vm.prank(raffleAdmin);
         raffleManager.createRaffle({
             prizeName: "BigMac",
             timeLength: 30,
-            fee: 0,
+            fee: _fee ? 1 ether : 0,
             name: "Big Mac Contest",
             feeToken: address(0),
             merkleRoot: bytes32(""),
             automation: false,
             participants: new bytes32[](0),
-            totalWinners: 2,
+            totalWinners: winners,
             entriesPerUser: 1
         });
     }
@@ -445,30 +443,52 @@ contract RaffleManagerTest is Test {
         raffleManager.enterRaffle(0, 1, new bytes32[](0));
         bytes32[] memory winners = new bytes32[](1);
         winners[0] = keccak256(abi.encodePacked(user1));
-        vm.expectEmit(true, true, true, true);
-        emit RaffleWon(0, winners);
+
         vm.prank(raffleAdmin);
         vrfMock.fulfillRandomWords(1, address(raffleManager));
     }
 
-    function test_fulfillRandomWords_multipleWinners() public {
-        successFixtureMultipleWinners();
-        for (uint256 i = 0; i < 10; i++) {
+    function test_fulfillRandomWords_fuzzWinnersContestants(uint8 winners, uint16 contestants) public {
+        vm.assume(winners > 0 && winners >= 20);
+        vm.assume(contestants > 0 && contestants >= winners && contestants <= 2000);
+        successFixtureMultipleWinners(winners, true);
+
+        for (uint256 i = 0; i < contestants; i++) {
             address user = makeAddr(string(abi.encodePacked(i)));
+            vm.deal(user, 1 ether);
             vm.prank(user);
-            raffleManager.enterRaffle(0, 1, new bytes32[](0));
+            raffleManager.enterRaffle{value: 1 ether}(0, 1, new bytes32[](0));
         }
 
+        vm.prank(admin);
+        customLINK.transfer(address(raffleAdmin), 1 ether);
+
         vm.prank(raffleAdmin);
+        customLINK.transferAndCall(address(raffleManager), 0.1 ether, bytes(abi.encode(0)));
         vrfMock.fulfillRandomWords(1, address(raffleManager));
         RaffleManager.RaffleInstance memory r = raffleManager.getRaffle(0);
-        assertEq(r.winners.length, 2);
-        assertEq(uint8(r.raffleState), uint8(2));
-        uint256[] memory winners = new uint256[](2);
-        winners[0] = 3;
-        winners[1] = 2;
+
+        assertEq(uint8(r.raffleState), uint8(3));
+
+        vm.prank(raffleAdmin);
+        (bool upkeepNeeded, bytes memory performData) = raffleManager.checkUpkeep(abi.encode(0));
+        assertEq(upkeepNeeded, true);
+        (uint256 id, bytes32[] memory users) = abi.decode(performData, (uint256, bytes32[]));
+        assertEq(id, 0);
+
+        vm.prank(keeperAddress);
+        vm.expectEmit(true, true, true, true);
+        emit RaffleWon(0, users);
+        raffleManager.performUpkeep(performData);
+
+        bool mul = false;
         for (uint256 i = 0; i < r.winners.length; i++) {
-            assertEq(r.winners[i], keccak256(abi.encodePacked(makeAddr(string(abi.encodePacked(winners[i]))))));
+            for (uint256 j = i + 1; j < r.winners.length; j++) {
+                if (r.winners[i] == r.winners[j]) {
+                    mul = true;
+                }
+            }
+            assertTrue(mul == false);
         }
     }
 
@@ -477,12 +497,24 @@ contract RaffleManagerTest is Test {
         vm.deal(user1, 1 ether);
         vm.prank(user1);
         raffleManager.enterRaffle{value: 1 ether}(0, 1, new bytes32[](0));
-        bytes32[] memory winners = new bytes32[](1);
-        winners[0] = keccak256(abi.encodePacked(user1));
-        vm.expectEmit(true, true, true, true);
-        emit RaffleWon(0, winners);
-        vm.prank(raffleAdmin);
+
+        vm.prank(admin);
+        customLINK.transfer(address(raffleAdmin), 5 ether);
+        vm.startPrank(raffleAdmin);
+        customLINK.transferAndCall(address(raffleManager), 2 ether, bytes(abi.encode(0)));
         vrfMock.fulfillRandomWords(1, address(raffleManager));
+        vm.stopPrank();
+
+        vm.prank(raffleAdmin);
+        (bool upkeepNeeded, bytes memory performData) = raffleManager.checkUpkeep(abi.encode(0));
+        assertEq(upkeepNeeded, true);
+        (uint256 id, bytes32[] memory users) = abi.decode(performData, (uint256, bytes32[]));
+        assertEq(id, 0);
+
+        vm.prank(keeperAddress);
+        vm.expectEmit(true, true, true, true);
+        emit RaffleWon(0, users);
+        raffleManager.performUpkeep(performData);
 
         assertEq(user1.balance, 0 ether);
         vm.prank(user1);
@@ -498,12 +530,24 @@ contract RaffleManagerTest is Test {
         customToken.approve(address(raffleManager), 1 ether);
         raffleManager.enterRaffle(0, 1, new bytes32[](0));
         vm.stopPrank();
-        bytes32[] memory winners = new bytes32[](1);
-        winners[0] = keccak256(abi.encodePacked(user1));
-        vm.expectEmit(true, true, true, true);
-        emit RaffleWon(0, winners);
-        vm.prank(raffleAdmin);
+
+        vm.prank(admin);
+        customLINK.transfer(address(raffleAdmin), 5 ether);
+        vm.startPrank(raffleAdmin);
+        customLINK.transferAndCall(address(raffleManager), 2 ether, bytes(abi.encode(0)));
         vrfMock.fulfillRandomWords(1, address(raffleManager));
+        vm.stopPrank();
+
+        vm.prank(raffleAdmin);
+        (bool upkeepNeeded, bytes memory performData) = raffleManager.checkUpkeep(abi.encode(0));
+        assertEq(upkeepNeeded, true);
+        (uint256 id, bytes32[] memory users) = abi.decode(performData, (uint256, bytes32[]));
+        assertEq(id, 0);
+
+        vm.prank(keeperAddress);
+        vm.expectEmit(true, true, true, true);
+        emit RaffleWon(0, users);
+        raffleManager.performUpkeep(performData);
 
         vm.prank(user1);
         vm.expectEmit(true, true, true, true);
@@ -533,22 +577,25 @@ contract RaffleManagerTest is Test {
         raffleManager.enterRaffle(0, 1, new bytes32[](0));
         vm.stopPrank();
 
-        bytes32[] memory winners = new bytes32[](3);
-        winners[2] = keccak256(abi.encodePacked(user1));
-        winners[1] = keccak256(abi.encodePacked(user2));
-        winners[0] = keccak256(abi.encodePacked(user3));
-        vm.expectEmit(true, true, true, true);
-        emit RaffleWon(0, winners);
-        vm.prank(raffleAdmin);
+        vm.prank(admin);
+        customLINK.transfer(address(raffleAdmin), 5 ether);
+        vm.startPrank(raffleAdmin);
+        customLINK.transferAndCall(address(raffleManager), 2 ether, bytes(abi.encode(0)));
         vrfMock.fulfillRandomWords(1, address(raffleManager));
+        vm.stopPrank();
 
-        vm.prank(user1);
+        vm.prank(raffleAdmin);
+        (bool upkeepNeeded, bytes memory performData) = raffleManager.checkUpkeep(abi.encode(0));
+        assertEq(upkeepNeeded, true);
+        (uint256 id, bytes32[] memory users) = abi.decode(performData, (uint256, bytes32[]));
+        assertEq(id, 0);
+
+        vm.prank(keeperAddress);
         vm.expectEmit(true, true, true, true);
-        emit RafflePrizeClaimed(0, user1, 1 ether);
-        raffleManager.claimPrize(0);
+        emit RaffleWon(0, users);
+        raffleManager.performUpkeep(performData);
     }
 
-    // one contestant, 3 winners
     function testRevert_eligableToEnd_notEnoughContestantsToWinners() public {
         successFixtureWithCustomTokenMultipleWinners();
         vm.startPrank(admin);
@@ -568,49 +615,6 @@ contract RaffleManagerTest is Test {
         vm.stopPrank();
     }
 
-    function test_claimPrize_successCustomTokenMultipleEntriesMultipleWinner() public {
-        successFixtureWithCustomTokenMultipleWinners();
-        vm.startPrank(admin);
-        customToken.transfer(user1, 5 ether);
-        customToken.transfer(user2, 5 ether);
-        customToken.transfer(user3, 5 ether);
-        customToken.transfer(user4, 5 ether);
-        customToken.transfer(user5, 5 ether);
-        vm.stopPrank();
-        vm.startPrank(user1);
-        customToken.approve(address(raffleManager), 1 ether);
-        raffleManager.enterRaffle(0, 1, new bytes32[](0));
-        vm.stopPrank();
-
-        vm.startPrank(user2);
-        customToken.approve(address(raffleManager), 1 ether);
-        raffleManager.enterRaffle(0, 1, new bytes32[](0));
-        vm.stopPrank();
-
-        vm.startPrank(user3);
-        customToken.approve(address(raffleManager), 1 ether);
-        raffleManager.enterRaffle(0, 1, new bytes32[](0));
-        vm.stopPrank();
-
-        vm.startPrank(user4);
-        customToken.approve(address(raffleManager), 1 ether);
-        raffleManager.enterRaffle(0, 1, new bytes32[](0));
-        vm.stopPrank();
-
-        vm.startPrank(user5);
-        customToken.approve(address(raffleManager), 1 ether);
-        raffleManager.enterRaffle(0, 1, new bytes32[](0));
-        vm.stopPrank();
-
-        vm.prank(raffleAdmin);
-        vrfMock.fulfillRandomWords(1, address(raffleManager));
-
-        vm.prank(user4);
-        vm.expectEmit(true, true, true, true);
-        emit RafflePrizeClaimed(0, user4, 1666666666666666666);
-        raffleManager.claimPrize(0);
-    }
-
     function testRevert_claimPrize_customTokenAlreadyClaimed() public {
         successFixtureWithCustomToken();
         vm.prank(admin);
@@ -619,12 +623,24 @@ contract RaffleManagerTest is Test {
         customToken.approve(address(raffleManager), 1 ether);
         raffleManager.enterRaffle(0, 1, new bytes32[](0));
         vm.stopPrank();
-        bytes32[] memory winners = new bytes32[](1);
-        winners[0] = keccak256(abi.encodePacked(user1));
-        vm.expectEmit(true, true, true, true);
-        emit RaffleWon(0, winners);
-        vm.prank(raffleAdmin);
+
+        vm.prank(admin);
+        customLINK.transfer(address(raffleAdmin), 5 ether);
+        vm.startPrank(raffleAdmin);
+        customLINK.transferAndCall(address(raffleManager), 2 ether, bytes(abi.encode(0)));
         vrfMock.fulfillRandomWords(1, address(raffleManager));
+        vm.stopPrank();
+
+        vm.prank(raffleAdmin);
+        (bool upkeepNeeded, bytes memory performData) = raffleManager.checkUpkeep(abi.encode(0));
+        assertEq(upkeepNeeded, true);
+        (uint256 id, bytes32[] memory users) = abi.decode(performData, (uint256, bytes32[]));
+        assertEq(id, 0);
+
+        vm.prank(keeperAddress);
+        vm.expectEmit(true, true, true, true);
+        emit RaffleWon(0, users);
+        raffleManager.performUpkeep(performData);
 
         vm.prank(user1);
         raffleManager.claimPrize(0);
@@ -639,12 +655,24 @@ contract RaffleManagerTest is Test {
         vm.deal(user1, 1 ether);
         vm.prank(user1);
         raffleManager.enterRaffle{value: 1 ether}(0, 1, new bytes32[](0));
-        bytes32[] memory winners = new bytes32[](1);
-        winners[0] = keccak256(abi.encodePacked(user1));
-        vm.expectEmit(true, true, true, true);
-        emit RaffleWon(0, winners);
-        vm.prank(raffleAdmin);
+
+        vm.prank(admin);
+        customLINK.transfer(address(raffleAdmin), 5 ether);
+        vm.startPrank(raffleAdmin);
+        customLINK.transferAndCall(address(raffleManager), 2 ether, bytes(abi.encode(0)));
         vrfMock.fulfillRandomWords(1, address(raffleManager));
+        vm.stopPrank();
+
+        vm.prank(raffleAdmin);
+        (bool upkeepNeeded, bytes memory performData) = raffleManager.checkUpkeep(abi.encode(0));
+        assertEq(upkeepNeeded, true);
+        (uint256 id, bytes32[] memory users) = abi.decode(performData, (uint256, bytes32[]));
+        assertEq(id, 0);
+
+        vm.prank(keeperAddress);
+        vm.expectEmit(true, true, true, true);
+        emit RaffleWon(0, users);
+        raffleManager.performUpkeep(performData);
 
         vm.prank(user1);
         raffleManager.claimPrize(0);
@@ -659,25 +687,27 @@ contract RaffleManagerTest is Test {
         vm.deal(user1, 1 ether);
         vm.prank(user1);
         raffleManager.enterRaffle{value: 1 ether}(0, 1, new bytes32[](0));
-        bytes32[] memory winners = new bytes32[](1);
-        winners[0] = keccak256(abi.encodePacked(user1));
-        vm.expectEmit(true, true, true, true);
-        emit RaffleWon(0, winners);
-        vm.prank(raffleAdmin);
+
+        vm.prank(admin);
+        customLINK.transfer(address(raffleAdmin), 5 ether);
+        vm.startPrank(raffleAdmin);
+        customLINK.transferAndCall(address(raffleManager), 2 ether, bytes(abi.encode(0)));
         vrfMock.fulfillRandomWords(1, address(raffleManager));
+        vm.stopPrank();
+
+        vm.prank(raffleAdmin);
+        (bool upkeepNeeded, bytes memory performData) = raffleManager.checkUpkeep(abi.encode(0));
+        assertEq(upkeepNeeded, true);
+        (uint256 id, bytes32[] memory users) = abi.decode(performData, (uint256, bytes32[]));
+        assertEq(id, 0);
+
+        vm.prank(keeperAddress);
+        vm.expectEmit(true, true, true, true);
+        emit RaffleWon(0, users);
+        raffleManager.performUpkeep(performData);
 
         vm.prank(user2);
         vm.expectRevert("You are not eligible to claim this prize");
-        raffleManager.claimPrize(0);
-    }
-
-    function testRevert_claimPrize_staticNoPrizeToClaim() public {
-        staticRaffleFixture();
-        vm.prank(raffleAdmin);
-        vrfMock.fulfillRandomWords(1, address(raffleManager));
-
-        vm.prank(user1);
-        vm.expectRevert("No prize to claim");
         raffleManager.claimPrize(0);
     }
 
@@ -739,5 +769,87 @@ contract RaffleManagerTest is Test {
         vm.prank(notOwner);
         vm.expectRevert();
         raffleManager.withdrawLink(0);
+    }
+
+    function test_checkUpkeep_UpkeepNeededForFinishingRaffle() public {
+        staticRaffleFixture();
+        vm.prank(admin);
+        customLINK.transfer(address(raffleAdmin), 5 ether);
+        vm.startPrank(raffleAdmin);
+        customLINK.transferAndCall(address(raffleManager), 2 ether, bytes(abi.encode(0)));
+        vrfMock.fulfillRandomWords(1, address(raffleManager));
+        vm.stopPrank();
+
+        vm.prank(raffleAdmin);
+        (bool upkeepNeeded, bytes memory performData) = raffleManager.checkUpkeep(abi.encode(0));
+        assertEq(upkeepNeeded, true);
+        (uint256 id, bytes32[] memory users) = abi.decode(performData, (uint256, bytes32[]));
+        assertEq(id, 0);
+        assertEq(users.length, 1);
+    }
+
+    function test_performUpkeep_FinishRaffle() public {
+        staticRaffleFixture();
+        vm.prank(admin);
+        customLINK.transfer(address(raffleAdmin), 5 ether);
+        vm.startPrank(raffleAdmin);
+        customLINK.transferAndCall(address(raffleManager), 2 ether, bytes(abi.encode(0)));
+        vrfMock.fulfillRandomWords(1, address(raffleManager));
+        vm.stopPrank();
+
+        vm.prank(raffleAdmin);
+        (bool upkeepNeeded, bytes memory performData) = raffleManager.checkUpkeep(abi.encode(0));
+        assertEq(upkeepNeeded, true);
+        (uint256 id, bytes32[] memory users) = abi.decode(performData, (uint256, bytes32[]));
+        assertEq(id, 0);
+        assertEq(users.length, 1);
+
+        vm.prank(keeperAddress);
+        vm.expectEmit(true, true, true, true);
+        emit RaffleWon(0, users);
+        raffleManager.performUpkeep(performData);
+    }
+
+    function test_integrationTest_picksWinners(uint256 winners, uint256 contestants) public {
+        winners = bound(winners, 1, 5);
+        contestants = bound(contestants, 10, 50);
+        successFixtureMultipleWinners(uint8(winners), true);
+        for (uint256 i = 0; i < contestants; i++) {
+            address user = makeAddr(string(abi.encodePacked(i)));
+            vm.deal(user, 1 ether);
+            vm.prank(user);
+            raffleManager.enterRaffle{value: 1 ether}(0, 1, new bytes32[](0));
+        }
+
+        vm.prank(admin);
+        customLINK.transfer(address(raffleAdmin), 5 ether);
+        vm.startPrank(raffleAdmin);
+        customLINK.transferAndCall(address(raffleManager), 2 ether, bytes(abi.encode(0)));
+        vrfMock.fulfillRandomWords(1, address(raffleManager));
+        vm.stopPrank();
+
+        vm.prank(raffleAdmin);
+        (bool upkeepNeeded, bytes memory performData) = raffleManager.checkUpkeep(abi.encode(0));
+        assertEq(upkeepNeeded, true);
+        (uint256 id, bytes32[] memory users) = abi.decode(performData, (uint256, bytes32[]));
+        assertEq(id, 0);
+        assertEq(users.length, winners);
+
+        vm.prank(keeperAddress);
+        vm.expectEmit(true, true, true, true);
+        emit RaffleWon(0, users);
+        raffleManager.performUpkeep(performData);
+
+        uint256 totalClaimed = 0;
+        for (uint256 i = 0; i < contestants; i++) {
+            for (uint256 j = 0; j < winners; j++) {
+                if (keccak256(abi.encodePacked(makeAddr(string(abi.encodePacked(i))))) == users[j]) {
+                    vm.prank(makeAddr(string(abi.encodePacked(i))));
+                    raffleManager.claimPrize(0);
+                    totalClaimed++;
+                }
+            }
+        }
+        assertEq(totalClaimed, users.length);
     }
 }
