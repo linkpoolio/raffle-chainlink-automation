@@ -451,15 +451,15 @@ contract RaffleManager is
     }
 
     function _shuffle(bytes32[] memory array, uint256 random) internal pure returns (bytes32[] memory) {
-        uint256 last_index = array.length - 1;
+        uint256 lastIndex = array.length - 1;
         bytes32 n_random = keccak256(abi.encodePacked(random));
-        while (last_index > 0) {
-            uint256 r_index = uint256(keccak256(abi.encode(n_random))) % last_index;
-            bytes32 temp = array[last_index];
-            array[last_index] = array[r_index];
+        while (lastIndex > 0) {
+            uint256 r_index = uint256(keccak256(abi.encode(n_random))) % lastIndex;
+            bytes32 temp = array[lastIndex];
+            array[lastIndex] = array[r_index];
             array[r_index] = temp;
             n_random = keccak256(abi.encodePacked(n_random));
-            last_index--;
+            lastIndex--;
         }
         return array;
     }
@@ -515,8 +515,9 @@ contract RaffleManager is
     }
 
     /**
-     * @dev used if automation is set to true for raffle.
+     * @dev used if automation is set to true for raffle or to pick winner
      * @dev user will need to set up an upkeep and include the raffle ID in the checkData
+     * @dev the performData will be the raffle ID and the winners. Winners are passed to the performUpkeep function
      *
      */
     function checkUpkeep(bytes calldata checkData)
@@ -538,8 +539,9 @@ contract RaffleManager is
     }
 
     /**
-     * @dev used if automation is set to true for raffle.
+     * @dev used if automation is set to true for raffle or to pick winner.
      * @dev will stage the raffle if the time has passed and allow for owner to call VRF
+     * @dev will pick winner if the raffle is in the RESOLVING state
      *
      */
     function performUpkeep(bytes calldata performData) external override onlyKeeperRegistry {
