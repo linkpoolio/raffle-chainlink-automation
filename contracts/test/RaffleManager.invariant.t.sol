@@ -103,7 +103,7 @@ contract RaffleManagerInvariants is Test {
             entriesPerUser: 5
         });
         vm.prank(raffleAdmin);
-        customLINK.transferAndCall(address(raffleManager), 1 ether, bytes(abi.encode(0, 1, _params)));
+        customLINK.transferAndCall(address(raffleManager), 1 ether, bytes(abi.encode(_params)));
     }
 
     function successFixture() public {
@@ -120,7 +120,7 @@ contract RaffleManagerInvariants is Test {
             entriesPerUser: 100
         });
         vm.prank(raffleAdmin);
-        customLINK.transferAndCall(address(raffleManager), 1 ether, bytes(abi.encode(0, 1, _params)));
+        customLINK.transferAndCall(address(raffleManager), 1 ether, bytes(abi.encode(_params)));
     }
 
     function invariant_enterRaffle_checkEthToEntries() public {
