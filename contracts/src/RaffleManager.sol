@@ -2,6 +2,11 @@
 pragma solidity ^0.8.17;
 
 import {AutomationCompatibleInterface} from "@chainlink/contracts/src/v0.8/AutomationCompatible.sol";
+import {
+    AutomationRegistryInterface,
+    State,
+    Config
+} from "@chainlink/contracts/src/v0.8/interfaces/AutomationRegistryInterface1_3.sol";
 import {VRFV2WrapperConsumerBase} from "@chainlink/contracts/src/v0.8/VRFV2WrapperConsumerBase.sol";
 import {VRFCoordinatorV2Interface} from "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
@@ -16,6 +21,8 @@ import {IRaffleManager} from "@src/interfaces/IRaffleManager.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 import {UD60x18, ud, intoUint256} from "@prb/math/UD60x18.sol";
+import {IKeeperRegistrar} from "@src/interfaces/IKeeperRegistrar.sol";
+import "forge-std/console.sol";
 
 /**
  * @title Raffle Manager
@@ -37,6 +44,8 @@ contract RaffleManager is
     Counters.Counter public raffleCounter;
     RequestConfig public requestConfig;
     VRFV2WrapperInterface public vrfWrapper;
+    AutomationRegistryInterface public immutable i_registry;
+    address public immutable registrar;
     address public owner;
     address public keeperRegistryAddress;
     address public linkTokenAddress;
@@ -45,6 +54,8 @@ contract RaffleManager is
     mapping(uint256 => RaffleInstance) public raffles;
     mapping(uint256 => uint256) public requestIdToRaffleIndex;
     mapping(address => mapping(uint256 => uint8)) internal userEntries;
+
+    bytes4 registerSig = IKeeperRegistrar.register.selector;
 
     // ------------------- STRUCTS -------------------
     enum RaffleState {
@@ -56,6 +67,11 @@ contract RaffleManager is
     enum RaffleType {
         DYNAMIC,
         STATIC
+    }
+
+    enum Service {
+        VRF,
+        AUTOMATION
     }
 
     struct RaffleInstance {
@@ -94,6 +110,7 @@ contract RaffleManager is
         uint256[] randomWords;
         uint256 totalLink;
         bool withdrawn;
+        uint256 upkeepId;
     }
 
     struct Prize {
@@ -105,6 +122,7 @@ contract RaffleManager is
         uint32 callbackGasLimit;
         uint16 requestConfirmations;
         uint32 numWords;
+        uint32 automationGasLimit;
     }
 
     //------------------------------ EVENTS ----------------------------------
@@ -142,16 +160,25 @@ contract RaffleManager is
         uint16 requestConfirmations,
         uint32 callbackGasLimit,
         address keeperAddress,
-        address linkAddress
+        address linkAddress,
+        address registrarAddress,
+        uint32 automationGas
     ) VRFV2WrapperConsumerBase(linkAddress, wrapperAddress) {
         require(keeperAddress != address(0), "Keeper Registry address cannot be 0x0");
         require(linkAddress != address(0), "Link Token address cannot be 0x0");
         require(wrapperAddress != address(0), "Wrapper address cannot be 0x0");
+        require(registrarAddress != address(0), "Registrar address cannot be 0x0");
         owner = msg.sender;
         vrfWrapper = VRFV2WrapperInterface(wrapperAddress);
+        i_registry = AutomationRegistryInterface(keeperAddress);
         linkTokenAddress = linkAddress;
-        requestConfig =
-            RequestConfig({callbackGasLimit: callbackGasLimit, requestConfirmations: requestConfirmations, numWords: 1});
+        registrar = registrarAddress;
+        requestConfig = RequestConfig({
+            callbackGasLimit: callbackGasLimit,
+            requestConfirmations: requestConfirmations,
+            numWords: 1,
+            automationGasLimit: automationGas
+        });
         setKeeperRegistryAddress(keeperAddress);
     }
 
@@ -213,7 +240,8 @@ contract RaffleManager is
                 fulfilled: false,
                 randomWords: new uint256[](0),
                 totalLink: 0,
-                withdrawn: false
+                withdrawn: false,
+                upkeepId: 0
             })
         });
         raffles[raffleCounter.current()] = newRaffle;
@@ -310,12 +338,19 @@ contract RaffleManager is
      * @dev Uses Chainlink VRF direct funding to generate random number paid by raffle owner.
      *
      */
-    function onTokenTransfer(address sender, uint256 value, bytes calldata raffleId) external {
-        uint256 _raffle = abi.decode(raffleId, (uint256));
-        require(sender == raffles[_raffle].owner, "Only owner can pick winner");
-        require(_eligableToEnd(_raffle), "Not enough contestants to pick winner");
-        require(raffles[_raffle].raffleState != RaffleState.FINISHED, "Raffle is already finished");
-        _pickWinner(_raffle, value);
+    function onTokenTransfer(address sender, uint256 value, bytes calldata data) external {
+        (uint256 _raffle, uint8 _service) = abi.decode(data, (uint256, uint8));
+        require(sender == raffles[_raffle].owner, "Only owner can transfer tokens to this contract");
+        if (Service(_service) == Service.AUTOMATION) {
+            string memory name = string(abi.encodePacked("Raffle ", _raffle));
+            _registerAutomation(name, requestConfig.automationGasLimit, abi.encode(_raffle), uint96(value), 0);
+        } else if (Service(_service) == Service.VRF) {
+            require(_eligableToEnd(_raffle), "Not enough contestants to pick winner");
+            require(raffles[_raffle].raffleState != RaffleState.FINISHED, "Raffle is already finished");
+            _pickWinner(_raffle, value);
+        } else {
+            revert("Invalid service");
+        }
     }
 
     /**
@@ -434,6 +469,32 @@ contract RaffleManager is
         claimable = raffles[raffleId].requestStatus.totalLink - raffles[raffleId].requestStatus.paid;
     }
 
+    function _registerAutomation(
+        string memory name,
+        uint32 gasLimit,
+        bytes memory checkData,
+        uint96 amount,
+        uint8 source
+    ) internal {
+        (uint256 raffleId) = abi.decode(checkData, (uint256));
+        (State memory state, Config memory _c, address[] memory _k) = i_registry.getState();
+        uint256 oldNonce = state.nonce;
+        bytes memory payload = abi.encode(
+            name, bytes(""), address(this), gasLimit, raffles[raffleId].owner, checkData, amount, source, address(this)
+        );
+        LinkTokenInterface(linkTokenAddress).transferAndCall(registrar, amount, bytes.concat(registerSig, payload));
+        (state, _c, _k) = i_registry.getState();
+        uint256 newNonce = state.nonce;
+        if (newNonce == oldNonce + 1) {
+            uint256 upkeepID =
+                uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), address(i_registry), uint32(oldNonce))));
+
+            raffles[raffleId].requestStatus.upkeepId = upkeepID;
+        } else {
+            revert("auto-approve disabled");
+        }
+    }
+
     // ------------------- INTERNAL FUNCTIONS -------------------
 
     /**
@@ -501,7 +562,8 @@ contract RaffleManager is
             randomWords: new uint256[](0),
             fulfilled: false,
             totalLink: value,
-            withdrawn: false
+            withdrawn: false,
+            upkeepId: raffles[raffleId].requestStatus.upkeepId
         });
 
         return requestId;
