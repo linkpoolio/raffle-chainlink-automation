@@ -125,6 +125,19 @@ contract RaffleManager is
         uint32 automationGasLimit;
     }
 
+    struct CreateRaffleParams {
+        string prizeName;
+        uint256 timeLength;
+        uint256 fee;
+        string name;
+        address feeToken;
+        bytes32 merkleRoot;
+        bool automation;
+        bytes32[] participants;
+        uint8 totalWinners;
+        uint8 entriesPerUser;
+    }
+
     //------------------------------ EVENTS ----------------------------------
     event RaffleCreated(string prize, uint256 indexed time, uint256 indexed fee, address feeToken, bool permissioned);
     event RaffleJoined(uint256 indexed raffleId, bytes32 indexed player, uint256 entries);
@@ -198,7 +211,8 @@ contract RaffleManager is
      * @param entriesPerUser number of entries per user
      *
      */
-    function createRaffle(
+    function _createRaffle(
+        address sender,
         string memory prizeName,
         uint256 timeLength,
         uint256 fee,
@@ -209,7 +223,7 @@ contract RaffleManager is
         bytes32[] memory participants,
         uint8 totalWinners,
         uint8 entriesPerUser
-    ) external payable whenNotPaused {
+    ) internal whenNotPaused returns (uint256) {
         RaffleInstance memory newRaffle = RaffleInstance({
             base: RaffleBase({
                 raffleType: participants.length > 0 ? RaffleType.STATIC : RaffleType.DYNAMIC,
@@ -223,11 +237,11 @@ contract RaffleManager is
                 provenanceHash: new bytes(0),
                 entriesPerUser: entriesPerUser
             }),
-            owner: msg.sender,
+            owner: sender,
             raffleName: name,
             contestants: participants.length > 0 ? participants : new bytes32[](0),
             winners: new bytes32[](0),
-            prizeWorth: ud(msg.value),
+            prizeWorth: ud(0),
             timeLength: timeLength,
             fee: fee,
             raffleState: RaffleState.LIVE,
@@ -248,6 +262,8 @@ contract RaffleManager is
         liveRaffles.add(raffleCounter.current());
         raffleCounter.increment();
         emit RaffleCreated(prizeName, timeLength, fee, feeToken, merkleRoot != bytes32(0) ? true : false);
+
+        return raffleCounter.current() - 1;
     }
 
     /**
@@ -334,17 +350,32 @@ contract RaffleManager is
     }
 
     /**
-     * @notice picks random raffle winner
+     * @notice Creates a new raffle/Creates Upkeep | Picks random numbers
      * @dev Uses Chainlink VRF direct funding to generate random number paid by raffle owner.
      *
      */
     function onTokenTransfer(address sender, uint256 value, bytes calldata data) external {
-        (uint256 _raffle, uint8 _service) = abi.decode(data, (uint256, uint8));
-        require(sender == raffles[_raffle].owner, "Only owner can transfer tokens to this contract");
+        require(msg.sender == address(linkTokenAddress), "Sender must be LINK address");
+        (uint256 _raffle, uint8 _service, CreateRaffleParams memory _params) =
+            abi.decode(data, (uint256, uint8, CreateRaffleParams));
         if (Service(_service) == Service.AUTOMATION) {
-            string memory name = string(abi.encodePacked("Raffle ", _raffle));
-            _registerAutomation(name, requestConfig.automationGasLimit, abi.encode(_raffle), uint96(value), 0);
+            uint256 _id = _createRaffle(
+                sender,
+                _params.prizeName,
+                _params.timeLength,
+                _params.fee,
+                _params.name,
+                _params.feeToken,
+                _params.merkleRoot,
+                _params.automation,
+                _params.participants,
+                _params.totalWinners,
+                _params.entriesPerUser
+            );
+            string memory name = string(abi.encodePacked("Raffle ", _id));
+            _registerAutomation(name, requestConfig.automationGasLimit, abi.encode(_id), uint96(value), 0);
         } else if (Service(_service) == Service.VRF) {
+            require(raffles[_raffle].owner == sender, "Only owner can pick winner");
             require(_eligableToEnd(_raffle), "Not enough contestants to pick winner");
             require(raffles[_raffle].raffleState != RaffleState.FINISHED, "Raffle is already finished");
             _pickWinner(_raffle, value);

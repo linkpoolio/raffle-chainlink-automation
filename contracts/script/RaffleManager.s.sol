@@ -57,28 +57,28 @@ contract RaffleManagerScript is Script {
         vm.stopBroadcast();
     }
 
-    function createRaffle() internal {
-        raffleManager.createRaffle({
-            prizeName: "BigMac",
-            timeLength: 0,
-            fee: 0,
-            name: "Big Mac Contest",
-            feeToken: address(0),
-            merkleRoot: bytes32(""),
-            automation: false,
-            participants: new bytes32[](0),
-            totalWinners: 1,
-            entriesPerUser: 1
-        });
+    // function createRaffle() internal {
+    //     raffleManager.createRaffle({
+    //         prizeName: "BigMac",
+    //         timeLength: 0,
+    //         fee: 0,
+    //         name: "Big Mac Contest",
+    //         feeToken: address(0),
+    //         merkleRoot: bytes32(""),
+    //         automation: false,
+    //         participants: new bytes32[](0),
+    //         totalWinners: 1,
+    //         entriesPerUser: 1
+    //     });
 
-        raffleManager.enterRaffle(0, 1, new bytes32[](0));
+    //     raffleManager.enterRaffle(0, 1, new bytes32[](0));
 
-        // create/fund upkeep
-        LinkTokenInterface(config.linkAddress).transferAndCall(address(raffleManager), 5 ether, bytes(abi.encode(0, 1)));
+    //     // create/fund upkeep
+    //     LinkTokenInterface(config.linkAddress).transferAndCall(address(raffleManager), 5 ether, bytes(abi.encode(0, 1)));
 
-        // fire off VRF request
-        LinkTokenInterface(config.linkAddress).transferAndCall(
-            address(raffleManager), 0.1 ether, bytes(abi.encode(0, 0))
-        );
-    }
+    //     // fire off VRF request
+    //     LinkTokenInterface(config.linkAddress).transferAndCall(
+    //         address(raffleManager), 0.1 ether, bytes(abi.encode(0, 0))
+    //     );
+    // }
 }

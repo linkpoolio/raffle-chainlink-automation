@@ -14,6 +14,7 @@ import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/interfaces/LinkT
 contract Handler is Test {
     using LibAddressSet for AddressSet;
 
+    address admin;
     RaffleManager public raffleManager;
     AddressSet internal _actors;
     AddressSet internal _raffleAdmins;
@@ -45,6 +46,8 @@ contract Handler is Test {
     }
 
     modifier createRaffleAdmin() {
+        vm.prank(admin);
+        LinkTokenInterface(linkAddress).transfer(msg.sender, 10 ether);
         currentRaffleAdmin = msg.sender;
         _raffleAdmins.add(msg.sender);
         _;
@@ -56,6 +59,7 @@ contract Handler is Test {
     }
 
     constructor(RaffleManager _raffleManager, address _linkAddress) {
+        admin = msg.sender;
         raffleManager = _raffleManager;
         linkAddress = _linkAddress;
     }
@@ -76,9 +80,9 @@ contract Handler is Test {
 
     function createRaffle(uint8 totalWinners, uint256 _entries) public createRaffleAdmin countCall("createRaffle") {
         _entries = bound(_entries, 1, 5);
-        vm.prank(currentRaffleAdmin);
+        vm.startPrank(currentRaffleAdmin);
         if (!raffles[currentRaffleAdmin].live) {
-            raffleManager.createRaffle({
+            RaffleManager.CreateRaffleParams memory _params = RaffleManager.CreateRaffleParams({
                 prizeName: "BigMac",
                 timeLength: 30,
                 fee: 1 ether,
@@ -90,20 +94,37 @@ contract Handler is Test {
                 totalWinners: totalWinners,
                 entriesPerUser: uint8(_entries)
             });
+
+            LinkTokenInterface(linkAddress).transferAndCall(
+                address(raffleManager), 5 ether, bytes(abi.encode(0, 1, _params))
+            );
+
             raffles[currentRaffleAdmin] = Raffle(raffleManager.raffleCounter() - 1, true);
             ghost_totalRaffles++;
         }
+        vm.stopPrank();
     }
 
     function transferAndCall(uint256 seed) public countCall("transferLINK") {
+        RaffleManager.CreateRaffleParams memory _params = RaffleManager.CreateRaffleParams({
+            prizeName: "BigMac",
+            timeLength: 30,
+            fee: 1 ether,
+            name: "Big Mac Contest",
+            feeToken: address(0),
+            merkleRoot: bytes32(""),
+            automation: false,
+            participants: new bytes32[](0),
+            totalWinners: 0,
+            entriesPerUser: uint8(1)
+        });
         address caller = _raffleAdmins.rand(seed);
         if (raffleManager.getRaffle(raffles[caller].id).contestants.length > 0 && !_raffleAdmins.depositLink[caller]) {
-            address admin = makeAddr("admin");
             vm.prank(admin);
             LinkTokenInterface(linkAddress).transfer(caller, 1 ether);
             vm.prank(caller);
             LinkTokenInterface(linkAddress).transferAndCall(
-                address(raffleManager), 1 ether, bytes(abi.encode(raffles[caller].id))
+                address(raffleManager), 1 ether, bytes(abi.encode(raffles[caller].id, 0, _params))
             );
             totalLink[raffles[caller].id] += 1 ether;
             _raffleAdmins.depositLink[caller] = true;

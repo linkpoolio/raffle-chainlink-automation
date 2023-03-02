@@ -54,7 +54,7 @@ contract RaffleManagerNetworkForkTest is Test {
     }
 
     function setUp() public {
-        network = vm.createSelectFork(vm.rpcUrl("mumbai"));
+        network = vm.createSelectFork(vm.rpcUrl("goerli"));
         config = configureNetwork("config");
         admin = makeAddr("admin");
         raffleAdmin = makeAddr("raffleAdmin");
@@ -76,10 +76,7 @@ contract RaffleManagerNetworkForkTest is Test {
         vm.selectFork(network);
         bytes32[] memory participants = new bytes32[](1);
         participants[0] = keccak256(abi.encodePacked(email));
-        vm.expectEmit(true, true, true, true);
-        emit RaffleCreated("BigMac", 0, 0, address(0), false);
-        vm.prank(raffleAdmin);
-        raffleManager.createRaffle({
+        RaffleManager.CreateRaffleParams memory _params = RaffleManager.CreateRaffleParams({
             prizeName: "BigMac",
             timeLength: 0,
             fee: 0,
@@ -91,26 +88,39 @@ contract RaffleManagerNetworkForkTest is Test {
             totalWinners: 1,
             entriesPerUser: 1
         });
-    }
-
-    function testFork_onTokenTransfer_Run() public {
-        forkRaffleFixture();
         vm.prank(config.whaleAddress);
-        LinkTokenInterface(config.linkAddress).transfer(raffleAdmin, 1 ether);
-        vm.startPrank(raffleAdmin);
-        LinkTokenInterface(config.linkAddress).transferAndCall(
-            address(raffleManager), 0.5 ether, bytes(abi.encode(0, 0))
-        );
-        vm.stopPrank();
-    }
-
-    function testFork_registerUpkeep() public {
-        forkRaffleFixture();
-        vm.prank(config.whaleAddress);
-        LinkTokenInterface(config.linkAddress).transfer(raffleAdmin, 500 ether);
+        LinkTokenInterface(config.linkAddress).transfer(raffleAdmin, 50 ether);
+        vm.expectEmit(true, true, true, true);
+        emit RaffleCreated("BigMac", 0, 0, address(0), false);
         vm.prank(raffleAdmin);
-        LinkTokenInterface(config.linkAddress).transferAndCall(address(raffleManager), 5 ether, bytes(abi.encode(0, 1)));
+        LinkTokenInterface(config.linkAddress).transferAndCall(
+            address(raffleManager), 5 ether, bytes(abi.encode(0, 1, _params))
+        );
+    }
+
+    function testFork_onTokenTransfer_CreateRaffleAndCreateUpkeep() public {
+        forkRaffleFixture();
         RaffleManager.RaffleInstance memory r = raffleManager.getRaffle(0);
         assertTrue(r.requestStatus.upkeepId > 0);
+    }
+
+    function testFork_vrf() public {
+        forkRaffleFixture();
+        RaffleManager.CreateRaffleParams memory _params = RaffleManager.CreateRaffleParams({
+            prizeName: "BigMac",
+            timeLength: 0,
+            fee: 0,
+            name: "Big Mac Contest",
+            feeToken: address(0),
+            merkleRoot: bytes32(""),
+            automation: false,
+            participants: new bytes32[](0),
+            totalWinners: 1,
+            entriesPerUser: 1
+        });
+        vm.prank(raffleAdmin);
+        LinkTokenInterface(config.linkAddress).transferAndCall(
+            address(raffleManager), 1 ether, bytes(abi.encode(0, 0, _params))
+        );
     }
 }
