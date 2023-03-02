@@ -9,6 +9,7 @@ import {ERC677Mock} from "@src/mock/ERC677Mock.sol";
 import {VRFV2WrapperMock} from "@src/mock/VRFV2WrapperMock.sol";
 import {Handler} from "./handlers/Handler.sol";
 import {UD60x18, ud, intoUint256} from "@prb/math/UD60x18.sol";
+import {AutomationMock} from "@src/mock/AutomationMock.sol";
 
 contract RaffleManagerInvariants is Test {
     RaffleManager raffleManager;
@@ -18,7 +19,7 @@ contract RaffleManagerInvariants is Test {
     address wrapperAddress;
     uint16 requestConfirmations;
     uint32 callbackGasLimit;
-    address keeperAddress;
+    AutomationMock keeperAddress;
     address linkAddress;
     address registrarAddress;
     ERC677Mock customLINK;
@@ -52,7 +53,7 @@ contract RaffleManagerInvariants is Test {
         requestConfirmations = 3;
         callbackGasLimit = 100000;
         automationCallbackGas = 500_000;
-        keeperAddress = address(0x2);
+        keeperAddress = new AutomationMock();
         linkAddress = address(0x3);
         registrarAddress = address(0x4);
         merkleRoot = 0x344510bd0c324c3912b13373e89df42d1b50450e9764a454b2aa6e2968a4578a;
@@ -68,11 +69,12 @@ contract RaffleManagerInvariants is Test {
             address(vrfMock),
             requestConfirmations,
             callbackGasLimit,
-            keeperAddress,
+            address(keeperAddress),
             address(customLINK),
             registrarAddress,
             automationCallbackGas
         );
+        customLINK.transfer(raffleAdmin, 1000000 ether);
 
         // handler now acts as entry point for invariant tests
         handler = new Handler(raffleManager, address(customLINK));
@@ -85,12 +87,10 @@ contract RaffleManagerInvariants is Test {
         targetContract(address(handler));
 
         vm.stopPrank();
-        // successFixtureWithETH();
     }
 
     function successFixtureWithETH() public {
-        vm.prank(raffleAdmin);
-        raffleManager.createRaffle({
+        RaffleManager.CreateRaffleParams memory _params = RaffleManager.CreateRaffleParams({
             prizeName: "BigMac",
             timeLength: 0,
             fee: 1 ether,
@@ -102,11 +102,12 @@ contract RaffleManagerInvariants is Test {
             totalWinners: 1,
             entriesPerUser: 5
         });
+        vm.prank(raffleAdmin);
+        customLINK.transferAndCall(address(raffleManager), 1 ether, bytes(abi.encode(0, 1, _params)));
     }
 
     function successFixture() public {
-        vm.prank(raffleAdmin);
-        raffleManager.createRaffle({
+        RaffleManager.CreateRaffleParams memory _params = RaffleManager.CreateRaffleParams({
             prizeName: "BigMac",
             timeLength: 30,
             fee: 0,
@@ -118,6 +119,8 @@ contract RaffleManagerInvariants is Test {
             totalWinners: 1,
             entriesPerUser: 100
         });
+        vm.prank(raffleAdmin);
+        customLINK.transferAndCall(address(raffleManager), 1 ether, bytes(abi.encode(0, 1, _params)));
     }
 
     function invariant_enterRaffle_checkEthToEntries() public {
