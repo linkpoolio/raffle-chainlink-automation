@@ -15,7 +15,9 @@ contract RaffleManagerTest is Test {
     address wrapperAddress;
     uint16 requestConfirmations;
     uint32 callbackGasLimit;
+    uint32 automationCallbackGasLimit;
     address keeperAddress;
+    address registrarAddress;
     address linkAddress;
     ERC677Mock customLINK;
     address admin;
@@ -52,9 +54,11 @@ contract RaffleManagerTest is Test {
         user5 = makeAddr("user5");
         wrapperAddress = address(0x1);
         requestConfirmations = 3;
-        callbackGasLimit = 5000000;
+        callbackGasLimit = 500_000;
+        automationCallbackGasLimit = 500_000;
         keeperAddress = address(0x2);
         linkAddress = address(0x3);
+        registrarAddress = address(0x4);
         merkleRoot = 0x344510bd0c324c3912b13373e89df42d1b50450e9764a454b2aa6e2968a4578a;
         proofA[0] = 0xd52688a8f926c816ca1e079067caba944f158e764817b83fc43594370ca9cf62;
         proofA[1] = 0x5b70e80538acdabd6137353b0f9d8d149f4dba91e8be2e7946e409bfdbe685b9;
@@ -69,7 +73,9 @@ contract RaffleManagerTest is Test {
             requestConfirmations,
             callbackGasLimit,
             keeperAddress,
-            address(customLINK)
+            address(customLINK),
+            registrarAddress,
+            automationCallbackGasLimit
         );
         vm.stopPrank();
     }

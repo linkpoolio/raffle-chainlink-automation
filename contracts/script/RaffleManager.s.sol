@@ -4,19 +4,24 @@ pragma solidity ^0.8.13;
 import "forge-std/Script.sol";
 import "forge-std/StdJson.sol";
 import {RaffleManager} from "@src/RaffleManager.sol";
+import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
 
 contract RaffleManagerScript is Script {
     using stdJson for string;
 
     RaffleManager raffleManager;
     uint256 deployerPrivateKey;
+    Config config;
 
     struct Config {
+        uint32 automationCallbackGas;
         uint32 callbackGasLimit;
         address keepersRegistry;
         address linkAddress;
         string name;
+        address registrarAddress;
         uint16 requestConfirmations;
+        address whaleAddress;
         address wrapperAddress;
     }
 
@@ -30,7 +35,7 @@ contract RaffleManagerScript is Script {
     }
 
     function run() public {
-        Config memory config = configureNetwork("config");
+        config = configureNetwork("config");
         if (block.chainid == 31337) {
             deployerPrivateKey = vm.envUint("ANVIL_PRIVATE_KEY");
         } else {
@@ -44,9 +49,36 @@ contract RaffleManagerScript is Script {
             config.requestConfirmations,
             config.callbackGasLimit,
             config.keepersRegistry,
-            config.linkAddress
+            config.linkAddress,
+            config.registrarAddress,
+            config.automationCallbackGas
         );
 
         vm.stopBroadcast();
+    }
+
+    function createRaffle() internal {
+        raffleManager.createRaffle({
+            prizeName: "BigMac",
+            timeLength: 0,
+            fee: 0,
+            name: "Big Mac Contest",
+            feeToken: address(0),
+            merkleRoot: bytes32(""),
+            automation: false,
+            participants: new bytes32[](0),
+            totalWinners: 1,
+            entriesPerUser: 1
+        });
+
+        raffleManager.enterRaffle(0, 1, new bytes32[](0));
+
+        // create/fund upkeep
+        LinkTokenInterface(config.linkAddress).transferAndCall(address(raffleManager), 5 ether, bytes(abi.encode(0, 1)));
+
+        // fire off VRF request
+        LinkTokenInterface(config.linkAddress).transferAndCall(
+            address(raffleManager), 0.1 ether, bytes(abi.encode(0, 0))
+        );
     }
 }
