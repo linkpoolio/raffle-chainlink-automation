@@ -53,7 +53,6 @@ contract RaffleManagerScript is Script {
             config.registrarAddress,
             config.automationCallbackGas
         );
-        createRaffle();
 
         vm.stopBroadcast();
     }

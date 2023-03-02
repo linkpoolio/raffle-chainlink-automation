@@ -113,14 +113,4 @@ contract RaffleManagerNetworkForkTest is Test {
         RaffleManager.RaffleInstance memory r = raffleManager.getRaffle(0);
         assertTrue(r.requestStatus.upkeepId > 0);
     }
-
-    // function testFork_registerUpkeepManual() public {
-    //     forkRaffleFixture();
-    //     vm.prank(config.whaleAddress);
-    //     LinkTokenInterface(config.linkAddress).transfer(raffleAdmin, 500 ether);
-    //     vm.prank(config.whaleAddress);
-    //     LinkTokenInterface(config.linkAddress).transfer(address(raffleManager), 500 ether);
-    //     vm.prank(raffleAdmin);
-    //     raffleManager.registerAutomation("big mac raffle", 500_000, abi.encode(0), 50 ether, 0);
-    // }
 }
