@@ -12,6 +12,7 @@ export interface EnterRaffleParams {
 }
 
 export interface CreateRaffleParams {
+  value: BigNumber // link amount for funding txn
   prizeName: string
   timeLength?: number // time length
   fee: string
@@ -31,4 +32,9 @@ export interface ResolveRaffleParams {
 
 export interface WithdrawLinkParams {
   id: number
+}
+
+export enum Service {
+  VRF = 0,
+  AUTOMATION = 1
 }

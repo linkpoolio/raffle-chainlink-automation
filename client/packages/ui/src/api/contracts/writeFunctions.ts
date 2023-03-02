@@ -12,24 +12,32 @@ const linkTokenContractAddress = env.linkTokenContractAddress()
 
 export const createRaffle = async (params: contracts.CreateRaffleParams) => {
   try {
+    const encodedRaffleParams = ethers.utils.defaultAbiCoder.encode(
+      [
+        'tuple(string, uint256, uint256, string, address, bytes32, bool, bytes32[], uint8, uint8)'
+      ],
+      [
+        [
+          params.prizeName,
+          params.timeLength ? params.timeLength : 0,
+          params.fee ? ethers.utils.parseEther(params.fee) : 0,
+          params.name,
+          params.feeToken ? params.feeToken : ethers.constants.AddressZero,
+          params.merkleRoot
+            ? params.merkleRoot
+            : '0x0000000000000000000000000000000000000000000000000000000000000000',
+          params.automation ? params.automation : false,
+          params.participants ? params.participants : [],
+          params.totalWinners,
+          params.entriesPerUser ? params.entriesPerUser : 1
+        ]
+      ]
+    )
     const config = await prepareWriteContract({
       address: raffleManagerContractAddress,
       abi: raffleManagerABI,
-      functionName: 'createRaffle',
-      args: [
-        params.prizeName,
-        params.timeLength ? params.timeLength : 0,
-        params.fee ? ethers.utils.parseEther(params.fee) : 0,
-        params.name,
-        params.feeToken ? params.feeToken : ethers.constants.AddressZero,
-        params.merkleRoot
-          ? params.merkleRoot
-          : '0x0000000000000000000000000000000000000000000000000000000000000000',
-        params.automation ? params.automation : false,
-        params.participants ? params.participants : [],
-        params.totalWinners,
-        params.entriesPerUser ? params.entriesPerUser : 1
-      ]
+      functionName: 'transferAndCall',
+      args: [raffleManagerContractAddress, params.value, encodedRaffleParams]
     })
     const data = await writeContract(config)
     return data
