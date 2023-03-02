@@ -69,11 +69,6 @@ contract RaffleManager is
         STATIC
     }
 
-    enum Service {
-        VRF,
-        AUTOMATION
-    }
-
     struct RaffleInstance {
         RaffleBase base;
         address owner;
@@ -356,9 +351,15 @@ contract RaffleManager is
      */
     function onTokenTransfer(address sender, uint256 value, bytes calldata data) external {
         require(msg.sender == address(linkTokenAddress), "Sender must be LINK address");
-        (uint256 _raffle, uint8 _service, CreateRaffleParams memory _params) =
-            abi.decode(data, (uint256, uint8, CreateRaffleParams));
-        if (Service(_service) == Service.AUTOMATION) {
+        if (data.length == 32) {
+            (uint256 _raffle) = abi.decode(data, (uint256));
+            require(raffles[_raffle].owner == sender, "Only owner can pick winner");
+            require(_eligableToEnd(_raffle), "Not enough contestants to pick winner");
+            require(raffles[_raffle].raffleState != RaffleState.FINISHED, "Raffle is already finished");
+            _pickWinner(_raffle, value);
+        } else {
+            (CreateRaffleParams memory _params) = abi.decode(data, (CreateRaffleParams));
+
             uint256 _id = _createRaffle(
                 sender,
                 _params.prizeName,
@@ -374,13 +375,6 @@ contract RaffleManager is
             );
             string memory name = string(abi.encodePacked("Raffle ", _id));
             _registerAutomation(name, requestConfig.automationGasLimit, abi.encode(_id), uint96(value), 0);
-        } else if (Service(_service) == Service.VRF) {
-            require(raffles[_raffle].owner == sender, "Only owner can pick winner");
-            require(_eligableToEnd(_raffle), "Not enough contestants to pick winner");
-            require(raffles[_raffle].raffleState != RaffleState.FINISHED, "Raffle is already finished");
-            _pickWinner(_raffle, value);
-        } else {
-            revert("Invalid service");
         }
     }
 

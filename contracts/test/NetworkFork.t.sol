@@ -94,7 +94,7 @@ contract RaffleManagerNetworkForkTest is Test {
         emit RaffleCreated("BigMac", 0, 0, address(0), false);
         vm.prank(raffleAdmin);
         LinkTokenInterface(config.linkAddress).transferAndCall(
-            address(raffleManager), 5 ether, bytes(abi.encode(0, 1, _params))
+            address(raffleManager), 5 ether, bytes(abi.encode(_params))
         );
     }
 
@@ -106,21 +106,8 @@ contract RaffleManagerNetworkForkTest is Test {
 
     function testFork_vrf() public {
         forkRaffleFixture();
-        RaffleManager.CreateRaffleParams memory _params = RaffleManager.CreateRaffleParams({
-            prizeName: "BigMac",
-            timeLength: 0,
-            fee: 0,
-            name: "Big Mac Contest",
-            feeToken: address(0),
-            merkleRoot: bytes32(""),
-            automation: false,
-            participants: new bytes32[](0),
-            totalWinners: 1,
-            entriesPerUser: 1
-        });
+
         vm.prank(raffleAdmin);
-        LinkTokenInterface(config.linkAddress).transferAndCall(
-            address(raffleManager), 1 ether, bytes(abi.encode(0, 0, _params))
-        );
+        LinkTokenInterface(config.linkAddress).transferAndCall(address(raffleManager), 1 ether, bytes(abi.encode(0)));
     }
 }

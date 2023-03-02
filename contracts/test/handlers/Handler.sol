@@ -95,9 +95,7 @@ contract Handler is Test {
                 entriesPerUser: uint8(_entries)
             });
 
-            LinkTokenInterface(linkAddress).transferAndCall(
-                address(raffleManager), 5 ether, bytes(abi.encode(0, 1, _params))
-            );
+            LinkTokenInterface(linkAddress).transferAndCall(address(raffleManager), 5 ether, bytes(abi.encode(_params)));
 
             raffles[currentRaffleAdmin] = Raffle(raffleManager.raffleCounter() - 1, true);
             ghost_totalRaffles++;
@@ -106,25 +104,13 @@ contract Handler is Test {
     }
 
     function transferAndCall(uint256 seed) public countCall("transferLINK") {
-        RaffleManager.CreateRaffleParams memory _params = RaffleManager.CreateRaffleParams({
-            prizeName: "BigMac",
-            timeLength: 30,
-            fee: 1 ether,
-            name: "Big Mac Contest",
-            feeToken: address(0),
-            merkleRoot: bytes32(""),
-            automation: false,
-            participants: new bytes32[](0),
-            totalWinners: 0,
-            entriesPerUser: uint8(1)
-        });
         address caller = _raffleAdmins.rand(seed);
         if (raffleManager.getRaffle(raffles[caller].id).contestants.length > 0 && !_raffleAdmins.depositLink[caller]) {
             vm.prank(admin);
             LinkTokenInterface(linkAddress).transfer(caller, 1 ether);
             vm.prank(caller);
             LinkTokenInterface(linkAddress).transferAndCall(
-                address(raffleManager), 1 ether, bytes(abi.encode(raffles[caller].id, 0, _params))
+                address(raffleManager), 1 ether, bytes(abi.encode(raffles[caller].id))
             );
             totalLink[raffles[caller].id] += 1 ether;
             _raffleAdmins.depositLink[caller] = true;
