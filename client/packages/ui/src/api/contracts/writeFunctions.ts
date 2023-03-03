@@ -14,28 +14,31 @@ export const createRaffle = async (params: contracts.CreateRaffleParams) => {
   try {
     const encodedRaffleParams = ethers.utils.defaultAbiCoder.encode(
       [
-        'tuple(string, uint256, uint256, string, address, bytes32, bool, bytes32[], uint8, uint8)'
+        'tuple(string prizeName, uint256 timeLength, uint256 fee, string name, address feeToken, bytes32 merkleRoot, bool automation, bytes32[] participants, uint8 totalWinners, uint8 entriesPerUser)'
       ],
       [
-        [
-          params.prizeName,
-          params.timeLength ? params.timeLength : 0,
-          params.fee ? ethers.utils.parseEther(params.fee) : 0,
-          params.name,
-          params.feeToken ? params.feeToken : ethers.constants.AddressZero,
-          params.merkleRoot
+        {
+          prizeName: params.prizeName,
+          timeLength: params.timeLength ? params.timeLength : 0,
+          fee: params.fee ? ethers.utils.parseEther(params.fee) : 0,
+          name: params.name,
+          feeToken: params.feeToken
+            ? params.feeToken
+            : ethers.constants.AddressZero,
+          merkleRoot: params.merkleRoot
             ? params.merkleRoot
             : '0x0000000000000000000000000000000000000000000000000000000000000000',
-          params.automation ? params.automation : false,
-          params.participants ? params.participants : [],
-          params.totalWinners,
-          params.entriesPerUser ? params.entriesPerUser : 1
-        ]
+          automation: params.automation ? params.automation : false,
+          participants: params.participants ? params.participants : [],
+          totalWinners: params.totalWinners,
+          entriesPerUser: params.entriesPerUser ? params.entriesPerUser : 1
+        }
       ]
     )
+
     const config = await prepareWriteContract({
-      address: raffleManagerContractAddress,
-      abi: raffleManagerABI,
+      address: linkTokenContractAddress,
+      abi: linkTokenABI,
       functionName: 'transferAndCall',
       args: [raffleManagerContractAddress, params.value, encodedRaffleParams]
     })
