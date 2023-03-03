@@ -494,6 +494,18 @@ contract RaffleManager is
         claimable = raffles[raffleId].requestStatus.totalLink - raffles[raffleId].requestStatus.paid;
     }
 
+    /**
+     * @notice returns the amount of claimable LINK from upkeep
+     * @param raffleId id of the raffle
+     * @return claimable amount of claimable LINK
+     * @dev claimable LINK is the total LINK available to withdraw from the upkeep contract
+     *
+     */
+    function claimableAutomation(uint256 raffleId) external view returns (uint256 claimable) {
+        (,,, uint96 balance,,,,,) = i_registry.getUpkeep(raffles[raffleId].requestStatus.upkeepId);
+        claimable = balance;
+    }
+
     function _registerAutomation(
         string memory name,
         uint32 gasLimit,
