@@ -153,4 +153,27 @@ export const getClaimableLink = async ({ id, asyncManager, update }) => {
   }
 }
 
-export const cancelUpkeep = async ({ id, asyncManager, update }) => {}
+export const cancelUpkeep = async ({ id, asyncManager, success, update }) => {
+  try {
+    asyncManager.start()
+
+    const payload: contracts.CancelUpkeepParams = { id }
+    const { wait } = await contracts.cancelUpkeep(payload)
+
+    asyncManager.waiting()
+
+    const isSuccess = await wait().then((receipt) => receipt.status === 1)
+    if (!isSuccess)
+      throw new Error('Request to cancel upkeep was not successful')
+
+    asyncManager.success()
+
+    await getRaffle({ id, asyncManager, update })
+    success(true)
+
+    return true
+  } catch (error) {
+    asyncManager.fail(`Could not cancel upkeep for raffle id \`${id}\``)
+    return false
+  }
+}

@@ -34,7 +34,8 @@ import {
   JoinButton,
   CheckStatusButton,
   PickWinnersButton,
-  WithdrawButton
+  WithdrawButton,
+  CancelUpkeepButton
 } from '@ui/features/raffleDetail'
 import { formatUnixTs, formatFinishDate, shortenAddress } from '@ui/utils'
 
@@ -195,6 +196,11 @@ export const RaffleDetail = ({ id }) => {
                   identifier={store.state.identifier}
                 />
                 <PickWinnersButton
+                  raffle={raffle}
+                  update={store.update}
+                  address={address}
+                />
+                <CancelUpkeepButton
                   raffle={raffle}
                   update={store.update}
                   address={address}
