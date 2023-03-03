@@ -500,6 +500,7 @@ contract RaffleManager is
     function cancelUpkeep(uint256 raffleId) external {
         require(raffles[raffleId].owner == msg.sender, "Not raffle owner");
         require(raffles[raffleId].requestStatus.upkeepLive, "Upkeep not live");
+        require(raffles[raffleId].raffleState == RaffleState.FINISHED, "Raffle not finished");
         raffles[raffleId].requestStatus.upkeepLive = false;
         i_registry.cancelUpkeep(raffles[raffleId].requestStatus.upkeepId);
     }
