@@ -2,7 +2,11 @@
 pragma solidity ^0.8.17;
 
 import {AutomationCompatibleInterface} from "@chainlink/contracts/src/v0.8/AutomationCompatible.sol";
-import {State, Config} from "@chainlink/contracts/src/v0.8/interfaces/AutomationRegistryInterface1_3.sol";
+import {
+    AutomationRegistryInterface,
+    State,
+    Config
+} from "@chainlink/contracts/src/v0.8/interfaces/AutomationRegistryInterface1_3.sol";
 import {VRFV2WrapperConsumerBase} from "@chainlink/contracts/src/v0.8/VRFV2WrapperConsumerBase.sol";
 import {VRFCoordinatorV2Interface} from "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
@@ -18,7 +22,6 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.
 import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 import {UD60x18, ud, intoUint256} from "@prb/math/UD60x18.sol";
 import {IKeeperRegistrar} from "@src/interfaces/IKeeperRegistrar.sol";
-import {IKeeperRegistry} from "@src/interfaces/IKeeperRegistry.sol";
 import "forge-std/console.sol";
 
 /**
@@ -41,7 +44,7 @@ contract RaffleManager is
     Counters.Counter public raffleCounter;
     RequestConfig public requestConfig;
     VRFV2WrapperInterface public vrfWrapper;
-    IKeeperRegistry public immutable i_registry;
+    AutomationRegistryInterface public immutable i_registry;
     address public immutable registrar;
     address public owner;
     address public keeperRegistryAddress;
@@ -103,7 +106,6 @@ contract RaffleManager is
         uint256 totalLink;
         bool withdrawn;
         uint256 upkeepId;
-        bool upkeepLive;
     }
 
     struct Prize {
@@ -176,7 +178,7 @@ contract RaffleManager is
         require(registrarAddress != address(0), "Registrar address cannot be 0x0");
         owner = msg.sender;
         vrfWrapper = VRFV2WrapperInterface(wrapperAddress);
-        i_registry = IKeeperRegistry(keeperAddress);
+        i_registry = AutomationRegistryInterface(keeperAddress);
         linkTokenAddress = linkAddress;
         registrar = registrarAddress;
         requestConfig = RequestConfig({
@@ -248,8 +250,7 @@ contract RaffleManager is
                 randomWords: new uint256[](0),
                 totalLink: 0,
                 withdrawn: false,
-                upkeepId: 0,
-                upkeepLive: false
+                upkeepId: 0
             })
         });
         raffles[raffleCounter.current()] = newRaffle;
@@ -473,12 +474,10 @@ contract RaffleManager is
     function withdrawLink(uint256 raffleId) external onlyRaffleOwner(raffleId) nonReentrant {
         require(!raffles[raffleId].requestStatus.withdrawn, "Already withdrawn");
         IERC20 link = IERC20(linkTokenAddress);
-        (,,, uint96 balance,,,,,) = i_registry.getUpkeep(raffles[raffleId].requestStatus.upkeepId);
-        uint256 claimableVRF = raffles[raffleId].requestStatus.totalLink - raffles[raffleId].requestStatus.paid;
-        require(balance + claimableVRF > 0, "Nothing to claim");
+        uint256 claimable = raffles[raffleId].requestStatus.totalLink - raffles[raffleId].requestStatus.paid;
+        require(claimable > 0, "Nothing to claim");
         raffles[raffleId].requestStatus.withdrawn = true;
-        if (claimableVRF > 0) link.safeTransfer(msg.sender, claimableVRF);
-        if (balance > 0) i_registry.withdrawFunds(raffles[raffleId].requestStatus.upkeepId, msg.sender);
+        link.safeTransfer(msg.sender, claimable);
     }
 
     /**
@@ -488,21 +487,11 @@ contract RaffleManager is
      * @dev claimable LINK is the total LINK sent to the raffle minus the amount already paid on VRF fees
      *
      */
-    function claimableLink(uint256 raffleId) public view returns (uint256 claimable) {
+    function claimableLink(uint256 raffleId) external view returns (uint256 claimable) {
         if (raffles[raffleId].requestStatus.withdrawn) {
             return 0;
         }
-        (,,, uint96 balance,,,,,) = i_registry.getUpkeep(raffles[raffleId].requestStatus.upkeepId);
-        uint256 claimableVRF = raffles[raffleId].requestStatus.totalLink - raffles[raffleId].requestStatus.paid;
-        claimable = claimableVRF + balance;
-    }
-
-    function cancelUpkeep(uint256 raffleId) external {
-        require(raffles[raffleId].owner == msg.sender, "Not raffle owner");
-        require(raffles[raffleId].requestStatus.upkeepLive, "Upkeep not live");
-        require(raffles[raffleId].raffleState == RaffleState.FINISHED, "Raffle not finished");
-        raffles[raffleId].requestStatus.upkeepLive = false;
-        i_registry.cancelUpkeep(raffles[raffleId].requestStatus.upkeepId);
+        claimable = raffles[raffleId].requestStatus.totalLink - raffles[raffleId].requestStatus.paid;
     }
 
     function _registerAutomation(
@@ -526,7 +515,6 @@ contract RaffleManager is
                 uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), address(i_registry), uint32(oldNonce))));
 
             raffles[raffleId].requestStatus.upkeepId = upkeepID;
-            raffles[raffleId].requestStatus.upkeepLive = true;
         } else {
             revert("auto-approve disabled");
         }
@@ -600,8 +588,7 @@ contract RaffleManager is
             fulfilled: false,
             totalLink: value,
             withdrawn: false,
-            upkeepId: raffles[raffleId].requestStatus.upkeepId,
-            upkeepLive: raffles[raffleId].requestStatus.upkeepLive
+            upkeepId: raffles[raffleId].requestStatus.upkeepId
         });
 
         return requestId;
