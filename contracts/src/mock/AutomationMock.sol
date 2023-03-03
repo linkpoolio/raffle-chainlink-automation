@@ -38,4 +38,22 @@ contract AutomationMock {
     function onTokenTransfer(address sender, uint256 value, bytes calldata data) external {
         state = State(1, 0, 0, 0);
     }
+
+    function getUpkeep(uint256 id)
+        external
+        view
+        returns (
+            address target,
+            uint32 executeGas,
+            bytes memory checkData,
+            uint96 balance,
+            address lastKeeper,
+            address admin,
+            uint64 maxValidBlocknumber,
+            uint96 amountSpent,
+            bool paused
+        )
+    {
+        return (address(0), 0, new bytes(0), 0, address(0), address(0), 0, 0, false);
+    }
 }
