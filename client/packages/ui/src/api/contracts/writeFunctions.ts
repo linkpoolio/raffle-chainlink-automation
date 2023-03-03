@@ -124,3 +124,19 @@ export const withdrawLink = async (params: contracts.WithdrawLinkParams) => {
     throw new Error(`Error withdrawing link: ${error.message}`)
   }
 }
+
+export const cancelUpkeep = async (params: contracts.CancelUpkeepParams) => {
+  try {
+    const { id } = params
+    const config = await prepareWriteContract({
+      address: raffleManagerContractAddress,
+      abi: raffleManagerABI,
+      functionName: 'cancelUpkeep',
+      args: [id]
+    })
+    const data = await writeContract(config)
+    return data
+  } catch (error: any) {
+    throw new Error(`Error cancelling upkeep: ${error.message}`)
+  }
+}

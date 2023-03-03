@@ -152,3 +152,5 @@ export const getClaimableLink = async ({ id, asyncManager, update }) => {
     return false
   }
 }
+
+export const cancelUpkeep = async ({ id, asyncManager, update }) => {}

@@ -38,3 +38,7 @@ export enum Service {
   VRF = 0,
   AUTOMATION = 1
 }
+
+export interface CancelUpkeepParams {
+  id: number // raffle id
+}

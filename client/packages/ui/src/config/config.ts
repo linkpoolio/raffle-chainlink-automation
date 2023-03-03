@@ -21,5 +21,14 @@ export const env = {
         ? // @ts-ignore:next-line
           envLinkTokenContractAddress
         : undefined // eslint-disable-line no-undef
+    ),
+  keeperRegistryContractAddress: () =>
+    getEnv(
+      `UI_KEEPER_REGISTRY_CONTRACT_ADDRESS`,
+      // @ts-ignore:next-line
+      typeof envKeeperRegistryContractAddress == 'string'
+        ? // @ts-ignore:next-line
+          envKeeperRegistryContractAddress
+        : undefined // eslint-disable-line no-undef
     )
 }
