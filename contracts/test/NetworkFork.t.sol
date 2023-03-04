@@ -54,7 +54,7 @@ contract RaffleManagerNetworkForkTest is Test {
     }
 
     function setUp() public {
-        network = vm.createSelectFork(vm.rpcUrl("mumbai"));
+        network = vm.createSelectFork(vm.rpcUrl("goerli"));
         config = configureNetwork("config");
         admin = makeAddr("admin");
         raffleAdmin = makeAddr("raffleAdmin");
