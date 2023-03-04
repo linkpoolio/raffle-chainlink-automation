@@ -1,17 +1,26 @@
 import React, { useState, useEffect } from 'react'
 import { Button, Text, Flex, Heading } from '@chakra-ui/react'
 
-import { withdrawLink, getClaimableLink } from '@ui/features/raffleDetail'
+import {
+  withdrawFunds,
+  getClaimableAutomation
+} from '@ui/features/raffleDetail'
 
-/* @Non-FunctionalImprovement
- * Would be good to write some tests for this component to check the various statuses.
- */
-export const Withdraw = ({ id, reset, asyncManager, store }) => {
+export const WithdrawKeeper = ({
+  id,
+  upkeepId,
+  address,
+  reset,
+  asyncManager,
+  store
+}) => {
   const [withdrawSuccess, setWithdrawSuccess] = useState(false)
 
   const onWithdraw = () => {
-    withdrawLink({
+    withdrawFunds({
       id,
+      upkeepId,
+      address,
       asyncManager,
       success: setWithdrawSuccess,
       update: store.update
@@ -19,13 +28,13 @@ export const Withdraw = ({ id, reset, asyncManager, store }) => {
   }
 
   const componentDidMount = () => {
-    getClaimableLink({ id, asyncManager, update: store.update })
+    getClaimableAutomation({ id, asyncManager, update: store.update })
     return () => setWithdrawSuccess(false)
   }
   useEffect(componentDidMount, [])
 
-  const { claimableLink } = store.state
-  const didFetchClaimable = claimableLink !== null
+  const { claimableAutomation } = store.state
+  const didFetchClaimable = claimableAutomation !== null
 
   return (
     <>
@@ -37,7 +46,9 @@ export const Withdraw = ({ id, reset, asyncManager, store }) => {
       )}
       {didFetchClaimable && !withdrawSuccess && (
         <>
-          <Text>You have {claimableLink} LINK available to withdraw.</Text>
+          <Text>
+            You have {claimableAutomation} LINK available to withdraw.
+          </Text>
           <Flex mt="2" justify="end">
             <Button
               variant="default"
@@ -50,7 +61,7 @@ export const Withdraw = ({ id, reset, asyncManager, store }) => {
       )}
       {didFetchClaimable && withdrawSuccess && (
         <>
-          <Text>You successfully withdrew {claimableLink} LINK.</Text>
+          <Text>You successfully withdrew {claimableAutomation} LINK.</Text>
           <Flex mt="2" justify="end">
             <Button variant="default" onClick={() => reset(store)}>
               Close

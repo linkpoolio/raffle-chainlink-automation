@@ -34,7 +34,11 @@ export interface WithdrawLinkParams {
   id: number
 }
 
-export enum Service {
-  VRF = 0,
-  AUTOMATION = 1
+export interface CancelUpkeepParams {
+  upkeepId: string // keeper id
+}
+
+export interface WithdrawFundsParams {
+  upkeepId: string // keeper id
+  address: string // address to withdraw funds to
 }

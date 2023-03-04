@@ -34,7 +34,9 @@ import {
   JoinButton,
   CheckStatusButton,
   PickWinnersButton,
-  WithdrawButton
+  WithdrawButton,
+  CancelUpkeepButton,
+  WithdrawKeeperButton
 } from '@ui/features/raffleDetail'
 import { formatUnixTs, formatFinishDate, shortenAddress } from '@ui/utils'
 
@@ -199,12 +201,27 @@ export const RaffleDetail = ({ id }) => {
                   update={store.update}
                   address={address}
                 />
+                <CancelUpkeepButton
+                  raffle={raffle}
+                  update={store.update}
+                  address={address}
+                />
                 <WithdrawButton
                   raffle={raffle}
                   update={store.update}
                   address={address}
                 />
-                <StepManager id={id} store={store} />
+                <WithdrawKeeperButton
+                  raffle={raffle}
+                  update={store.update}
+                  address={address}
+                />
+                <StepManager
+                  id={id}
+                  upkeepId={raffle.upkeepId}
+                  store={store}
+                  address={address}
+                />
               </HStack>
             </Center>
           )}

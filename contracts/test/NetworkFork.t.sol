@@ -110,4 +110,11 @@ contract RaffleManagerNetworkForkTest is Test {
         vm.prank(raffleAdmin);
         LinkTokenInterface(config.linkAddress).transferAndCall(address(raffleManager), 1 ether, bytes(abi.encode(0)));
     }
+
+    function testFork_withdrawAutomation() public {
+        forkRaffleFixture();
+
+        vm.prank(raffleAdmin);
+        raffleManager.claimableAutomation(0);
+    }
 }

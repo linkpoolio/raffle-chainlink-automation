@@ -152,3 +152,86 @@ export const getClaimableLink = async ({ id, asyncManager, update }) => {
     return false
   }
 }
+
+export const cancelUpkeep = async ({
+  id,
+  upkeepId,
+  asyncManager,
+  success,
+  update
+}) => {
+  try {
+    asyncManager.start()
+
+    const payload: contracts.CancelUpkeepParams = { upkeepId }
+    const { wait } = await contracts.cancelUpkeep(payload)
+
+    asyncManager.waiting()
+
+    const isSuccess = await wait().then((receipt) => receipt.status === 1)
+    if (!isSuccess)
+      throw new Error('Request to cancel upkeep was not successful')
+
+    asyncManager.success()
+
+    await getRaffle({ id, asyncManager, update })
+    success(true)
+
+    return true
+  } catch (error) {
+    asyncManager.fail(`Upkeep has already been cancelled`)
+    return false
+  }
+}
+
+export const getClaimableAutomation = async ({ id, asyncManager, update }) => {
+  try {
+    asyncManager.start()
+
+    const claimableAutomation: number = await contracts.getClaimableAutomation(
+      id
+    )
+
+    asyncManager.success()
+
+    update({ claimableAutomation })
+    return true
+  } catch (error) {
+    asyncManager.fail(
+      `Could not determine how much LINK is able to be withdrawn from keeper for raffle id \`${id}\`.`
+    )
+    return false
+  }
+}
+
+export const withdrawFunds = async ({
+  id,
+  upkeepId,
+  address,
+  asyncManager,
+  success,
+  update
+}) => {
+  try {
+    asyncManager.start()
+
+    const payload: contracts.WithdrawFundsParams = { upkeepId, address }
+    const { wait } = await contracts.withdrawFunds(payload)
+
+    asyncManager.waiting()
+
+    const isSuccess = await wait().then((receipt) => receipt.status === 1)
+    if (!isSuccess)
+      throw new Error('Request to withdraw LINK was not successful')
+
+    asyncManager.success()
+
+    await getRaffle({ id, asyncManager, update })
+
+    success(true)
+    return true
+  } catch (error) {
+    asyncManager.fail(`Could not withdraw LINK for raffle id \`${id}\``)
+    return false
+  }
+}

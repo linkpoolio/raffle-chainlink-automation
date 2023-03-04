@@ -56,6 +56,20 @@ export const getClaimableLink = async (id: number): Promise<number> => {
   }
 }
 
+export const getClaimableAutomation = async (id: number): Promise<number> => {
+  try {
+    const data = await readContract({
+      ...defaultOptions,
+      address: raffleManagerContractAddress,
+      functionName: 'claimableAutomation',
+      args: [id]
+    })
+    return transformClaimable(data)
+  } catch (error: any) {
+    throw new Error(`Error getting claimable link: ${error.message}`)
+  }
+}
+
 export const getLINKBalance = async (address: string): Promise<number> => {
   try {
     const data = await readContract({

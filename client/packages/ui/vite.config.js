@@ -6,9 +6,11 @@ import NodeGlobalsPolyfillPlugin from '@esbuild-plugins/node-globals-polyfill'
 // https://vitejs.dev/config/
 const prefix = 'UI'
 const raffleManagerContractAddress =
-    process.env[`${prefix}_RAFFLE_MANAGER_CONTRACT_ADDRESS`] || ''
+  process.env[`${prefix}_RAFFLE_MANAGER_CONTRACT_ADDRESS`] || ''
 const linkTokenContractAddress =
-    process.env[`${prefix}_LINK_TOKEN_CONTRACT_ADDRESS`] || ''
+  process.env[`${prefix}_LINK_TOKEN_CONTRACT_ADDRESS`] || ''
+const keeperRegistryContractAddress =
+  process.env[`${prefix}_KEEPER_REGISTRY_CONTRACT_ADDRESS`]
 
 export default defineConfig({
   build: {
@@ -35,8 +37,13 @@ export default defineConfig({
     }
   },
   define: {
-    envRaffleManagerContractAddress: JSON.stringify(raffleManagerContractAddress),
+    envRaffleManagerContractAddress: JSON.stringify(
+      raffleManagerContractAddress
+    ),
     envLinkTokenContractAddress: JSON.stringify(linkTokenContractAddress),
+    envKeeperRegistryContractAddress: JSON.stringify(
+      keeperRegistryContractAddress
+    )
   },
   envPrefix: `${prefix}_`,
   plugins: [reactRefresh()],
@@ -56,8 +63,9 @@ export default defineConfig({
       },
       plugins: [
         NodeGlobalsPolyfillPlugin({
-          buffer: true,
+          buffer: true
         })
       ]
     }
-  },})
+  }
+})

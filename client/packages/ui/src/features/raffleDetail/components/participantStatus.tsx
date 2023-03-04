@@ -61,21 +61,22 @@ const WonUnclaimed = ({ id, store, asyncManager }) => {
         />
       )}
       <Text>You won!</Text>
-      {store.state.raffle.type == RaffleType.DYNAMIC && (
-        <Flex mt="2" justify="end">
-          <Button
-            variant="default"
-            isDisabled={asyncManager.loading || asyncManager.pending}
-            onClick={onClaim}
-            loadingText={
-              asyncManager.loading
-                ? 'Claiming prize'
-                : 'Waiting for confirmation'
-            }>
-            Claim Prize
-          </Button>
-        </Flex>
-      )}
+      {store.state.raffle.type == RaffleType.DYNAMIC &&
+        store.state.raffle.prizeWorth == '0' && (
+          <Flex mt="2" justify="end">
+            <Button
+              variant="default"
+              isDisabled={asyncManager.loading || asyncManager.pending}
+              onClick={onClaim}
+              loadingText={
+                asyncManager.loading
+                  ? 'Claiming prize'
+                  : 'Waiting for confirmation'
+              }>
+              Claim Prize
+            </Button>
+          </Flex>
+        )}
     </>
   )
 }

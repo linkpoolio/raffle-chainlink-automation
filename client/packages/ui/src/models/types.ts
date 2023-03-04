@@ -1,3 +1,4 @@
+import { BigNumber } from 'ethers'
 export enum RaffleStatus {
   STAGED = 0,
   LIVE = 1,
@@ -33,4 +34,5 @@ export interface RaffleInstance {
   winners: Array<string> // bytes32[]
   claimedPrizes: Array<string> // bytes32[]
   withdrawn: boolean
+  upkeepId: BigNumber
 }

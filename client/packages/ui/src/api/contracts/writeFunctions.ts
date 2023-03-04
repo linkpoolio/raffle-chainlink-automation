@@ -6,9 +6,11 @@ import { env } from '@ui/config'
 import { contracts } from '@ui/api'
 import raffleManagerABI from './abi/RaffleManager.json'
 import linkTokenABI from './abi/LinkToken.json'
+import keeperRegistryABI from './abi/KeeperRegistry.json'
 
 const raffleManagerContractAddress = env.raffleManagerContractAddress()
 const linkTokenContractAddress = env.linkTokenContractAddress()
+const keeperRegistryContractAddress = env.keeperRegistryContractAddress()
 
 export const createRaffle = async (params: contracts.CreateRaffleParams) => {
   try {
@@ -122,5 +124,38 @@ export const withdrawLink = async (params: contracts.WithdrawLinkParams) => {
     return data
   } catch (error: any) {
     throw new Error(`Error withdrawing link: ${error.message}`)
+  }
+}
+
+export const cancelUpkeep = async (params: contracts.CancelUpkeepParams) => {
+  try {
+    const { upkeepId } = params
+
+    const config = await prepareWriteContract({
+      address: keeperRegistryContractAddress,
+      abi: keeperRegistryABI,
+      functionName: 'cancelUpkeep',
+      args: [upkeepId]
+    })
+    const data = await writeContract(config)
+    return data
+  } catch (error: any) {
+    throw new Error(`Error cancelling upkeep: ${error.message}`)
+  }
+}
+
+export const withdrawFunds = async (params: contracts.WithdrawFundsParams) => {
+  try {
+    const { upkeepId, address } = params
+    const config = await prepareWriteContract({
+      address: keeperRegistryContractAddress,
+      abi: keeperRegistryABI,
+      functionName: 'withdrawFunds',
+      args: [upkeepId, address]
+    })
+    const data = await writeContract(config)
+    return data
+  } catch (error: any) {
+    throw new Error(`Error cancelling upkeep: ${error.message}`)
   }
 }
