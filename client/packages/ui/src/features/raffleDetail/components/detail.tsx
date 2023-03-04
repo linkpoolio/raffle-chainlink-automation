@@ -201,10 +201,9 @@ export const RaffleDetail = ({ id }) => {
                   update={store.update}
                   address={address}
                 />
-                {/* {console.log(raffle.keeperId.toString())} */}
                 <CancelUpkeepButton
                   raffle={raffle}
-                  keeperId={raffle.keeperId.toString()}
+                  keeperId={raffle.keeperId}
                   update={store.update}
                   address={address}
                 />
