@@ -66,7 +66,6 @@ export const getClaimableAutomation = async (id: number): Promise<number> => {
     })
     return transformClaimable(data)
   } catch (error: any) {
-    console.log(error)
     throw new Error(`Error getting claimable link: ${error.message}`)
   }
 }

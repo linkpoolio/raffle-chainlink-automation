@@ -8,7 +8,7 @@ import {
 
 export const WithdrawKeeper = ({
   id,
-  keeperId,
+  upkeepId,
   address,
   reset,
   asyncManager,
@@ -19,7 +19,7 @@ export const WithdrawKeeper = ({
   const onWithdraw = () => {
     withdrawFunds({
       id,
-      keeperId,
+      upkeepId,
       address,
       asyncManager,
       success: setWithdrawSuccess,

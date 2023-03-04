@@ -26,7 +26,7 @@ export const transformRaffleItem = (raffle): RaffleInstance => {
       winners: raffle.winners,
       claimedPrizes: raffle.prize.claimedPrizes,
       withdrawn: raffle.requestStatus.withdrawn,
-      keeperId: raffle.requestStatus.upkeepId
+      upkeepId: raffle.requestStatus.upkeepId
     }
   } catch (error: any) {
     throw new Error(`Error transforming raffle item: ${error.message}`)

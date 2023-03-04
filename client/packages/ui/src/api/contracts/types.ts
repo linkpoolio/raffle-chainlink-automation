@@ -35,10 +35,10 @@ export interface WithdrawLinkParams {
 }
 
 export interface CancelUpkeepParams {
-  keeperId: string // keeper id
+  upkeepId: string // keeper id
 }
 
 export interface WithdrawFundsParams {
-  keeperId: string // keeper id
+  upkeepId: string // keeper id
   address: string // address to withdraw funds to
 }

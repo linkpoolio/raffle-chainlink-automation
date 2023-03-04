@@ -129,13 +129,13 @@ export const withdrawLink = async (params: contracts.WithdrawLinkParams) => {
 
 export const cancelUpkeep = async (params: contracts.CancelUpkeepParams) => {
   try {
-    const { keeperId } = params
+    const { upkeepId } = params
 
     const config = await prepareWriteContract({
       address: keeperRegistryContractAddress,
       abi: keeperRegistryABI,
       functionName: 'cancelUpkeep',
-      args: [keeperId.toString()]
+      args: [upkeepId.toString()]
     })
     const data = await writeContract(config)
     return data
@@ -146,12 +146,12 @@ export const cancelUpkeep = async (params: contracts.CancelUpkeepParams) => {
 
 export const withdrawFunds = async (params: contracts.WithdrawFundsParams) => {
   try {
-    const { keeperId, address } = params
+    const { upkeepId, address } = params
     const config = await prepareWriteContract({
       address: keeperRegistryContractAddress,
       abi: keeperRegistryABI,
       functionName: 'withdrawFunds',
-      args: [keeperId, address]
+      args: [upkeepId, address]
     })
     const data = await writeContract(config)
     return data

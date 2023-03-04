@@ -155,7 +155,7 @@ export const getClaimableLink = async ({ id, asyncManager, update }) => {
 
 export const cancelUpkeep = async ({
   id,
-  keeperId,
+  upkeepId,
   asyncManager,
   success,
   update
@@ -163,7 +163,7 @@ export const cancelUpkeep = async ({
   try {
     asyncManager.start()
 
-    const payload: contracts.CancelUpkeepParams = { keeperId }
+    const payload: contracts.CancelUpkeepParams = { upkeepId }
     const { wait } = await contracts.cancelUpkeep(payload)
 
     asyncManager.waiting()
@@ -206,7 +206,7 @@ export const getClaimableAutomation = async ({ id, asyncManager, update }) => {
 
 export const withdrawFunds = async ({
   id,
-  keeperId,
+  upkeepId,
   address,
   asyncManager,
   success,
@@ -215,7 +215,7 @@ export const withdrawFunds = async ({
   try {
     asyncManager.start()
 
-    const payload: contracts.WithdrawFundsParams = { keeperId, address }
+    const payload: contracts.WithdrawFundsParams = { upkeepId, address }
     const { wait } = await contracts.withdrawFunds(payload)
 
     asyncManager.waiting()

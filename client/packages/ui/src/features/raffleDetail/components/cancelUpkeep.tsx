@@ -3,13 +3,13 @@ import { Button, Text, Flex, Heading } from '@chakra-ui/react'
 
 import { cancelUpkeep } from '@ui/features/raffleDetail'
 
-export const CancelUpkeep = ({ id, keeperId, store, reset, asyncManager }) => {
+export const CancelUpkeep = ({ id, upkeepId, store, reset, asyncManager }) => {
   const [success, setSuccess] = useState(false)
 
   const componentDidMount = () => {
     cancelUpkeep({
       id,
-      keeperId,
+      upkeepId,
       asyncManager,
       success: setSuccess,
       update: store.update

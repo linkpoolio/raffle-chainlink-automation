@@ -203,7 +203,6 @@ export const RaffleDetail = ({ id }) => {
                 />
                 <CancelUpkeepButton
                   raffle={raffle}
-                  keeperId={raffle.keeperId}
                   update={store.update}
                   address={address}
                 />
@@ -219,7 +218,7 @@ export const RaffleDetail = ({ id }) => {
                 />
                 <StepManager
                   id={id}
-                  keeperId={raffle.keeperId}
+                  upkeepId={raffle.upkeepId}
                   store={store}
                   address={address}
                 />

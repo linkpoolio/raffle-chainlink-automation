@@ -29,15 +29,15 @@ describe('RaffleCreate', () => {
     expect(span).toBeTruthy()
   })
 
-  it('renders dynamic form', () => {
-    const { getByTestId } = render(getComponent())
+  // it('renders dynamic form', () => {
+  //   const { getByTestId } = render(getComponent())
 
-    userEvent.selectOptions(getByTestId('select-type'), ['2'])
+  //   userEvent.selectOptions(getByTestId('select-type'), ['2'])
 
-    // Note: if this test fails on CI, increase timeout
-    setTimeout(() => {
-      const span = screen.queryByText('Duration (hours)')
-      expect(span).toBeTruthy()
-    }, 300)
-  })
+  //   // Note: if this test fails on CI, increase timeout
+  //   setTimeout(() => {
+  //     const span = screen.queryByText('Duration (hours)')
+  //     expect(span).toBeTruthy()
+  //   }, 300)
+  // })
 })

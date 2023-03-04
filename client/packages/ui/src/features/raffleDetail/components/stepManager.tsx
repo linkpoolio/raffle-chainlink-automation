@@ -34,7 +34,7 @@ const getComponent = (props) => {
   }
 }
 
-export const StepManager = ({ id, store, keeperId, address }) => {
+export const StepManager = ({ id, store, upkeepId, address }) => {
   const asyncManager = useAsyncManager()
   const { step } = store.state
 
@@ -45,7 +45,7 @@ export const StepManager = ({ id, store, keeperId, address }) => {
       <Loading asyncManager={asyncManager} />
       <Pending asyncManager={asyncManager} />
       <Error asyncManager={asyncManager} />
-      {getComponent({ id, keeperId, address, store, asyncManager, reset })}
+      {getComponent({ id, upkeepId, address, store, asyncManager, reset })}
     </Modal>
   )
 }
