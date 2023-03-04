@@ -4,13 +4,12 @@ import { Button } from '@chakra-ui/react'
 import { steps } from '@ui/features/raffleDetail'
 import { RaffleStatus, isRaffleOwner } from '@ui/models'
 
-const onWithdrawClick = ({ update }) => update({ step: steps.WITHDRAW })
+const onWithdrawClick = ({ update }) => update({ step: steps.WITHDRAW_KEEPER })
 
-export const WithdrawButton = ({ update, raffle, address }) =>
+export const WithdrawKeeperButton = ({ update, raffle, address }) =>
   raffle?.status == RaffleStatus.FINISHED &&
-  isRaffleOwner(raffle, address) &&
-  !raffle.withdrawn && (
+  isRaffleOwner(raffle, address) && (
     <Button onClick={() => onWithdrawClick({ update })} variant="default">
-      Withdraw LINK
+      Withdraw Automation LINK
     </Button>
   )

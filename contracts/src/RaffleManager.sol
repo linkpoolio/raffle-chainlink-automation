@@ -6,7 +6,7 @@ import {
     AutomationRegistryInterface,
     State,
     Config
-} from "@chainlink/contracts/src/v0.8/interfaces/AutomationRegistryInterface1_3.sol";
+} from "@chainlink/contracts/src/v0.8/interfaces/AutomationRegistryInterface1_2.sol";
 import {VRFV2WrapperConsumerBase} from "@chainlink/contracts/src/v0.8/VRFV2WrapperConsumerBase.sol";
 import {VRFCoordinatorV2Interface} from "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
@@ -502,7 +502,7 @@ contract RaffleManager is
      *
      */
     function claimableAutomation(uint256 raffleId) external view returns (uint256 claimable) {
-        (,,, uint96 balance,,,,,) = i_registry.getUpkeep(raffles[raffleId].requestStatus.upkeepId);
+        (,,, uint96 balance,,,,) = i_registry.getUpkeep(raffles[raffleId].requestStatus.upkeepId);
         claimable = balance;
     }
 

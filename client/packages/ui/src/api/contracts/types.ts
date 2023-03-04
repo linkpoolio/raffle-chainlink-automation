@@ -34,11 +34,11 @@ export interface WithdrawLinkParams {
   id: number
 }
 
-export enum Service {
-  VRF = 0,
-  AUTOMATION = 1
+export interface CancelUpkeepParams {
+  keeperId: string // keeper id
 }
 
-export interface CancelUpkeepParams {
-  id: number // raffle id
+export interface WithdrawFundsParams {
+  keeperId: string // keeper id
+  address: string // address to withdraw funds to
 }

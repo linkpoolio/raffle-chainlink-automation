@@ -35,7 +35,8 @@ import {
   CheckStatusButton,
   PickWinnersButton,
   WithdrawButton,
-  CancelUpkeepButton
+  CancelUpkeepButton,
+  WithdrawKeeperButton
 } from '@ui/features/raffleDetail'
 import { formatUnixTs, formatFinishDate, shortenAddress } from '@ui/utils'
 
@@ -200,8 +201,10 @@ export const RaffleDetail = ({ id }) => {
                   update={store.update}
                   address={address}
                 />
+                {/* {console.log(raffle.keeperId.toString())} */}
                 <CancelUpkeepButton
                   raffle={raffle}
+                  keeperId={raffle.keeperId.toString()}
                   update={store.update}
                   address={address}
                 />
@@ -210,7 +213,17 @@ export const RaffleDetail = ({ id }) => {
                   update={store.update}
                   address={address}
                 />
-                <StepManager id={id} store={store} />
+                <WithdrawKeeperButton
+                  raffle={raffle}
+                  update={store.update}
+                  address={address}
+                />
+                <StepManager
+                  id={id}
+                  keeperId={raffle.keeperId}
+                  store={store}
+                  address={address}
+                />
               </HStack>
             </Center>
           )}

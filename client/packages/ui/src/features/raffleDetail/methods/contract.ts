@@ -153,11 +153,17 @@ export const getClaimableLink = async ({ id, asyncManager, update }) => {
   }
 }
 
-export const cancelUpkeep = async ({ id, asyncManager, success, update }) => {
+export const cancelUpkeep = async ({
+  id,
+  keeperId,
+  asyncManager,
+  success,
+  update
+}) => {
   try {
     asyncManager.start()
 
-    const payload: contracts.CancelUpkeepParams = { id }
+    const payload: contracts.CancelUpkeepParams = { keeperId }
     const { wait } = await contracts.cancelUpkeep(payload)
 
     asyncManager.waiting()
@@ -173,7 +179,59 @@ export const cancelUpkeep = async ({ id, asyncManager, success, update }) => {
 
     return true
   } catch (error) {
-    asyncManager.fail(`Could not cancel upkeep for raffle id \`${id}\``)
+    asyncManager.fail(`Upkeep has already been cancelled`)
+    return false
+  }
+}
+
+export const getClaimableAutomation = async ({ id, asyncManager, update }) => {
+  try {
+    asyncManager.start()
+
+    const claimableAutomation: number = await contracts.getClaimableAutomation(
+      id
+    )
+
+    asyncManager.success()
+
+    update({ claimableAutomation })
+    return true
+  } catch (error) {
+    asyncManager.fail(
+      `Could not determine how much LINK is able to be withdrawn from keeper for raffle id \`${id}\`.`
+    )
+    return false
+  }
+}
+
+export const withdrawFunds = async ({
+  id,
+  keeperId,
+  address,
+  asyncManager,
+  success,
+  update
+}) => {
+  try {
+    asyncManager.start()
+
+    const payload: contracts.WithdrawFundsParams = { keeperId, address }
+    const { wait } = await contracts.withdrawFunds(payload)
+
+    asyncManager.waiting()
+
+    const isSuccess = await wait().then((receipt) => receipt.status === 1)
+    if (!isSuccess)
+      throw new Error('Request to withdraw LINK was not successful')
+
+    asyncManager.success()
+
+    await getRaffle({ id, asyncManager, update })
+
+    success(true)
+    return true
+  } catch (error) {
+    asyncManager.fail(`Could not withdraw LINK for raffle id \`${id}\``)
     return false
   }
 }
