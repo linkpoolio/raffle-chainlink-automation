@@ -34,5 +34,5 @@ export interface RaffleInstance {
   winners: Array<string> // bytes32[]
   claimedPrizes: Array<string> // bytes32[]
   withdrawn: boolean
-  upkeepId: string
+  upkeepId: BigNumber
 }

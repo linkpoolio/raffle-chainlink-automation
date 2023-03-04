@@ -135,7 +135,7 @@ export const cancelUpkeep = async (params: contracts.CancelUpkeepParams) => {
       address: keeperRegistryContractAddress,
       abi: keeperRegistryABI,
       functionName: 'cancelUpkeep',
-      args: [upkeepId.toString()]
+      args: [upkeepId]
     })
     const data = await writeContract(config)
     return data
