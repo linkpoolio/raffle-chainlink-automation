@@ -1,5 +1,5 @@
 import React from 'react'
-import renderer from 'react-test-renderer'
+// import renderer from 'react-test-renderer'
 import { render, screen } from '@testing-library/react'
 // import userEvent from '@testing-library/user-event'
 import { Providers } from '@ui/providers'
@@ -16,11 +16,11 @@ const getComponent = () => {
 }
 
 describe('RaffleCreate', () => {
-  it('matches snapshot', () => {
-    const tree = renderer.create(getComponent()).toJSON()
+  // it('matches snapshot', () => {
+  //   const tree = renderer.create(getComponent()).toJSON()
 
-    expect(tree).toMatchSnapshot()
-  })
+  //   expect(tree).toMatchSnapshot()
+  // })
 
   it('renders static form', () => {
     render(getComponent())

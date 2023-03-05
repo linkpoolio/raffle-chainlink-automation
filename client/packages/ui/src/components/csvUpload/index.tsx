@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useCSVReader, formatFileSize } from 'react-papaparse'
 import { Flex, Text, Box } from '@chakra-ui/react'
 
-export const CSVUpload = ({ callback, isInvalid }) => {
+export const CSVUpload = ({ callback, isInvalid, details }) => {
   const { CSVReader } = useCSVReader()
   const [zoneHover, setZoneHover] = useState(false)
 
@@ -95,7 +95,7 @@ export const CSVUpload = ({ callback, isInvalid }) => {
                 </Flex>
               </>
             ) : (
-              <Text size="md"> Drop CSV file here or click to upload</Text>
+              <Text size="md">{details}</Text>
             )}
           </Flex>
         </>

@@ -88,7 +88,7 @@ export const pickWinners = async ({ id, asyncManager, success, update }) => {
      */
     asyncManager.start()
 
-    const value = BigNumber.from('1000000000000000000') // 1 LINK
+    const value = BigNumber.from('500000000000000000') // 0.5 LINK
     const payload: contracts.ResolveRaffleParams = { id, value }
     const { wait } = await contracts.resolveRaffle(payload)
 

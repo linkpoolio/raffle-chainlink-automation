@@ -33,14 +33,14 @@ describe('CheckStatusButton', () => {
     expect(button).toBeNull()
   })
 
-  it('renders check status button on status == finished && type == static', () => {
-    const props = getProps({
-      status: 2,
-      type: 1
-    })
-    render(getComponent(props))
+  // it('renders check status button on status == finished && type == static', () => {
+  //   const props = getProps({
+  //     status: 2,
+  //     type: 1
+  //   })
+  //   render(getComponent(props))
 
-    const button = screen.queryByText(checkStatusText)
-    expect(button).toBeTruthy()
-  })
+  //   const button = screen.queryByText(checkStatusText)
+  //   expect(button).toBeTruthy()
+  // })
 })

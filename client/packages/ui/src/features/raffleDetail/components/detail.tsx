@@ -36,9 +36,11 @@ import {
   PickWinnersButton,
   WithdrawButton,
   CancelUpkeepButton,
-  WithdrawKeeperButton
+  WithdrawKeeperButton,
+  CheckWinnersButton
 } from '@ui/features/raffleDetail'
 import { formatUnixTs, formatFinishDate, shortenAddress } from '@ui/utils'
+import { UploadWinners } from '@ui/features/raffleDetail'
 
 export const initialState = {
   raffle: null,
@@ -46,7 +48,8 @@ export const initialState = {
   identifier: null,
   participantStatus: null,
   isParticipant: null,
-  claimableLink: null
+  claimableLink: null,
+  participants: []
 }
 
 const Row = ({ name, value }) => {
@@ -195,12 +198,14 @@ export const RaffleDetail = ({ id }) => {
                   update={store.update}
                   raffle={raffle}
                   identifier={store.state.identifier}
+                  address={address}
                 />
                 <PickWinnersButton
                   raffle={raffle}
                   update={store.update}
                   address={address}
                 />
+
                 <CancelUpkeepButton
                   raffle={raffle}
                   update={store.update}
@@ -216,15 +221,29 @@ export const RaffleDetail = ({ id }) => {
                   update={store.update}
                   address={address}
                 />
+                <CheckWinnersButton
+                  raffle={raffle}
+                  update={store.update}
+                  address={address}
+                  uploaded={store.state.uploaded}
+                />
                 <StepManager
                   id={id}
                   upkeepId={raffle.upkeepId}
                   store={store}
                   address={address}
+                  raffle={raffle}
                 />
               </HStack>
             </Center>
           )}
+          <Center h="60px">
+            <UploadWinners
+              update={store.update}
+              raffle={raffle}
+              address={address}
+            />
+          </Center>
         </Box>
       </Container>
     )

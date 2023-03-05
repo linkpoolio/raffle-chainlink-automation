@@ -32,6 +32,7 @@ export const FormStatic = ({ update, validation }) => {
         <CSVUpload
           callback={onCsvUpload}
           isInvalid={!!validation['participants']}
+          details="Drop CSV file here or click to upload"
         />
       </Control>
     </GridItem>

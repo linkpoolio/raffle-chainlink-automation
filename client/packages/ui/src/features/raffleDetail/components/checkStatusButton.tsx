@@ -1,13 +1,13 @@
 import React from 'react'
 import { Button } from '@chakra-ui/react'
-
 import { steps } from '@ui/features/raffleDetail'
 import {
   RaffleStatus,
   RaffleType,
   isRaffleParticipant,
   isRaffleWinner,
-  isRaffleClaimedPrize
+  isRaffleClaimedPrize,
+  isRaffleOwner
 } from '@ui/models'
 import { ethers } from 'ethers'
 
@@ -40,6 +40,7 @@ const onParticipantStatusClick = async ({ update, raffle, identifier }) => {
 
 export const CheckStatusButton = (props) => {
   if (
+    !isRaffleOwner(props.raffle, props.address) &&
     props.raffle?.status === RaffleStatus.FINISHED &&
     (props.raffle?.type === RaffleType.STATIC ||
       (props.identifier &&

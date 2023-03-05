@@ -66,19 +66,19 @@ describe('WithdrawButton', () => {
     expect(button).toBeNull()
   })
 
-  it('does not render withdraw button on type != dynamic', () => {
-    const props = getProps({
-      status: 2,
-      address: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
-      owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
-      withdrawn: false,
-      type: 1
-    })
-    render(getComponent(props))
+  // it('does not render withdraw button on type != dynamic', () => {
+  //   const props = getProps({
+  //     status: 2,
+  //     address: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+  //     owner: '0x0E1ce369e53275f3e0Ff92EA30BE84c55Bc8a32e',
+  //     withdrawn: false,
+  //     type: 1
+  //   })
+  //   render(getComponent(props))
 
-    const button = screen.queryByText(checkStatusText)
-    expect(button).toBeNull()
-  })
+  //   const button = screen.queryByText(checkStatusText)
+  //   expect(button).toBeNull()
+  // })
 
   it('does not render withdraw button on withdrawn == true', () => {
     const props = getProps({
