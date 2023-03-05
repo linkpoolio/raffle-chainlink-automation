@@ -50,12 +50,14 @@ export const WithdrawKeeper = ({
             You have {claimableAutomation} LINK available to withdraw.
           </Text>
           <Flex mt="2" justify="end">
-            <Button
-              variant="default"
-              isDisabled={asyncManager.loading || asyncManager.pending}
-              onClick={onWithdraw}>
-              Withdraw
-            </Button>
+            {claimableAutomation !== 0 ? (
+              <Button
+                variant="default"
+                isDisabled={asyncManager.loading || asyncManager.pending}
+                onClick={onWithdraw}>
+                Withdraw
+              </Button>
+            ) : null}
           </Flex>
         </>
       )}

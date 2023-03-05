@@ -10,6 +10,7 @@ import {
   Withdraw,
   WithdrawKeeper,
   CancelUpkeep,
+  CheckWinners,
   steps
 } from '@ui/features/raffleDetail'
 
@@ -29,12 +30,14 @@ const getComponent = (props) => {
       return <WithdrawKeeper {...props} />
     case steps.CANCEL_UPKEEP:
       return <CancelUpkeep {...props} />
+    case steps.CHECK_WINNERS:
+      return <CheckWinners {...props} />
     default:
       return null
   }
 }
 
-export const StepManager = ({ id, store, upkeepId, address }) => {
+export const StepManager = ({ id, store, upkeepId, address, raffle }) => {
   const asyncManager = useAsyncManager()
   const { step } = store.state
 
@@ -45,7 +48,15 @@ export const StepManager = ({ id, store, upkeepId, address }) => {
       <Loading asyncManager={asyncManager} />
       <Pending asyncManager={asyncManager} />
       <Error asyncManager={asyncManager} />
-      {getComponent({ id, upkeepId, address, store, asyncManager, reset })}
+      {getComponent({
+        id,
+        upkeepId,
+        address,
+        store,
+        asyncManager,
+        reset,
+        raffle
+      })}
     </Modal>
   )
 }

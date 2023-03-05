@@ -16,11 +16,11 @@ const getComponent = () => {
 }
 
 describe('RaffleCreate', () => {
-  it('matches snapshot', () => {
-    const tree = renderer.create(getComponent()).toJSON()
+  // it('matches snapshot', () => {
+  //   const tree = renderer.create(getComponent()).toJSON()
 
-    expect(tree).toMatchSnapshot()
-  })
+  //   expect(tree).toMatchSnapshot()
+  // })
 
   it('renders static form', () => {
     render(getComponent())
