@@ -40,9 +40,9 @@ const onParticipantStatusClick = async ({ update, raffle, identifier }) => {
 
 export const CheckStatusButton = (props) => {
   if (
-    !isRaffleOwner(props.raffle, props.address) &&
     props.raffle?.status === RaffleStatus.FINISHED &&
-    (props.raffle?.type === RaffleType.STATIC ||
+    ((props.raffle?.type === RaffleType.STATIC &&
+      !isRaffleOwner(props.raffle, props.address)) ||
       (props.identifier &&
         isRaffleParticipant(props.raffle, hashedUserAddress(props.identifier))))
   ) {

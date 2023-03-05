@@ -12,7 +12,7 @@ export const CancelUpkeepButton = ({ update, raffle, address }) =>
     <Tooltip
       hasArrow
       arrowSize={10}
-      placement="left"
+      placement="top"
       label="Upkeep must be cancelled to withdraw Automation LINK">
       <Button onClick={() => onCancelClick({ update })} variant="default">
         Cancel Upkeep

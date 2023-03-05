@@ -1,7 +1,7 @@
 import React from 'react'
 import { ethers } from 'ethers'
 import { GridItem } from '@chakra-ui/react'
-import { RaffleStatus, isRaffleOwner } from '@ui/models'
+import { RaffleStatus, isRaffleOwner, RaffleType } from '@ui/models'
 import { CSVUpload } from '@ui/components'
 
 export const initialStaticState = {
@@ -20,6 +20,7 @@ export const UploadWinners = ({ update, raffle, address }) => {
   }
   if (
     raffle?.status == RaffleStatus.FINISHED &&
+    raffle?.type === RaffleType.STATIC &&
     isRaffleOwner(raffle, address)
   ) {
     return (

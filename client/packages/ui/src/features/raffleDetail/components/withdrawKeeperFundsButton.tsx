@@ -12,7 +12,7 @@ export const WithdrawKeeperButton = ({ update, raffle, address }) =>
     <Tooltip
       hasArrow
       arrowSize={10}
-      placement="right"
+      placement="top"
       label="Block time must be reached before withdrawal is available">
       <Button onClick={() => onWithdrawClick({ update })} variant="default">
         Withdraw Automation LINK
