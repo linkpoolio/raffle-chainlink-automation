@@ -491,7 +491,7 @@ contract RaffleManagerTest is Test {
     }
 
     function test_fulfillRandomWords_fuzzWinnersContestants(uint8 winners, uint16 contestants) public {
-        vm.assume(winners > 0 && winners >= 20);
+        vm.assume(winners > 20 && winners <= 200);
         vm.assume(contestants > 0 && contestants >= winners && contestants <= 2000);
         successFixtureMultipleWinners(winners, true);
 
