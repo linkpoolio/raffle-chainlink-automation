@@ -11,6 +11,7 @@ local = "${LOCAL_RPC_URL}"
 sepolia = "${SEPOLIA_RPC_URL}"
 fuji = "${FUJI_RPC_URL}"
 mumbai = "${MUMBAI_RPC_URL}"
+binance = "${BINANCE_RPC_URL}"
 
 [invariant]
 runs = 500

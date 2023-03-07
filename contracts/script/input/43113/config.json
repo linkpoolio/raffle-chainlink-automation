@@ -7,5 +7,5 @@
   "callbackGasLimit": 600000,
   "registrarAddress": "0xDb8e8e2ccb5C033938736aa89Fe4fa1eDfD15a1d",
   "whaleAddress": "0x4281ecf07378ee595c564a59048801330f3084ee",
-  "automationCallbackGas": 500000
+  "automationCallbackGas": 5000000
 }

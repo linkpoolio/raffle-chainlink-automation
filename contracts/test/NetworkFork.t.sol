@@ -9,6 +9,7 @@ import {ERC20Mock} from "@src/mock/ERC20Mock.sol";
 import {ERC677Mock} from "@src/mock/ERC677Mock.sol";
 import {VRFV2WrapperMock} from "@src/mock/VRFV2WrapperMock.sol";
 import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
+import {IKeeperRegistry} from "@src/interfaces/IKeeperRegistry.sol";
 
 contract RaffleManagerNetworkForkTest is Test {
     using stdJson for string;
@@ -116,5 +117,10 @@ contract RaffleManagerNetworkForkTest is Test {
 
         vm.prank(raffleAdmin);
         raffleManager.claimableAutomation(0);
+    }
+
+    function testFork_maxPaymentForGas() public view {
+        uint96 payment = IKeeperRegistry(config.keepersRegistry).getMaxPaymentForGas(5_000_000);
+        console.log("Max payment for gas: ", payment);
     }
 }

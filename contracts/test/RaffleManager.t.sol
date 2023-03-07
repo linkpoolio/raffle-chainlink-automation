@@ -844,4 +844,47 @@ contract RaffleManagerTest is Test {
         }
         assertEq(totalClaimed, users.length);
     }
+
+    function test_fulfillRandomWords_200winners() public {
+        uint8 winners = 200;
+        successFixtureMultipleWinners(winners, true);
+
+        for (uint256 i = 0; i < 2000; i++) {
+            address user = makeAddr(string(abi.encodePacked(i)));
+            vm.deal(user, 1 ether);
+            vm.prank(user);
+            raffleManager.enterRaffle{value: 1 ether}(0, 1, new bytes32[](0));
+        }
+
+        vm.prank(admin);
+        customLINK.transfer(address(raffleAdmin), 1 ether);
+
+        vm.prank(raffleAdmin);
+        customLINK.transferAndCall(address(raffleManager), 0.1 ether, bytes(abi.encode(0)));
+        vrfMock.fulfillRandomWords(1, address(raffleManager));
+        RaffleManager.RaffleInstance memory r = raffleManager.getRaffle(0);
+
+        assertEq(uint8(r.raffleState), uint8(3));
+
+        vm.prank(raffleAdmin);
+        (bool upkeepNeeded, bytes memory performData) = raffleManager.checkUpkeep(abi.encode(0));
+        assertEq(upkeepNeeded, true);
+        (uint256 id, bytes32[] memory users) = abi.decode(performData, (uint256, bytes32[]));
+        assertEq(id, 0);
+
+        vm.prank(address(keeperAddress));
+        vm.expectEmit(true, true, true, true);
+        emit RaffleWon(0, users);
+        raffleManager.performUpkeep(performData);
+
+        bool mul = false;
+        for (uint256 i = 0; i < r.winners.length; i++) {
+            for (uint256 j = i + 1; j < r.winners.length; j++) {
+                if (r.winners[i] == r.winners[j]) {
+                    mul = true;
+                }
+            }
+            assertTrue(mul == false);
+        }
+    }
 }
