@@ -4,7 +4,7 @@ install:
 	forge install --no-git Openzeppelin/openzeppelin-contracts foundry-rs/forge-std smartcontractkit/chainlink PaulRBerg/prb-math@v3
 
 deploy:
-	forge script script/RaffleManager.s.sol:RaffleManagerScript --rpc-url ${RPC_URL} --etherscan-api-key ${EXPLORER_KEY} --broadcast --verify -vvvv
+	forge script script/VRFDirectFunding.s.sol:VRFDirectFundingScript --rpc-url ${RPC_URL} --etherscan-api-key ${EXPLORER_KEY} --broadcast --verify -vvvv
 
 
 deploy-local:
