@@ -165,7 +165,7 @@ export const RaffleCreate = () => {
         <GridItem>
           <Control
             label="Number of winners"
-            helper="Max 120 winners"
+            helper="Max 200 winners"
             isInvalid={!!validation['totalWinners']}
             errorMessage={validation['totalWinners']}>
             <Input
