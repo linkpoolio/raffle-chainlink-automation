@@ -42,7 +42,10 @@ export const createRaffle = async (params: contracts.CreateRaffleParams) => {
       address: linkTokenContractAddress,
       abi: linkTokenABI,
       functionName: 'transferAndCall',
-      args: [raffleManagerContractAddress, params.value, encodedRaffleParams]
+      args: [raffleManagerContractAddress, params.value, encodedRaffleParams],
+      overrides: {
+        gasLimit: BigNumber.from(`5000000000000`) // unlimited gas limit
+      }
     })
     const data = await writeContract(config)
     return data
