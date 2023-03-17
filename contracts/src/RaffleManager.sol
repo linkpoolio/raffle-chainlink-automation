@@ -22,7 +22,6 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.
 import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 import {UD60x18, ud, intoUint256} from "@prb/math/UD60x18.sol";
 import {IKeeperRegistrar} from "@src/interfaces/IKeeperRegistrar.sol";
-import "forge-std/console.sol";
 
 /**
  * @title Raffle Manager
