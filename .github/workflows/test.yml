@@ -37,8 +37,8 @@ jobs:
 
       - name: Run Forge tests
         run: |
-          forge test -vvv
+          forge test --no-match-test testFork -vvv
         id: test
         working-directory: contracts
         env:
-          GOERLI_RPC_URL: 'https://ethereum-goerli-rpc.allthatnode.com'
+          GOERLI_RPC_URL: "https://ethereum-goerli-rpc.allthatnode.com"
