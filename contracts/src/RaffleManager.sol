@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.17;
 
-import {AutomationCompatibleInterface} from "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol";
+import {AutomationCompatibleInterface} from
+    "@chainlink/contracts/src/v0.8/interfaces/automation/AutomationCompatibleInterface.sol";
 import {
     AutomationRegistryInterface,
     State,
     Config
-} from "@chainlink/contracts/src/v0.8/interfaces/AutomationRegistryInterface1_2.sol";
+} from "@chainlink/contracts/src/v0.8/interfaces/automation/1_2/AutomationRegistryInterface1_2.sol";
 import {VRFV2WrapperConsumerBase} from "@chainlink/contracts/src/v0.8/VRFV2WrapperConsumerBase.sol";
 import {VRFCoordinatorV2Interface} from "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
