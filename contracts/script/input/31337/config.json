@@ -1,8 +1,11 @@
 {
   "name": "anvil",
-  "linkAddress": "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
-  "wrapperAddress": "0x708701a1DfF4f478de54383E49a627eD4852C816",
-  "keepersRegistry": "0x02777053d6764996e594c3E88AF1D58D5363a2e6",
+  "linkAddress": "0x779877A7B0D9E8603169DdbD7836e478b4624789",
+  "wrapperAddress": "0xab18414CD93297B0d12ac29E63Ca20f515b3DB46",
+  "keepersRegistry": "0xE16Df59B887e3Caa439E0b29B42bA2e7976FD8b2",
   "requestConfirmations": 3,
-  "callbackGasLimit": 1000000
+  "callbackGasLimit": 500000,
+  "registrarAddress": "0xE16Df59B887e3Caa439E0b29B42bA2e7976FD8b2",
+  "whaleAddress": "0x61E5E1ea8fF9Dc840e0A549c752FA7BDe9224e99",
+  "automationCallbackGas": 500000
 }
