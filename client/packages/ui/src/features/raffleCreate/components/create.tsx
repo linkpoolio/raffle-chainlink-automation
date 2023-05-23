@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useHistory } from 'react-router-dom'
 import { useAccount } from 'wagmi'
+import { Link as RouterLink } from 'react-router-dom'
 import {
   Container,
   Heading,
@@ -10,9 +11,9 @@ import {
   Input,
   Grid,
   GridItem,
-  Button
+  Button,
+  Link
 } from '@chakra-ui/react'
-
 import { Routes } from '@ui/Routes'
 import { Error, Control } from '@ui/components'
 import { useAsyncManager, useStore } from '@ui/hooks'
@@ -132,6 +133,9 @@ export const RaffleCreate = () => {
         <Text fontSize="lg" color="brand.gray_70" fontWeight="600">
           Create dynamic or static raffle
         </Text>
+        <Link as={RouterLink} to={Routes.FAQ} color="brand.blue">
+          Need help? Check out our FAQ page.
+        </Link>
       </Center>
       <Grid templateColumns="repeat(3, 1fr)" gap={14} rowGap={14} mb={12}>
         <GridItem>

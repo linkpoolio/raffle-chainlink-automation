@@ -30,7 +30,6 @@ import {
 } from '@ui/models'
 import {
   StepManager,
-  getRaffle,
   JoinButton,
   CheckStatusButton,
   PickWinnersButton,
@@ -41,6 +40,7 @@ import {
 } from '@ui/features/raffleDetail'
 import { formatUnixTs, formatFinishDate, shortenAddress } from '@ui/utils'
 import { UploadWinners } from '@ui/features/raffleDetail'
+import { getRaffleHook } from '@ui/api/contracts'
 
 export const initialState = {
   raffle: null,
@@ -76,16 +76,16 @@ export const RaffleDetail = ({ id }) => {
   const asyncManager = useAsyncManager()
 
   const { raffle } = store.state
-  const componentDidMount = () => {
-    if (id) getRaffle({ id, update: store.update, asyncManager })
-  }
-  useEffect(componentDidMount, [])
+  getRaffleHook(store, id)
 
-  const addressOrRafleDidChange = () => {
+  console.log(raffle)
+
+  const addressOrRaffleDidChange = () => {
     if (raffle?.type == RaffleType.DYNAMIC)
       store.update({ identifier: address })
   }
-  useEffect(addressOrRafleDidChange, [address, raffle])
+  useEffect(addressOrRaffleDidChange, [address, raffle])
+
   return (
     raffle?.id && (
       <Container
@@ -146,6 +146,7 @@ export const RaffleDetail = ({ id }) => {
         </Center>
 
         <Box>
+          <Row name="ID" value={raffle.id} />
           <Row
             name="Status"
             value={

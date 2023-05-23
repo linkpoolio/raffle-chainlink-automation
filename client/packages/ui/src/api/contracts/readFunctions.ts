@@ -1,5 +1,6 @@
 import { readContract } from '@wagmi/core'
-
+import { useEffect } from 'react'
+import { useContractRead } from 'wagmi'
 import { env } from '@ui/config'
 import {
   transformRaffleItem,
@@ -40,6 +41,27 @@ export const getRaffle = async (id: number): Promise<RaffleInstance> => {
   } catch (error: any) {
     throw new Error(`Error fetching raffle from contract: ${error.message}`)
   }
+}
+
+export const getRaffleHook = (store, id) => {
+  const { data, isError } = useContractRead({
+    ...defaultOptions,
+    address: raffleManagerContractAddress,
+    functionName: 'getRaffle',
+    args: [id]
+  })
+
+  useEffect(() => {
+    const transformedData = transformRaffleItem(data)
+    if (
+      data &&
+      JSON.stringify(store.state.raffle) !== JSON.stringify(transformedData)
+    ) {
+      store.update({ raffle: transformedData })
+    }
+  }, [data, store])
+
+  return { data, isError }
 }
 
 export const getClaimableLink = async (id: number): Promise<number> => {
