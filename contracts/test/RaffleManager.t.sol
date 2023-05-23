@@ -887,4 +887,32 @@ contract RaffleManagerTest is Test {
             assertTrue(mul == false);
         }
     }
+
+    function test_checkIfWon_checkWonFromStatic() public {
+        staticRaffleFixture();
+        assertTrue(raffleManager.checkIfEntered(0, email));
+
+        vm.prank(admin);
+        customLINK.transfer(address(raffleAdmin), 5 ether);
+        vm.startPrank(raffleAdmin);
+        customLINK.transferAndCall(address(raffleManager), 2 ether, bytes(abi.encode(0)));
+        vrfMock.fulfillRandomWords(1, address(raffleManager));
+        vm.stopPrank();
+
+        vm.prank(raffleAdmin);
+        (bool upkeepNeeded, bytes memory performData) = raffleManager.checkUpkeep(abi.encode(0));
+        assertEq(upkeepNeeded, true);
+        (uint256 id, bytes32[] memory users) = abi.decode(performData, (uint256, bytes32[]));
+        assertEq(id, 0);
+        assertEq(users.length, 1);
+
+        vm.prank(address(keeperAddress));
+        vm.expectEmit(true, true, true, true);
+        emit RaffleWon(0, users);
+        raffleManager.performUpkeep(performData);
+        RaffleManager.RaffleInstance memory r = raffleManager.getRaffle(0);
+        for (uint256 i = 0; i < r.winners.length; i++) {
+            assertTrue(raffleManager.checkIfWon(0, email));
+        }
+    }
 }
