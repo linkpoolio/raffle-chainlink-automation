@@ -40,7 +40,7 @@ import {
 } from '@ui/features/raffleDetail'
 import { formatUnixTs, formatFinishDate, shortenAddress } from '@ui/utils'
 import { UploadWinners } from '@ui/features/raffleDetail'
-import { getRaffleHook } from '@ui/api/contracts'
+import { getRaffleHook } from '@ui/api/contracts/readFunctions'
 
 export const initialState = {
   raffle: null,
@@ -78,14 +78,11 @@ export const RaffleDetail = ({ id }) => {
   const { raffle } = store.state
   getRaffleHook(store, id)
 
-  console.log(raffle)
-
-  const addressOrRaffleDidChange = () => {
+  const addressOrRafleDidChange = () => {
     if (raffle?.type == RaffleType.DYNAMIC)
       store.update({ identifier: address })
   }
-  useEffect(addressOrRaffleDidChange, [address, raffle])
-
+  useEffect(addressOrRafleDidChange, [address, raffle])
   return (
     raffle?.id && (
       <Container
@@ -146,7 +143,7 @@ export const RaffleDetail = ({ id }) => {
         </Center>
 
         <Box>
-          <Row name="ID" value={raffle.id} />
+          <Row name="Raffle" value={raffle.id} />
           <Row
             name="Status"
             value={

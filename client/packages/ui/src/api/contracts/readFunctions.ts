@@ -44,14 +44,14 @@ export const getRaffle = async (id: number): Promise<RaffleInstance> => {
 }
 
 export const getRaffleHook = (store, id) => {
-  const { data, isError } = useContractRead({
+  const { data, isError, isLoading, isSuccess } = useContractRead({
     ...defaultOptions,
     address: raffleManagerContractAddress,
     functionName: 'getRaffle',
     args: [id]
   })
-
   useEffect(() => {
+    if (!id || !isSuccess) return
     const transformedData = transformRaffleItem(data)
     if (
       data &&
@@ -59,9 +59,9 @@ export const getRaffleHook = (store, id) => {
     ) {
       store.update({ raffle: transformedData })
     }
-  }, [data, store])
+  }, [data, store, id, isSuccess])
 
-  return { data, isError }
+  return { data, isError, isLoading, isSuccess }
 }
 
 export const getClaimableLink = async (id: number): Promise<number> => {
