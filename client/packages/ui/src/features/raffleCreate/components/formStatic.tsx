@@ -1,7 +1,6 @@
 import React from 'react'
 import { ethers } from 'ethers'
 import { GridItem } from '@chakra-ui/react'
-
 import { CSVUpload, Control } from '@ui/components'
 
 export const initialStaticState = {
@@ -18,6 +17,18 @@ export const FormStatic = ({ update, validation }) => {
     update({ participants })
   }
 
+  const downloadCSV = () => {
+    const exampleCSV = 'john\nsteve\nbrad'
+    const blob = new Blob([exampleCSV], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'example.csv'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   return (
     <GridItem colSpan={2}>
       <Control
@@ -26,7 +37,8 @@ export const FormStatic = ({ update, validation }) => {
         errorMessage={validation['participants']}
         helper={
           <>
-            <button>Click here to download</button> CSV file example
+            <button onClick={downloadCSV}>Click here to download</button> CSV
+            file example
           </>
         }>
         <CSVUpload
