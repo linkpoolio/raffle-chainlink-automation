@@ -87,7 +87,17 @@ export const pickWinners = async ({ id, asyncManager, success, txHash }) => {
      * and (b) the owner can withdraw excess link amount after the raffle has been resolved.
      */
     asyncManager.start()
-
+    let update: boolean
+    const raffle = await getRaffle({ id, asyncManager, update }, true)
+    if (typeof raffle === 'object') {
+      const totalWinners = raffle.totalWinners as number
+      const totalPar = raffle.contestantsAddresses as string[]
+      if (totalWinners > totalPar.length) {
+        throw new Error(
+          `Total winners cannot be greater than total participants`
+        )
+      }
+    }
     const value = BigNumber.from('100000000000000000') // 0.1 LINK
     const payload: contracts.ResolveRaffleParams = { id, value }
     const { wait, hash } = await contracts.resolveRaffle(payload)
@@ -105,7 +115,8 @@ export const pickWinners = async ({ id, asyncManager, success, txHash }) => {
     success(true)
     return true
   } catch (error) {
-    asyncManager.fail(`Could not pick winners for raffle id \`${id}\``)
+    asyncManager.fail(`
+    Could not pick winners for raffle id \`${id}\` \n${error}`)
     return false
   }
 }
