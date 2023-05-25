@@ -9,7 +9,8 @@ import {
   Flex,
   HStack,
   Divider,
-  useMediaQuery
+  useMediaQuery,
+  Wrap
 } from '@chakra-ui/react'
 
 import {
@@ -178,7 +179,7 @@ export const RaffleDetail = ({ id }) => {
           />
 
           <Center>
-            <HStack spacing="6">
+            <Wrap justify="center" spacing="6">
               <JoinButton
                 update={store.update}
                 raffle={raffle}
@@ -225,7 +226,7 @@ export const RaffleDetail = ({ id }) => {
                 address={address}
                 raffle={raffle}
               />
-            </HStack>
+            </Wrap>
           </Center>
           <Center h="60px">
             <UploadWinners

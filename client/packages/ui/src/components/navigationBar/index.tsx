@@ -46,6 +46,7 @@ export const NavigationBar = () => {
                   textTransform: 'none',
                   color: 'brand.primary'
                 }}
+                display={{ base: 'none', md: 'inline-flex' }}
                 href={Routes.RaffleList}>
                 Home
               </Link>
