@@ -28,11 +28,9 @@ export const PickWinners = ({ id, reset, asyncManager, store }) => {
         {txHash && (
           <Text>
             <Link
-              href={`${chain.blockExplorers.default}${txHash}#eventlog`}
-              color="brand.blue"
-              textDecoration="underline"
+              href={`${chain.blockExplorers.default.url}/tx/${txHash}/#eventlogs`}
               isExternal>
-              View VRF transaction
+              View VRF Request
             </Link>
           </Text>
         )}

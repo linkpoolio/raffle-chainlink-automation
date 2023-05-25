@@ -38,7 +38,7 @@ const faqList = [
 
 export const FAQ = () => {
   return (
-    <Container maxW="container.xl" mt="20">
+    <Container maxW="container.xl" mt="20" mb="20">
       <Heading size="2xl" fontWeight="700" mb="6">
         What are Chainlink Raffles?
       </Heading>
