@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Button, Text, Stack, Flex, Heading } from '@chakra-ui/react'
+import { Button, Text, Stack, Flex, Heading, Tooltip } from '@chakra-ui/react'
 
 export const CheckWinners = ({ store, reset }) => {
   const [winners, setWinners] = useState([])
@@ -46,9 +46,16 @@ export const CheckWinners = ({ store, reset }) => {
         ))}
       </Stack>
       <Flex mt="2" justify="end">
-        <Button variant="default" mr="4" onClick={exportToCSV}>
-          Export to CSV
-        </Button>
+        <Tooltip
+          hasArrow
+          arrowSize={10}
+          placement="top"
+          color="red.500"
+          label="Warning: You are exporting private data.">
+          <Button variant="default" mr="4" onClick={exportToCSV}>
+            Export to CSV
+          </Button>
+        </Tooltip>
         <Button variant="default" onClick={() => reset(store)}>
           Close
         </Button>
