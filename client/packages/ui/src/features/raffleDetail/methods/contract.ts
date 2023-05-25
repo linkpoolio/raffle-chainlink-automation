@@ -77,7 +77,7 @@ export const joinRaffle = async ({
   }
 }
 
-export const pickWinners = async ({ id, asyncManager, success, update }) => {
+export const pickWinners = async ({ id, asyncManager, success, txHash }) => {
   try {
     /*
      * @FeatureEnhancement
@@ -90,7 +90,7 @@ export const pickWinners = async ({ id, asyncManager, success, update }) => {
 
     const value = BigNumber.from('100000000000000000') // 0.1 LINK
     const payload: contracts.ResolveRaffleParams = { id, value }
-    const { wait } = await contracts.resolveRaffle(payload)
+    const { wait, hash } = await contracts.resolveRaffle(payload)
 
     asyncManager.waiting()
 
@@ -99,6 +99,8 @@ export const pickWinners = async ({ id, asyncManager, success, update }) => {
       throw new Error('Request to pick winners was not successful')
 
     asyncManager.success()
+
+    txHash(hash)
 
     success(true)
     return true

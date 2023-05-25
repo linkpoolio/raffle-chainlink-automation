@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from 'react'
-import { Button, Text, Flex, Heading } from '@chakra-ui/react'
+import { Button, Text, Flex, Heading, Link } from '@chakra-ui/react'
+import { useNetwork } from 'wagmi'
 
 import { pickWinners } from '@ui/features/raffleDetail'
 
 export const PickWinners = ({ id, reset, asyncManager, store }) => {
   const [success, setSuccess] = useState(false)
+  const [txHash, setTxHash] = useState(null)
+  const { chain } = useNetwork()
 
-  const componentDidMount = () => {
+  useEffect(() => {
     pickWinners({
       id,
       asyncManager,
       success: setSuccess,
-      update: store.update
+      txHash: setTxHash
     })
-  }
-  useEffect(componentDidMount, [])
+  }, [])
 
   return (
     success && (
@@ -23,6 +25,17 @@ export const PickWinners = ({ id, reset, asyncManager, store }) => {
           Pick Winners
         </Heading>
         <Text>Successfully picked winners for raffle id `{id}`.</Text>
+        {txHash && (
+          <Text>
+            <Link
+              href={`${chain.blockExplorers.default}${txHash}#eventlog`}
+              color="brand.blue"
+              textDecoration="underline"
+              isExternal>
+              View VRF transaction
+            </Link>
+          </Text>
+        )}
         <Flex mt="2" justify="end">
           <Button variant="default" onClick={() => reset(store)}>
             Close

@@ -133,7 +133,11 @@ export const RaffleCreate = () => {
         <Text fontSize="lg" color="brand.gray_70" fontWeight="600">
           Create dynamic or static raffle
         </Text>
-        <Link as={RouterLink} to={Routes.FAQ} color="brand.blue">
+        <Link
+          as={RouterLink}
+          to={Routes.FAQ}
+          color="brand.blue"
+          textDecoration="underline">
           Need help? Check out our FAQ page.
         </Link>
       </Center>
