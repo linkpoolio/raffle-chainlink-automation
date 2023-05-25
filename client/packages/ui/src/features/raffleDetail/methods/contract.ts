@@ -100,8 +100,6 @@ export const pickWinners = async ({ id, asyncManager, success, update }) => {
 
     asyncManager.success()
 
-    await getRaffle({ id, asyncManager, update })
-
     success(true)
     return true
   } catch (error) {
