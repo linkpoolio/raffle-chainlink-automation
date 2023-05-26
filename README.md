@@ -19,8 +19,9 @@ $ git clone git@github.com:linkpoolio/raffle-chainlink-automation.git
 
 ### 3. Setup contracts environment variables
 
-```bash
+See `.env.example` This is set in your root directory.
 
+```bash
 # Network RPCs
 export RPC_URL=
 
@@ -35,7 +36,7 @@ export LOCAL_RPC_URL="http://localhost:8545"
 export ANVIL_PRIVATE_KEY="" # Get from anvil after running for the first time, see below
 
 # UI
-export UI_RAFFLE_MANAGER_CONTRACT_ADDRESS= # Get from anvil after deploying contract 
+export UI_RAFFLE_MANAGER_CONTRACT_ADDRESS= # Get from anvil after deploying contract
 export UI_LINK_TOKEN_CONTRACT_ADDRESS=
 export UI_KEEPER_REGISTRY_CONTRACT_ADDRESS=
 ```
@@ -141,3 +142,31 @@ $ yarn tsc
 $ yarn lint
 $ yarn prettier
 ```
+
+### 8. Notes
+
+#### 1. Balance Amounts
+
+As a creator of a raffle, the minimum token requirments are needed to ensure that your raffle is created and finished without issues. All unused LINK token amounts are able to be withdrawn after completion of raffle.
+
+- 5.1 LINK
+  - 0.1 (VRF request)
+  - 5 (Automation subscription)
+
+#### 2. Raffle Status
+
+After picking winners is initiated in the UI, the status of the raffle is moved to `pending`. Each subsequent block is then checked to see if the VRF request has been finished and winners picked. Once found, the status is automatically moved to `finished`. The winners are then able to be viewed and leftover LINK is able to be withdrawn.
+
+#### 3. Helper Functions
+
+To work with both `address` and `string` types for contestant identifiers, identifiers are hashed and formed as `bytes32` to preserve consistency and privacy over both `Dynamic/Static` raffles. To help users who are added into static raffles by the raffle admin find out if they were entered or won, two helper functions have been created.
+
+```solidity
+function checkIfWon(uint256 raffleId, string memory user) external view returns (bool)
+```
+
+```solidity
+function checkIfEntered(uint256 raffleId, string memory user) external view returns (bool)
+```
+
+Both helper functions allow for static raffle users to add their unique identifer `(ie. user@protonmail.com)` and raffle ID to check if they were entered or if they have won the raffle without releasing senative information.
