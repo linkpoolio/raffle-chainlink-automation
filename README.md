@@ -36,7 +36,8 @@ export ANVIL_PRIVATE_KEY="" # Get from anvil after running for the first time, s
 
 # UI
 export UI_RAFFLE_MANAGER_CONTRACT_ADDRESS= # Get from anvil after deploying contract 
-export UI_LINK_TOKEN_CONTRACT_ADDRESS= 
+export UI_LINK_TOKEN_CONTRACT_ADDRESS=
+export UI_KEEPER_REGISTRY_CONTRACT_ADDRESS=
 ```
 
 ### 4. Setup Wallet
@@ -62,7 +63,7 @@ $ docker compose up
 
 ### 1. Setup Foundry
 
-([Installation instructions](https://book.getfoundry.sh/getting-started/installation)
+[Installation instructions](https://book.getfoundry.sh/getting-started/installation)
 
 ```bash
 # Download foundry

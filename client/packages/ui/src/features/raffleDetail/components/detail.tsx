@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useAccount } from 'wagmi'
 import {
   Container,
@@ -9,7 +9,8 @@ import {
   Flex,
   HStack,
   Divider,
-  useMediaQuery
+  useMediaQuery,
+  Wrap
 } from '@chakra-ui/react'
 
 import {
@@ -30,7 +31,6 @@ import {
 } from '@ui/models'
 import {
   StepManager,
-  getRaffle,
   JoinButton,
   CheckStatusButton,
   PickWinnersButton,
@@ -41,6 +41,7 @@ import {
 } from '@ui/features/raffleDetail'
 import { formatUnixTs, formatFinishDate, shortenAddress } from '@ui/utils'
 import { UploadWinners } from '@ui/features/raffleDetail'
+import { getRaffleHook } from '@ui/api/contracts/readFunctions'
 
 export const initialState = {
   raffle: null,
@@ -70,22 +71,13 @@ export const RaffleDetail = ({ id }) => {
   const [isLargerThanMd] = useMediaQuery('(min-width: 48em)')
   const { address } = useAccount()
   const store = useStore({
-    ...initialState,
-    identifier: address ? address : initialState.identifier
+    ...initialState
   })
   const asyncManager = useAsyncManager()
 
   const { raffle } = store.state
-  const componentDidMount = () => {
-    if (id) getRaffle({ id, update: store.update, asyncManager })
-  }
-  useEffect(componentDidMount, [])
+  getRaffleHook(store, id)
 
-  const addressOrRafleDidChange = () => {
-    if (raffle?.type == RaffleType.DYNAMIC)
-      store.update({ identifier: address })
-  }
-  useEffect(addressOrRafleDidChange, [address, raffle])
   return (
     raffle?.id && (
       <Container
@@ -146,6 +138,7 @@ export const RaffleDetail = ({ id }) => {
         </Center>
 
         <Box>
+          <Row name="Raffle" value={raffle.id} />
           <Row
             name="Status"
             value={
@@ -185,58 +178,56 @@ export const RaffleDetail = ({ id }) => {
             value={isLargerThanMd ? raffle.owner : shortenAddress(raffle.owner)}
           />
 
-          {raffle.status !== RaffleStatus.RESOLVING && (
-            <Center>
-              <HStack spacing="6">
-                <JoinButton
-                  update={store.update}
-                  raffle={raffle}
-                  address={address}
-                  identifier={store.state.identifier}
-                />
-                <CheckStatusButton
-                  update={store.update}
-                  raffle={raffle}
-                  identifier={store.state.identifier}
-                  address={address}
-                />
-                <PickWinnersButton
-                  raffle={raffle}
-                  update={store.update}
-                  address={address}
-                />
+          <Center>
+            <Wrap justify="center" spacing="6">
+              <JoinButton
+                update={store.update}
+                raffle={raffle}
+                address={address}
+                identifier={address}
+              />
+              <CheckStatusButton
+                update={store.update}
+                raffle={raffle}
+                identifier={address}
+                address={address}
+              />
+              <PickWinnersButton
+                raffle={raffle}
+                update={store.update}
+                address={address}
+              />
 
-                <CancelUpkeepButton
-                  raffle={raffle}
-                  update={store.update}
-                  address={address}
-                />
-                <WithdrawButton
-                  raffle={raffle}
-                  update={store.update}
-                  address={address}
-                />
-                <WithdrawKeeperButton
-                  raffle={raffle}
-                  update={store.update}
-                  address={address}
-                />
-                <CheckWinnersButton
-                  raffle={raffle}
-                  update={store.update}
-                  address={address}
-                  uploaded={store.state.uploaded}
-                />
-                <StepManager
-                  id={id}
-                  upkeepId={raffle.upkeepId}
-                  store={store}
-                  address={address}
-                  raffle={raffle}
-                />
-              </HStack>
-            </Center>
-          )}
+              <CancelUpkeepButton
+                raffle={raffle}
+                update={store.update}
+                address={address}
+              />
+              <WithdrawButton
+                raffle={raffle}
+                update={store.update}
+                address={address}
+              />
+              <WithdrawKeeperButton
+                raffle={raffle}
+                update={store.update}
+                address={address}
+              />
+              <CheckWinnersButton
+                raffle={raffle}
+                update={store.update}
+                address={address}
+                uploaded={store.state.uploaded}
+              />
+              <StepManager
+                id={id}
+                upkeepId={raffle.upkeepId}
+                store={store}
+                address={address}
+                raffle={raffle}
+              />
+            </Wrap>
+          </Center>
           <Center h="60px">
             <UploadWinners
               update={store.update}

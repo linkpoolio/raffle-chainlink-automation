@@ -77,7 +77,7 @@ export const joinRaffle = async ({
   }
 }
 
-export const pickWinners = async ({ id, asyncManager, success, update }) => {
+export const pickWinners = async ({ id, asyncManager, success, txHash }) => {
   try {
     /*
      * @FeatureEnhancement
@@ -87,10 +87,20 @@ export const pickWinners = async ({ id, asyncManager, success, update }) => {
      * and (b) the owner can withdraw excess link amount after the raffle has been resolved.
      */
     asyncManager.start()
-
+    let update: boolean
+    const raffle = await getRaffle({ id, asyncManager, update }, true)
+    if (typeof raffle === 'object') {
+      const totalWinners = raffle.totalWinners as number
+      const totalPar = raffle.contestantsAddresses as string[]
+      if (totalWinners > totalPar.length) {
+        throw new Error(
+          `Total winners cannot be greater than total participants`
+        )
+      }
+    }
     const value = BigNumber.from('100000000000000000') // 0.1 LINK
     const payload: contracts.ResolveRaffleParams = { id, value }
-    const { wait } = await contracts.resolveRaffle(payload)
+    const { wait, hash } = await contracts.resolveRaffle(payload)
 
     asyncManager.waiting()
 
@@ -100,12 +110,13 @@ export const pickWinners = async ({ id, asyncManager, success, update }) => {
 
     asyncManager.success()
 
-    await getRaffle({ id, asyncManager, update })
+    txHash(hash)
 
     success(true)
     return true
   } catch (error) {
-    asyncManager.fail(`Could not pick winners for raffle id \`${id}\``)
+    asyncManager.fail(`
+    Could not pick winners for raffle id \`${id}\` \n${error}`)
     return false
   }
 }

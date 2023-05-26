@@ -41,7 +41,10 @@ export const StepManager = ({ id, store, upkeepId, address, raffle }) => {
   const asyncManager = useAsyncManager()
   const { step } = store.state
 
-  const reset = (_store) => _store.update({ step: null })
+  const reset = (_store) => {
+    _store.update({ step: null })
+    asyncManager.reset()
+  }
 
   return (
     <Modal onClose={() => reset(store)} isOpen={!!step}>

@@ -46,8 +46,22 @@ export const NavigationBar = () => {
                   textTransform: 'none',
                   color: 'brand.primary'
                 }}
+                display={{ base: 'none', md: 'inline-flex' }}
                 href={Routes.RaffleList}>
                 Home
+              </Link>
+              <Link
+                as={RouterLink}
+                to={Routes.FAQ}
+                fontSize="sm"
+                color="brand.gray_70"
+                fontWeight={600}
+                _hover={{
+                  textTransform: 'none',
+                  color: 'brand.primary'
+                }}
+                href={Routes.FAQ}>
+                FAQ
               </Link>
             </Flex>
             <Flex alignItems="center" justifyContent="space-between" gap="6">

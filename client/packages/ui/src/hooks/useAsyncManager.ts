@@ -48,6 +48,7 @@ export const useAsyncManager = () => {
     start,
     waiting,
     success,
-    fail
+    fail,
+    reset
   }
 }

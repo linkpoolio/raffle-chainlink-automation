@@ -5,7 +5,7 @@ import { Routes } from '@ui/Routes'
 import { RaffleList } from '@ui/features/raffleList'
 import { RaffleDetail } from '@ui/features/raffleDetail'
 import { RaffleCreate } from '@ui/features/raffleCreate'
-import { AuthenticatedRoute, Hero } from '@ui/components'
+import { AuthenticatedRoute, Hero, FAQ } from '@ui/components'
 
 export const App = () => (
   <>
@@ -25,6 +25,8 @@ export const App = () => (
         path={Routes.RaffleDetail}
         render={({ match }) => <RaffleDetail id={match.params.id} />}
       />
+
+      <Route path={Routes.FAQ} render={FAQ} />
 
       <Route exact path={Routes.RaffleCreate}>
         <AuthenticatedRoute connected={true}>
