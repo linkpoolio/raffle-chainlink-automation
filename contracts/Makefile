@@ -1,7 +1,7 @@
 -include .env
 
 install:
-	forge install --no-git Openzeppelin/openzeppelin-contracts foundry-rs/forge-std smartcontractkit/chainlink@v1.13.0 PaulRBerg/prb-math@v3
+	forge install --no-git Openzeppelin/openzeppelin-contracts@v4.8.1 foundry-rs/forge-std smartcontractkit/chainlink@v1.13.0 PaulRBerg/prb-math@v3
 
 deploy:
 	forge script script/RaffleManager.s.sol:RaffleManagerScript --rpc-url ${RPC_URL} --etherscan-api-key ${EXPLORER_KEY} --broadcast --verify -vvvv
