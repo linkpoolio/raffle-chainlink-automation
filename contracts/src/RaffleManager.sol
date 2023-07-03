@@ -43,7 +43,6 @@ contract RaffleManager is
     AutomationRegistryInterface public immutable i_registry;
     address public immutable registrar;
     address public owner;
-    address public keeperRegistryAddress;
     address public linkTokenAddress;
     uint256[] public stagedRaffles;
     EnumerableSet.UintSet private liveRaffles;
@@ -150,7 +149,6 @@ contract RaffleManager is
         address indexed winner,
         uint256 value
     );
-    event KeeperRegistryAddressUpdated(address oldAddress, address newAddress);
     event RaffleOwnerUpdated(
         uint256 indexed raffleId,
         address oldOwner,
@@ -167,9 +165,6 @@ contract RaffleManager is
         _;
     }
 
-    // ------------------- ERRORS -------------------
-    error OnlyKeeperRegistry();
-
     constructor(
         address wrapperAddress,
         uint16 requestConfirmations,
@@ -179,10 +174,6 @@ contract RaffleManager is
         address registrarAddress,
         uint32 automationGas
     ) VRFV2WrapperConsumerBase(linkAddress, wrapperAddress) {
-        require(
-            keeperAddress != address(0),
-            "Keeper Registry address cannot be 0x0"
-        );
         require(linkAddress != address(0), "Link Token address cannot be 0x0");
         require(wrapperAddress != address(0), "Wrapper address cannot be 0x0");
         require(
@@ -191,9 +182,9 @@ contract RaffleManager is
         );
         owner = msg.sender;
         vrfWrapper = VRFV2WrapperInterface(wrapperAddress);
-        i_registry = AutomationRegistryInterface(keeperAddress);
         linkTokenAddress = linkAddress;
         registrar = registrarAddress;
+        i_registry = AutomationRegistryInterface(keeperAddress);
         requestConfig = RequestConfig({
             callbackGasLimit: callbackGasLimit,
             requestConfirmations: requestConfirmations,
