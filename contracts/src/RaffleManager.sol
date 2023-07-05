@@ -57,7 +57,8 @@ contract RaffleManager is
         STAGED,
         LIVE,
         FINISHED,
-        RESOLVING
+        RESOLVING,
+        CANCELLED
     }
     enum RaffleType {
         DYNAMIC,
@@ -143,6 +144,7 @@ contract RaffleManager is
     );
     event RaffleClosed(uint256 indexed raffleId, bytes32[] participants);
     event RaffleStaged(uint256 indexed raffleId);
+    event RaffleCancelled(uint256 indexed raffleId);
     event RaffleWon(uint256 indexed raffleId, bytes32[] indexed winners);
     event RafflePrizeClaimed(
         uint256 indexed raffleId,
@@ -282,6 +284,22 @@ contract RaffleManager is
     }
 
     /**
+     * @notice cancels a live raffle
+     * @param raffleId id of raffle
+     * @dev requires that raffle is live
+     *
+     */
+    function cancelRaffle(uint256 raffleId) external onlyRaffleOwner(raffleId) {
+        require(
+            raffles[raffleId].raffleState == RaffleState.LIVE,
+            "Raffle is not live"
+        );
+        raffles[raffleId].raffleState = RaffleState.CANCELLED;
+        liveRaffles.remove(raffleId);
+        emit RaffleCancelled(raffleId);
+    }
+
+    /**
      * @notice joins raffle by ID and number of entries
      * @param raffleId id of raffle
      * @param entries number of entries
@@ -356,50 +374,6 @@ contract RaffleManager is
         uint256 raffleId
     ) external view returns (bytes32[] memory) {
         return raffles[raffleId].winners;
-    }
-
-    /**
-     * @notice Check if user has won a static raffle
-     * @param raffleId id of the raffle
-     * @param user string of the user's identifier they used to enter the raffle
-     * @return bool if user has won
-     *
-     */
-    function checkIfWon(
-        uint256 raffleId,
-        string memory user
-    ) external view returns (bool) {
-        for (uint256 i = 0; i < raffles[raffleId].winners.length; i++) {
-            if (
-                raffles[raffleId].winners[i] ==
-                keccak256(abi.encodePacked(user))
-            ) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * @notice Check if user has been entered into a static raffle
-     * @param raffleId id of the raffle
-     * @param user string of the user's identifier they used to enter the raffle
-     * @return bool if user has been entered
-     *
-     */
-    function checkIfEntered(
-        uint256 raffleId,
-        string memory user
-    ) external view returns (bool) {
-        for (uint256 i = 0; i < raffles[raffleId].contestants.length; i++) {
-            if (
-                raffles[raffleId].contestants[i] ==
-                keccak256(abi.encodePacked(user))
-            ) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -875,6 +849,7 @@ contract RaffleManager is
             performData,
             (uint256, bytes32[])
         );
+
         if (raffles[raffleId].raffleState == RaffleState.RESOLVING) {
             for (uint256 i = 0; i < winners.length; i++) {
                 raffles[raffleId].winners.push(winners[i]);
@@ -890,8 +865,17 @@ contract RaffleManager is
                     (block.timestamp - raffles[raffleId].base.startDate) >
                     raffles[raffleId].timeLength
                 ) {
-                    raffles[raffleId].raffleState == RaffleState.STAGED;
-                    emit RaffleStaged(liveRaffles.at(raffleId));
+                    // Check if the number of participants is less than the number of winners
+                    if (
+                        raffles[raffleId].contestants.length <
+                        raffles[raffleId].base.totalWinners
+                    ) {
+                        raffles[raffleId].raffleState = RaffleState.CANCELLED;
+                        emit RaffleCancelled(raffleId);
+                    } else {
+                        raffles[raffleId].raffleState = RaffleState.STAGED;
+                        emit RaffleStaged(raffleId);
+                    }
                 }
             }
         }

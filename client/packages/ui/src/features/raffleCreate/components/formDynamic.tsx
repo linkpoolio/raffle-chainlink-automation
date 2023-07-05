@@ -19,19 +19,6 @@ export const FormDynamic = ({
     <>
       <GridItem>
         <Control
-          label="Fee Amount (ETH)"
-          isInvalid={!!validation['fee']}
-          errorMessage={validation['fee']}>
-          <Input
-            type="text"
-            value={state.fee}
-            onChange={onTextChange('fee')}
-            isInvalid={!!validation['fee']}
-          />
-        </Control>
-      </GridItem>
-      <GridItem>
-        <Control
           label="Automation"
           helper={
             <a

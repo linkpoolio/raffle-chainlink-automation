@@ -16,74 +16,26 @@
         "name": "callbackGasLimit",
         "type": "uint32"
       },
-      {
-        "internalType": "address",
-        "name": "keeperAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "linkAddress",
-        "type": "address"
-      },
+      { "internalType": "address", "name": "keeperAddress", "type": "address" },
+      { "internalType": "address", "name": "linkAddress", "type": "address" },
       {
         "internalType": "address",
         "name": "registrarAddress",
         "type": "address"
       },
-      {
-        "internalType": "uint32",
-        "name": "automationGas",
-        "type": "uint32"
-      }
+      { "internalType": "uint32", "name": "automationGas", "type": "uint32" }
     ],
     "stateMutability": "nonpayable",
     "type": "constructor"
   },
   {
-    "inputs": [],
-    "name": "OnlyKeeperRegistry",
-    "type": "error"
-  },
-  {
     "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "x",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "y",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "denominator",
-        "type": "uint256"
-      }
+      { "internalType": "uint256", "name": "x", "type": "uint256" },
+      { "internalType": "uint256", "name": "y", "type": "uint256" },
+      { "internalType": "uint256", "name": "denominator", "type": "uint256" }
     ],
     "name": "PRBMath_MulDiv_Overflow",
     "type": "error"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "oldAddress",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "newAddress",
-        "type": "address"
-      }
-    ],
-    "name": "KeeperRegistryAddressUpdated",
-    "type": "event"
   },
   {
     "anonymous": false,
@@ -96,6 +48,19 @@
       }
     ],
     "name": "Paused",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "raffleId",
+        "type": "uint256"
+      }
+    ],
+    "name": "RaffleCancelled",
     "type": "event"
   },
   {
@@ -276,83 +241,28 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "raffleId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "string",
-        "name": "user",
-        "type": "string"
-      }
+      { "internalType": "uint256", "name": "raffleId", "type": "uint256" }
     ],
-    "name": "checkIfEntered",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
+    "name": "cancelRaffle",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "raffleId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "string",
-        "name": "user",
-        "type": "string"
-      }
-    ],
-    "name": "checkIfWon",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes",
-        "name": "checkData",
-        "type": "bytes"
-      }
+      { "internalType": "bytes", "name": "checkData", "type": "bytes" }
     ],
     "name": "checkUpkeep",
     "outputs": [
-      {
-        "internalType": "bool",
-        "name": "upkeepNeeded",
-        "type": "bool"
-      },
-      {
-        "internalType": "bytes",
-        "name": "performData",
-        "type": "bytes"
-      }
+      { "internalType": "bool", "name": "upkeepNeeded", "type": "bool" },
+      { "internalType": "bytes", "name": "performData", "type": "bytes" }
     ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "raffleId",
-        "type": "uint256"
-      }
+      { "internalType": "uint256", "name": "raffleId", "type": "uint256" }
     ],
     "name": "claimPrize",
     "outputs": [],
@@ -361,59 +271,31 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "raffleId",
-        "type": "uint256"
-      }
+      { "internalType": "uint256", "name": "raffleId", "type": "uint256" }
     ],
     "name": "claimableAutomation",
     "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "claimable",
-        "type": "uint256"
-      }
+      { "internalType": "uint256", "name": "claimable", "type": "uint256" }
     ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "raffleId",
-        "type": "uint256"
-      }
+      { "internalType": "uint256", "name": "raffleId", "type": "uint256" }
     ],
     "name": "claimableLink",
     "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "claimable",
-        "type": "uint256"
-      }
+      { "internalType": "uint256", "name": "claimable", "type": "uint256" }
     ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "raffleId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint8",
-        "name": "entries",
-        "type": "uint8"
-      },
-      {
-        "internalType": "bytes32[]",
-        "name": "proof",
-        "type": "bytes32[]"
-      }
+      { "internalType": "uint256", "name": "raffleId", "type": "uint256" },
+      { "internalType": "uint8", "name": "entries", "type": "uint8" },
+      { "internalType": "bytes32[]", "name": "proof", "type": "bytes32[]" }
     ],
     "name": "enterRaffle",
     "outputs": [],
@@ -433,21 +315,9 @@
                 "name": "raffleType",
                 "type": "uint8"
               },
-              {
-                "internalType": "uint256",
-                "name": "id",
-                "type": "uint256"
-              },
-              {
-                "internalType": "bool",
-                "name": "automation",
-                "type": "bool"
-              },
-              {
-                "internalType": "bool",
-                "name": "feeToken",
-                "type": "bool"
-              },
+              { "internalType": "uint256", "name": "id", "type": "uint256" },
+              { "internalType": "bool", "name": "automation", "type": "bool" },
+              { "internalType": "bool", "name": "feeToken", "type": "bool" },
               {
                 "internalType": "address",
                 "name": "feeTokenAddress",
@@ -483,16 +353,8 @@
             "name": "base",
             "type": "tuple"
           },
-          {
-            "internalType": "address",
-            "name": "owner",
-            "type": "address"
-          },
-          {
-            "internalType": "string",
-            "name": "raffleName",
-            "type": "string"
-          },
+          { "internalType": "address", "name": "owner", "type": "address" },
+          { "internalType": "string", "name": "raffleName", "type": "string" },
           {
             "internalType": "bytes32[]",
             "name": "contestants",
@@ -515,16 +377,8 @@
                 "name": "requestId",
                 "type": "uint256"
               },
-              {
-                "internalType": "uint256",
-                "name": "paid",
-                "type": "uint256"
-              },
-              {
-                "internalType": "bool",
-                "name": "fulfilled",
-                "type": "bool"
-              },
+              { "internalType": "uint256", "name": "paid", "type": "uint256" },
+              { "internalType": "bool", "name": "fulfilled", "type": "bool" },
               {
                 "internalType": "uint256[]",
                 "name": "randomWords",
@@ -535,11 +389,7 @@
                 "name": "totalLink",
                 "type": "uint256"
               },
-              {
-                "internalType": "bool",
-                "name": "withdrawn",
-                "type": "bool"
-              },
+              { "internalType": "bool", "name": "withdrawn", "type": "bool" },
               {
                 "internalType": "uint256",
                 "name": "upkeepId",
@@ -555,11 +405,7 @@
             "name": "timeLength",
             "type": "uint256"
           },
-          {
-            "internalType": "uint256",
-            "name": "fee",
-            "type": "uint256"
-          },
+          { "internalType": "uint256", "name": "fee", "type": "uint256" },
           {
             "internalType": "enum RaffleManager.RaffleState",
             "name": "raffleState",
@@ -582,16 +428,8 @@
             "name": "prize",
             "type": "tuple"
           },
-          {
-            "internalType": "bool",
-            "name": "paymentNeeded",
-            "type": "bool"
-          },
-          {
-            "internalType": "bytes32",
-            "name": "merkleRoot",
-            "type": "bytes32"
-          }
+          { "internalType": "bool", "name": "paymentNeeded", "type": "bool" },
+          { "internalType": "bytes32", "name": "merkleRoot", "type": "bytes32" }
         ],
         "internalType": "struct RaffleManager.RaffleInstance[]",
         "name": "",
@@ -603,11 +441,7 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "address",
-        "name": "raffleOwner",
-        "type": "address"
-      }
+      { "internalType": "address", "name": "raffleOwner", "type": "address" }
     ],
     "name": "getOwnerRaffles",
     "outputs": [
@@ -620,21 +454,9 @@
                 "name": "raffleType",
                 "type": "uint8"
               },
-              {
-                "internalType": "uint256",
-                "name": "id",
-                "type": "uint256"
-              },
-              {
-                "internalType": "bool",
-                "name": "automation",
-                "type": "bool"
-              },
-              {
-                "internalType": "bool",
-                "name": "feeToken",
-                "type": "bool"
-              },
+              { "internalType": "uint256", "name": "id", "type": "uint256" },
+              { "internalType": "bool", "name": "automation", "type": "bool" },
+              { "internalType": "bool", "name": "feeToken", "type": "bool" },
               {
                 "internalType": "address",
                 "name": "feeTokenAddress",
@@ -670,16 +492,8 @@
             "name": "base",
             "type": "tuple"
           },
-          {
-            "internalType": "address",
-            "name": "owner",
-            "type": "address"
-          },
-          {
-            "internalType": "string",
-            "name": "raffleName",
-            "type": "string"
-          },
+          { "internalType": "address", "name": "owner", "type": "address" },
+          { "internalType": "string", "name": "raffleName", "type": "string" },
           {
             "internalType": "bytes32[]",
             "name": "contestants",
@@ -702,16 +516,8 @@
                 "name": "requestId",
                 "type": "uint256"
               },
-              {
-                "internalType": "uint256",
-                "name": "paid",
-                "type": "uint256"
-              },
-              {
-                "internalType": "bool",
-                "name": "fulfilled",
-                "type": "bool"
-              },
+              { "internalType": "uint256", "name": "paid", "type": "uint256" },
+              { "internalType": "bool", "name": "fulfilled", "type": "bool" },
               {
                 "internalType": "uint256[]",
                 "name": "randomWords",
@@ -722,11 +528,7 @@
                 "name": "totalLink",
                 "type": "uint256"
               },
-              {
-                "internalType": "bool",
-                "name": "withdrawn",
-                "type": "bool"
-              },
+              { "internalType": "bool", "name": "withdrawn", "type": "bool" },
               {
                 "internalType": "uint256",
                 "name": "upkeepId",
@@ -742,11 +544,7 @@
             "name": "timeLength",
             "type": "uint256"
           },
-          {
-            "internalType": "uint256",
-            "name": "fee",
-            "type": "uint256"
-          },
+          { "internalType": "uint256", "name": "fee", "type": "uint256" },
           {
             "internalType": "enum RaffleManager.RaffleState",
             "name": "raffleState",
@@ -769,16 +567,8 @@
             "name": "prize",
             "type": "tuple"
           },
-          {
-            "internalType": "bool",
-            "name": "paymentNeeded",
-            "type": "bool"
-          },
-          {
-            "internalType": "bytes32",
-            "name": "merkleRoot",
-            "type": "bytes32"
-          }
+          { "internalType": "bool", "name": "paymentNeeded", "type": "bool" },
+          { "internalType": "bytes32", "name": "merkleRoot", "type": "bytes32" }
         ],
         "internalType": "struct RaffleManager.RaffleInstance[]",
         "name": "",
@@ -790,11 +580,7 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "raffleId",
-        "type": "uint256"
-      }
+      { "internalType": "uint256", "name": "raffleId", "type": "uint256" }
     ],
     "name": "getRaffle",
     "outputs": [
@@ -807,21 +593,9 @@
                 "name": "raffleType",
                 "type": "uint8"
               },
-              {
-                "internalType": "uint256",
-                "name": "id",
-                "type": "uint256"
-              },
-              {
-                "internalType": "bool",
-                "name": "automation",
-                "type": "bool"
-              },
-              {
-                "internalType": "bool",
-                "name": "feeToken",
-                "type": "bool"
-              },
+              { "internalType": "uint256", "name": "id", "type": "uint256" },
+              { "internalType": "bool", "name": "automation", "type": "bool" },
+              { "internalType": "bool", "name": "feeToken", "type": "bool" },
               {
                 "internalType": "address",
                 "name": "feeTokenAddress",
@@ -857,16 +631,8 @@
             "name": "base",
             "type": "tuple"
           },
-          {
-            "internalType": "address",
-            "name": "owner",
-            "type": "address"
-          },
-          {
-            "internalType": "string",
-            "name": "raffleName",
-            "type": "string"
-          },
+          { "internalType": "address", "name": "owner", "type": "address" },
+          { "internalType": "string", "name": "raffleName", "type": "string" },
           {
             "internalType": "bytes32[]",
             "name": "contestants",
@@ -889,16 +655,8 @@
                 "name": "requestId",
                 "type": "uint256"
               },
-              {
-                "internalType": "uint256",
-                "name": "paid",
-                "type": "uint256"
-              },
-              {
-                "internalType": "bool",
-                "name": "fulfilled",
-                "type": "bool"
-              },
+              { "internalType": "uint256", "name": "paid", "type": "uint256" },
+              { "internalType": "bool", "name": "fulfilled", "type": "bool" },
               {
                 "internalType": "uint256[]",
                 "name": "randomWords",
@@ -909,11 +667,7 @@
                 "name": "totalLink",
                 "type": "uint256"
               },
-              {
-                "internalType": "bool",
-                "name": "withdrawn",
-                "type": "bool"
-              },
+              { "internalType": "bool", "name": "withdrawn", "type": "bool" },
               {
                 "internalType": "uint256",
                 "name": "upkeepId",
@@ -929,11 +683,7 @@
             "name": "timeLength",
             "type": "uint256"
           },
-          {
-            "internalType": "uint256",
-            "name": "fee",
-            "type": "uint256"
-          },
+          { "internalType": "uint256", "name": "fee", "type": "uint256" },
           {
             "internalType": "enum RaffleManager.RaffleState",
             "name": "raffleState",
@@ -956,16 +706,8 @@
             "name": "prize",
             "type": "tuple"
           },
-          {
-            "internalType": "bool",
-            "name": "paymentNeeded",
-            "type": "bool"
-          },
-          {
-            "internalType": "bytes32",
-            "name": "merkleRoot",
-            "type": "bytes32"
-          }
+          { "internalType": "bool", "name": "paymentNeeded", "type": "bool" },
+          { "internalType": "bytes32", "name": "merkleRoot", "type": "bytes32" }
         ],
         "internalType": "struct RaffleManager.RaffleInstance",
         "name": "",
@@ -977,43 +719,21 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "raffleId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
+      { "internalType": "uint256", "name": "raffleId", "type": "uint256" },
+      { "internalType": "address", "name": "user", "type": "address" }
     ],
     "name": "getUserEntries",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "raffleId",
-        "type": "uint256"
-      }
+      { "internalType": "uint256", "name": "raffleId", "type": "uint256" }
     ],
     "name": "getWinners",
     "outputs": [
-      {
-        "internalType": "bytes32[]",
-        "name": "",
-        "type": "bytes32[]"
-      }
+      { "internalType": "bytes32[]", "name": "", "type": "bytes32[]" }
     ],
     "stateMutability": "view",
     "type": "function"
@@ -1034,59 +754,22 @@
   {
     "inputs": [],
     "name": "isPaused",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "keeperRegistryAddress",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "linkTokenAddress",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      {
-        "internalType": "address",
-        "name": "sender",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "value",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes",
-        "name": "data",
-        "type": "bytes"
-      }
+      { "internalType": "address", "name": "sender", "type": "address" },
+      { "internalType": "uint256", "name": "value", "type": "uint256" },
+      { "internalType": "bytes", "name": "data", "type": "bytes" }
     ],
     "name": "onTokenTransfer",
     "outputs": [],
@@ -1096,13 +779,7 @@
   {
     "inputs": [],
     "name": "owner",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "stateMutability": "view",
     "type": "function"
   },
@@ -1116,23 +793,13 @@
   {
     "inputs": [],
     "name": "paused",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      {
-        "internalType": "bytes",
-        "name": "performData",
-        "type": "bytes"
-      }
+      { "internalType": "bytes", "name": "performData", "type": "bytes" }
     ],
     "name": "performUpkeep",
     "outputs": [],
@@ -1143,23 +810,13 @@
     "inputs": [],
     "name": "raffleCounter",
     "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "_value",
-        "type": "uint256"
-      }
+      { "internalType": "uint256", "name": "_value", "type": "uint256" }
     ],
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
+    "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "name": "raffles",
     "outputs": [
       {
@@ -1169,123 +826,51 @@
             "name": "raffleType",
             "type": "uint8"
           },
-          {
-            "internalType": "uint256",
-            "name": "id",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bool",
-            "name": "automation",
-            "type": "bool"
-          },
-          {
-            "internalType": "bool",
-            "name": "feeToken",
-            "type": "bool"
-          },
+          { "internalType": "uint256", "name": "id", "type": "uint256" },
+          { "internalType": "bool", "name": "automation", "type": "bool" },
+          { "internalType": "bool", "name": "feeToken", "type": "bool" },
           {
             "internalType": "address",
             "name": "feeTokenAddress",
             "type": "address"
           },
-          {
-            "internalType": "uint256",
-            "name": "startDate",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bool",
-            "name": "permissioned",
-            "type": "bool"
-          },
-          {
-            "internalType": "uint8",
-            "name": "totalWinners",
-            "type": "uint8"
-          },
+          { "internalType": "uint256", "name": "startDate", "type": "uint256" },
+          { "internalType": "bool", "name": "permissioned", "type": "bool" },
+          { "internalType": "uint8", "name": "totalWinners", "type": "uint8" },
           {
             "internalType": "bytes",
             "name": "provenanceHash",
             "type": "bytes"
           },
-          {
-            "internalType": "uint8",
-            "name": "entriesPerUser",
-            "type": "uint8"
-          }
+          { "internalType": "uint8", "name": "entriesPerUser", "type": "uint8" }
         ],
         "internalType": "struct RaffleManager.RaffleBase",
         "name": "base",
         "type": "tuple"
       },
-      {
-        "internalType": "address",
-        "name": "owner",
-        "type": "address"
-      },
-      {
-        "internalType": "string",
-        "name": "raffleName",
-        "type": "string"
-      },
-      {
-        "internalType": "UD60x18",
-        "name": "prizeWorth",
-        "type": "uint256"
-      },
+      { "internalType": "address", "name": "owner", "type": "address" },
+      { "internalType": "string", "name": "raffleName", "type": "string" },
+      { "internalType": "UD60x18", "name": "prizeWorth", "type": "uint256" },
       {
         "components": [
-          {
-            "internalType": "uint256",
-            "name": "requestId",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "paid",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bool",
-            "name": "fulfilled",
-            "type": "bool"
-          },
+          { "internalType": "uint256", "name": "requestId", "type": "uint256" },
+          { "internalType": "uint256", "name": "paid", "type": "uint256" },
+          { "internalType": "bool", "name": "fulfilled", "type": "bool" },
           {
             "internalType": "uint256[]",
             "name": "randomWords",
             "type": "uint256[]"
           },
-          {
-            "internalType": "uint256",
-            "name": "totalLink",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bool",
-            "name": "withdrawn",
-            "type": "bool"
-          },
-          {
-            "internalType": "uint256",
-            "name": "upkeepId",
-            "type": "uint256"
-          }
+          { "internalType": "uint256", "name": "totalLink", "type": "uint256" },
+          { "internalType": "bool", "name": "withdrawn", "type": "bool" },
+          { "internalType": "uint256", "name": "upkeepId", "type": "uint256" }
         ],
         "internalType": "struct RaffleManager.RequestStatus",
         "name": "requestStatus",
         "type": "tuple"
       },
-      {
-        "internalType": "uint256",
-        "name": "timeLength",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "fee",
-        "type": "uint256"
-      },
+      { "internalType": "uint256", "name": "timeLength", "type": "uint256" },
+      { "internalType": "uint256", "name": "fee", "type": "uint256" },
       {
         "internalType": "enum RaffleManager.RaffleState",
         "name": "raffleState",
@@ -1293,11 +878,7 @@
       },
       {
         "components": [
-          {
-            "internalType": "string",
-            "name": "prizeName",
-            "type": "string"
-          },
+          { "internalType": "string", "name": "prizeName", "type": "string" },
           {
             "internalType": "bytes32[]",
             "name": "claimedPrizes",
@@ -1308,27 +889,15 @@
         "name": "prize",
         "type": "tuple"
       },
-      {
-        "internalType": "bool",
-        "name": "paymentNeeded",
-        "type": "bool"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "merkleRoot",
-        "type": "bytes32"
-      }
+      { "internalType": "bool", "name": "paymentNeeded", "type": "bool" },
+      { "internalType": "bytes32", "name": "merkleRoot", "type": "bytes32" }
     ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_requestId",
-        "type": "uint256"
-      },
+      { "internalType": "uint256", "name": "_requestId", "type": "uint256" },
       {
         "internalType": "uint256[]",
         "name": "_randomWords",
@@ -1343,13 +912,7 @@
   {
     "inputs": [],
     "name": "registrar",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "stateMutability": "view",
     "type": "function"
   },
@@ -1367,11 +930,7 @@
         "name": "requestConfirmations",
         "type": "uint16"
       },
-      {
-        "internalType": "uint32",
-        "name": "numWords",
-        "type": "uint32"
-      },
+      { "internalType": "uint32", "name": "numWords", "type": "uint32" },
       {
         "internalType": "uint32",
         "name": "automationGasLimit",
@@ -1382,36 +941,16 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
+    "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "name": "requestIdToRaffleIndex",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "raffleId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes",
-        "name": "provenanceHash",
-        "type": "bytes"
-      }
+      { "internalType": "uint256", "name": "raffleId", "type": "uint256" },
+      { "internalType": "bytes", "name": "provenanceHash", "type": "bytes" }
     ],
     "name": "setProvenanceHash",
     "outputs": [],
@@ -1419,21 +958,9 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
+    "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "name": "stagedRaffles",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "stateMutability": "view",
     "type": "function"
   },
@@ -1446,11 +973,7 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "uint32",
-        "name": "newGasLimit",
-        "type": "uint32"
-      }
+      { "internalType": "uint32", "name": "newGasLimit", "type": "uint32" }
     ],
     "name": "updateAutomationCallBackGasLimit",
     "outputs": [],
@@ -1459,16 +982,8 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "raffleId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "newAdmin",
-        "type": "address"
-      }
+      { "internalType": "uint256", "name": "raffleId", "type": "uint256" },
+      { "internalType": "address", "name": "newAdmin", "type": "address" }
     ],
     "name": "updateRaffleOwner",
     "outputs": [],
@@ -1477,11 +992,7 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "uint32",
-        "name": "newGasLimit",
-        "type": "uint32"
-      }
+      { "internalType": "uint32", "name": "newGasLimit", "type": "uint32" }
     ],
     "name": "updateVRFCallBackGasLimit",
     "outputs": [],
@@ -1503,11 +1014,7 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "raffleId",
-        "type": "uint256"
-      }
+      { "internalType": "uint256", "name": "raffleId", "type": "uint256" }
     ],
     "name": "withdrawLink",
     "outputs": [],

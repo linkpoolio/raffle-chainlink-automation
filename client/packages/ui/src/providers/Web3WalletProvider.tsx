@@ -54,7 +54,7 @@ export const CHAINS = [
         http: ['https://endpoints.omniatech.io/v1/matic/mumbai/public']
       },
       default: {
-        http: ['https://endpoints.omniatech.io/v1/matic/mumbai/public	']
+        http: ['https://endpoints.omniatech.io/v1/matic/mumbai/public']
       }
     }
   },

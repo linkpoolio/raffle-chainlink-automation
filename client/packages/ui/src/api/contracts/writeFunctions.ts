@@ -51,6 +51,22 @@ export const createRaffle = async (params: contracts.CreateRaffleParams) => {
   }
 }
 
+export const cancelRaffle = async (params: contracts.CancelRaffleParams) => {
+  try {
+    const { id } = params
+    const config = await prepareWriteContract({
+      address: raffleManagerContractAddress,
+      abi: raffleManagerABI,
+      functionName: 'cancelRaffle',
+      args: [id]
+    })
+    const data = await writeContract(config)
+    return data
+  } catch (error: any) {
+    throw new Error(`Error cancelling raffle: ${error.message}`)
+  }
+}
+
 export const enterRaffle = async (params: contracts.EnterRaffleParams) => {
   try {
     const { id, proof, fee } = params

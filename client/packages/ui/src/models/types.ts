@@ -3,7 +3,8 @@ export enum RaffleStatus {
   STAGED = 0,
   LIVE = 1,
   FINISHED = 2,
-  RESOLVING = 3
+  RESOLVING = 3,
+  CANCELLED = 4
 }
 
 export enum RaffleType {

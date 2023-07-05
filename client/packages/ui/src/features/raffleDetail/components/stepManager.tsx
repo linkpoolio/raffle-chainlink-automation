@@ -11,7 +11,8 @@ import {
   WithdrawKeeper,
   CancelUpkeep,
   CheckWinners,
-  steps
+  steps,
+  CancelRaffle
 } from '@ui/features/raffleDetail'
 
 const getComponent = (props) => {
@@ -32,6 +33,8 @@ const getComponent = (props) => {
       return <CancelUpkeep {...props} />
     case steps.CHECK_WINNERS:
       return <CheckWinners {...props} />
+    case steps.CANCEL_RAFFLE:
+      return <CancelRaffle {...props} />
     default:
       return null
   }

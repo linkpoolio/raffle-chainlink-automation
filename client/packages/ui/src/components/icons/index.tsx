@@ -105,6 +105,8 @@ export const StatusIcons = ({ status }: { status: RaffleStatus }) => {
       return <CircleIcon fill="#3F5ACB" />
     case RaffleStatus.LIVE:
       return <LiveIcon fill="#59C174" />
+    case RaffleStatus.CANCELLED:
+      return <CircleIcon fill="#FF4D4D" />
     default:
       return <CircleIcon fill="#CED0D5" />
   }
