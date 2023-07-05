@@ -80,8 +80,6 @@ export const RaffleDetail = ({ id }) => {
   const { raffle } = store.state
   getRaffleHook(store, id)
 
-  console.log(raffle)
-
   return (
     raffle?.id && (
       <Container
