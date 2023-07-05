@@ -3,7 +3,7 @@ import { Button, Text, Flex, Heading } from '@chakra-ui/react'
 
 import { cancelRaffle } from '@ui/features/raffleDetail'
 
-export const CancelRaffle = ({ id, upkeepId, store, reset, asyncManager }) => {
+export const CancelRaffle = ({ id, store, reset, asyncManager }) => {
   const [success, setSuccess] = useState(false)
 
   const componentDidMount = () => {
