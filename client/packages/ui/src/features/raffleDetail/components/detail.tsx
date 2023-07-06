@@ -27,6 +27,7 @@ import {
   isRaffleLive,
   isRaffleStaged,
   isRaffleFinished,
+  isRaffleCancelled,
   RaffleStatus
 } from '@ui/models'
 import {
@@ -37,7 +38,8 @@ import {
   WithdrawButton,
   CancelUpkeepButton,
   WithdrawKeeperButton,
-  CheckWinnersButton
+  CheckWinnersButton,
+  CancelRaffleButton
 } from '@ui/features/raffleDetail'
 import { formatUnixTs, formatFinishDate, shortenAddress } from '@ui/utils'
 import { UploadWinners } from '@ui/features/raffleDetail'
@@ -110,6 +112,8 @@ export const RaffleDetail = ({ id }) => {
                   ? 'Staged'
                   : isRaffleLive(raffle)
                   ? 'Live'
+                  : isRaffleCancelled(raffle)
+                  ? 'Cancelled'
                   : isRaffleFinished(raffle)
                   ? 'Finished'
                   : 'Resolving'}
@@ -170,8 +174,6 @@ export const RaffleDetail = ({ id }) => {
 
           <Row name="Permissioned" value={raffle.permissioned ? 'Yes' : 'No'} />
           <Row name="Prize Name" value={raffle.prizeName} />
-          <Row name="Prize Worth" value={raffle.prizeWorth + ' ETH'} />
-          <Row name="Entrance Fee" value={raffle.fee + ' ETH'} />
           <Row name="Contestants" value={raffle.contestantsAddresses?.length} />
           <Row
             name="Owner"
@@ -218,6 +220,11 @@ export const RaffleDetail = ({ id }) => {
                 update={store.update}
                 address={address}
                 uploaded={store.state.uploaded}
+              />
+              <CancelRaffleButton
+                raffle={raffle}
+                update={store.update}
+                address={address}
               />
               <StepManager
                 id={id}

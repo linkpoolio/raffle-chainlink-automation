@@ -24,6 +24,32 @@ export const getRaffle = async (
   }
 }
 
+export const cancelRaffle = async ({ id, asyncManager, update, success }) => {
+  try {
+    asyncManager.start()
+
+    const payload: contracts.CancelRaffleParams = { id }
+    const { wait } = await contracts.cancelRaffle(payload)
+
+    asyncManager.waiting()
+
+    const isSuccess = await wait().then((receipt) => receipt.status === 1)
+    if (!isSuccess)
+      throw new Error('Request to cancel raffle was not successful')
+
+    asyncManager.success()
+
+    const raffle = await getRaffle({ id, asyncManager, update }, true)
+
+    success(true)
+
+    return { raffle }
+  } catch (error) {
+    asyncManager.fail(`Could not cancel raffle id \`${id}\``)
+    return {}
+  }
+}
+
 export const claimPrize = async ({ id, asyncManager, update }) => {
   try {
     asyncManager.start()

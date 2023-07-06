@@ -18,7 +18,8 @@ import {
   RaffleInstance,
   isRaffleLive,
   isRaffleStaged,
-  isRaffleFinished
+  isRaffleFinished,
+  isRaffleCancelled
 } from '@ui/models'
 import { formatUnixTs, formatFinishDate } from '@ui/utils'
 
@@ -72,6 +73,8 @@ export const Card = (raffle: RaffleInstance) => {
                 ? 'Staged'
                 : isRaffleLive(raffle)
                 ? 'Live'
+                : isRaffleCancelled(raffle)
+                ? 'Cancelled'
                 : isRaffleFinished(raffle)
                 ? 'Finished'
                 : 'Resolving'}

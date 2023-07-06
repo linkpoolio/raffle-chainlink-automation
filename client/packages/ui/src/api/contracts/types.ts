@@ -25,6 +25,10 @@ export interface CreateRaffleParams {
   entriesPerUser?: number
 }
 
+export interface CancelRaffleParams {
+  id: number
+}
+
 export interface ResolveRaffleParams {
   id: number
   value: BigNumber // link amount for funding txn
