@@ -53,16 +53,6 @@ export const FormDynamic = ({
           </Control>
         </GridItem>
       ) : null}
-
-      {/* <GridItem colSpan={2}>
-        <Control label="Fee Token" helper="Ethereum Address">
-          <Input
-            type="text"
-            value={state.feeToken}
-            onChange={onTextChange('feeToken')}
-          />
-        </Control>
-      </GridItem> */}
     </>
   )
 }

@@ -33,12 +33,11 @@ import {
 import {
   StepManager,
   JoinButton,
-  CheckStatusButton,
   PickWinnersButton,
   WithdrawButton,
   CancelUpkeepButton,
   WithdrawKeeperButton,
-  CheckWinnersButton,
+  CheckWinnersButtonDynamic,
   CancelRaffleButton
 } from '@ui/features/raffleDetail'
 import { formatUnixTs, formatFinishDate, shortenAddress } from '@ui/utils'
@@ -188,10 +187,9 @@ export const RaffleDetail = ({ id }) => {
                 address={address}
                 identifier={address}
               />
-              <CheckStatusButton
-                update={store.update}
+              <CheckWinnersButtonDynamic
                 raffle={raffle}
-                identifier={address}
+                update={store.update}
                 address={address}
               />
               <PickWinnersButton
@@ -199,7 +197,6 @@ export const RaffleDetail = ({ id }) => {
                 update={store.update}
                 address={address}
               />
-
               <CancelUpkeepButton
                 raffle={raffle}
                 update={store.update}
@@ -214,12 +211,6 @@ export const RaffleDetail = ({ id }) => {
                 raffle={raffle}
                 update={store.update}
                 address={address}
-              />
-              <CheckWinnersButton
-                raffle={raffle}
-                update={store.update}
-                address={address}
-                uploaded={store.state.uploaded}
               />
               <CancelRaffleButton
                 raffle={raffle}
