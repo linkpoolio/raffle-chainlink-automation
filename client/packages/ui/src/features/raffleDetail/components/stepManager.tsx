@@ -12,7 +12,8 @@ import {
   CancelUpkeep,
   CheckWinners,
   steps,
-  CancelRaffle
+  CancelRaffle,
+  ViewWinnersDynamic
 } from '@ui/features/raffleDetail'
 
 const getComponent = (props) => {
@@ -35,6 +36,8 @@ const getComponent = (props) => {
       return <CheckWinners {...props} />
     case steps.CANCEL_RAFFLE:
       return <CancelRaffle {...props} />
+    case steps.VIEW_WINNERS_DYNAMIC:
+      return <ViewWinnersDynamic {...props} />
     default:
       return null
   }

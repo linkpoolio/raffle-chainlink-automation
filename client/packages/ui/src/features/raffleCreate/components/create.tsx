@@ -62,14 +62,20 @@ export const RaffleCreate = () => {
       setType(RaffleType.STATIC)
       update({
         ...baseInitialState,
-        ...initialStaticState
+        ...initialStaticState,
+        ...initialDynamicState,
+        automation: false,
+        fee: 0,
+        hours: 24
       })
     }
     if (e.target.value == RaffleType.DYNAMIC) {
       setType(RaffleType.DYNAMIC)
       update({
         ...baseInitialState,
-        ...initialDynamicState
+        ...initialDynamicState,
+        ...initialStaticState,
+        participants: []
       })
     }
   }

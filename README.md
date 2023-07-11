@@ -156,3 +156,41 @@ As a creator of a raffle, the minimum token requirments are needed to ensure tha
 #### 2. Raffle Status
 
 After picking winners is initiated in the UI, the status of the raffle is moved to `pending`. Each subsequent block is then checked to see if the VRF request has been finished and winners picked. Once found, the status is automatically moved to `finished`. The winners are then able to be viewed and leftover LINK is able to be withdrawn.
+
+#### 3. Developer Integration for Entering Dynamic Raffle
+
+The Raffle contract is able to be integrated with any application that is able to send a transaction to the contract. The user will need to call the `enterRaffle` function with the following parameters:
+
+- `raffleId` - The ID of the raffle that the user is entering
+- `entries` - The amount of entries the user is purchasing
+- `proof` The merkle proof of the user's entry if the raffle is permissioned
+
+This is how the UI in this repo calls the `enterRaffle` function using `wagmi`:
+
+```javascript
+export const enterRaffle = async (params: contracts.EnterRaffleParams) => {
+  try {
+    const { id, proof, fee } = params
+    const config = await prepareWriteContract({
+      address: raffleManagerContractAddress,
+      abi: raffleManagerABI,
+      functionName: 'enterRaffle',
+      overrides: {
+        value: ethers.utils.parseEther(fee)
+      },
+      args: [id, params.entries ? params.entries : 1, proof ? proof : []]
+    })
+    const data = await writeContract(config)
+    return data
+  } catch (error: any) {
+    throw new Error(`Error entering raffle: ${error.message}`)
+  }
+}
+
+export interface EnterRaffleParams {
+  id: number
+  entries?: number
+  proof?: string[]
+  fee: string
+}
+```
