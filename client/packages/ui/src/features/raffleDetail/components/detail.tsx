@@ -38,7 +38,8 @@ import {
   CancelUpkeepButton,
   WithdrawKeeperButton,
   CheckWinnersButtonDynamic,
-  CancelRaffleButton
+  CancelRaffleButton,
+  CheckWinnersButton
 } from '@ui/features/raffleDetail'
 import { formatUnixTs, formatFinishDate, shortenAddress } from '@ui/utils'
 import { UploadWinners } from '@ui/features/raffleDetail'
@@ -191,6 +192,12 @@ export const RaffleDetail = ({ id }) => {
                 raffle={raffle}
                 update={store.update}
                 address={address}
+              />
+              <CheckWinnersButton
+                raffle={raffle}
+                update={store.update}
+                address={address}
+                uploaded={store.state.uploaded}
               />
               <PickWinnersButton
                 raffle={raffle}
