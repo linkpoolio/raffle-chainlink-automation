@@ -10,16 +10,6 @@ import {
 
 const faqList = [
   {
-    question: 'What is a Chainlink Raffle?',
-    answer:
-      "A Chainlink Raffle is a lottery system built on the blockchain. It uses Chainlink's Verifiable Random Function (VRF) to ensure that the selection of winners is provably fair and transparent."
-  },
-  {
-    question: 'How do I participate in a Chainlink Raffle?',
-    answer:
-      "To participate in a Chainlink Raffle, you first need to register or 'sign up' during the sign up period. Once the raffle event is committed on-chain, you become a participant and stand a chance to win prizes when the raffle is settled."
-  },
-  {
     question: 'How are the winners selected?',
     answer:
       "Winners are selected using Chainlink's Verifiable Random Function (VRF). This is a trusted and secure source of randomness on the blockchain. It ensures that the winner selection process is fair, transparent, and tamper-proof."
