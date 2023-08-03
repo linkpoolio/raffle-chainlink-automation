@@ -1,5 +1,5 @@
 import { BigNumber } from 'ethers'
-export enum RaffleStatus {
+export enum GiveawayStatus {
   STAGED = 0,
   LIVE = 1,
   FINISHED = 2,
@@ -7,16 +7,16 @@ export enum RaffleStatus {
   CANCELLED = 4
 }
 
-export enum RaffleType {
+export enum GiveawayType {
   DYNAMIC = 0,
   STATIC = 1
 }
 
-export interface RaffleInstance {
+export interface GiveawayInstance {
   id: string
   name: string // bytes32
-  type: RaffleType
-  status: RaffleStatus
+  type: GiveawayType
+  status: GiveawayStatus
   owner: string // address
   startDate: string
   hours: number

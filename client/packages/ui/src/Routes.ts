@@ -1,7 +1,7 @@
 export const Routes = {
-  RaffleList: '/',
-  RaffleDetail: '/raffle/:id',
-  RaffleCreate: '/create',
+  GiveawayList: '/',
+  GiveawayDetail: '/giveaway/:id',
+  GiveawayCreate: '/create',
   FAQ: '/faq',
   Disclaimer: '/disclaimer'
 }
