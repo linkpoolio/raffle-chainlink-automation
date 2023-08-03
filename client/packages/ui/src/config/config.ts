@@ -4,13 +4,13 @@ const getEnv = (app, local) => {
 }
 
 export const env = {
-  raffleManagerContractAddress: () =>
+  giveawayManagerContractAddress: () =>
     getEnv(
-      `UI_RAFFLE_MANAGER_CONTRACT_ADDRESS`,
+      `UI_GIVEAWAY_MANAGER_CONTRACT_ADDRESS`,
       // @ts-ignore:next-line
-      typeof envRaffleManagerContractAddress == 'string'
+      typeof envGiveawayManagerContractAddress == 'string'
         ? // @ts-ignore:next-line
-          envRaffleManagerContractAddress
+          envGiveawayManagerContractAddress
         : undefined // eslint-disable-line no-undef
     ),
   linkTokenContractAddress: () =>

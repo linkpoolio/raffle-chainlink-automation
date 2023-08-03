@@ -1,38 +1,38 @@
-import { RaffleInstance, RaffleType, RaffleStatus } from '@ui/models'
+import { GiveawayInstance, GiveawayType, GiveawayStatus } from '@ui/models'
 
-export const filterRaffleList = (list, filters): RaffleInstance[] =>
-  list.filter((raffle) => filters.every((filter) => filter(raffle)))
+export const filterGiveawayList = (list, filters): GiveawayInstance[] =>
+  list.filter((giveaway) => filters.every((filter) => filter(giveaway)))
 
-export const isRaffleOwner = (raffle, account): boolean =>
-  raffle?.owner === account
+export const isGiveawayOwner = (giveaway, account): boolean =>
+  giveaway?.owner === account
 
-export const isRaffleParticipant = (raffle, account): boolean => {
-  return raffle?.contestantsAddresses.includes(account)
+export const isGiveawayParticipant = (giveaway, account): boolean => {
+  return giveaway?.contestantsAddresses.includes(account)
 }
 
-export const isRaffleWinner = (raffle, account): boolean =>
-  raffle?.winners.includes(account)
+export const isGiveawayWinner = (giveaway, account): boolean =>
+  giveaway?.winners.includes(account)
 
-export const isRaffleClaimedPrize = (raffle, account): boolean =>
-  raffle?.claimedPrizes.includes(account)
+export const isGiveawayClaimedPrize = (giveaway, account): boolean =>
+  giveaway?.claimedPrizes.includes(account)
 
-export const isRaffleStatic = (raffle): boolean =>
-  raffle?.type === RaffleType.STATIC
+export const isGiveawayStatic = (giveaway): boolean =>
+  giveaway?.type === GiveawayType.STATIC
 
-export const isRaffleDynamic = (raffle): boolean =>
-  raffle?.type === RaffleType.DYNAMIC
+export const isGiveawayDynamic = (giveaway): boolean =>
+  giveaway?.type === GiveawayType.DYNAMIC
 
-export const isRaffleStaged = (raffle): boolean =>
-  raffle?.status === RaffleStatus.STAGED
+export const isGiveawayStaged = (giveaway): boolean =>
+  giveaway?.status === GiveawayStatus.STAGED
 
-export const isRaffleLive = (raffle): boolean =>
-  raffle?.status === RaffleStatus.LIVE
+export const isGiveawayLive = (giveaway): boolean =>
+  giveaway?.status === GiveawayStatus.LIVE
 
-export const isRaffleFinished = (raffle): boolean =>
-  raffle?.status === RaffleStatus.FINISHED
+export const isGiveawayFinished = (giveaway): boolean =>
+  giveaway?.status === GiveawayStatus.FINISHED
 
-export const isRaffleResolving = (raffle): boolean =>
-  raffle?.status === RaffleStatus.RESOLVING
+export const isGiveawayResolving = (giveaway): boolean =>
+  giveaway?.status === GiveawayStatus.RESOLVING
 
-export const isRaffleCancelled = (raffle): boolean =>
-  raffle?.status === RaffleStatus.CANCELLED
+export const isGiveawayCancelled = (giveaway): boolean =>
+  giveaway?.status === GiveawayStatus.CANCELLED

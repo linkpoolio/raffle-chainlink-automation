@@ -4,14 +4,14 @@ export interface ClaimPrizeParams {
   id: number
 }
 
-export interface EnterRaffleParams {
+export interface EnterGiveawayParams {
   id: number
   entries?: number
   proof?: string[]
   fee: string
 }
 
-export interface CreateRaffleParams {
+export interface CreateGiveawayParams {
   value: BigNumber // link amount for funding txn
   prizeName: string
   timeLength?: number // time length
@@ -25,11 +25,11 @@ export interface CreateRaffleParams {
   entriesPerUser?: number
 }
 
-export interface CancelRaffleParams {
+export interface CancelGiveawayParams {
   id: number
 }
 
-export interface ResolveRaffleParams {
+export interface ResolveGiveawayParams {
   id: number
   value: BigNumber // link amount for funding txn
 }

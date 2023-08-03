@@ -4,17 +4,19 @@ import { ethers, BigNumber } from 'ethers'
 
 import { env } from '@ui/config'
 import { contracts } from '@ui/api'
-import raffleManagerABI from './abi/RaffleManager.json'
+import giveawayManagerABI from './abi/GiveawayManager.json'
 import linkTokenABI from './abi/LinkToken.json'
 import keeperRegistryABI from './abi/KeeperRegistry.json'
 
-const raffleManagerContractAddress = env.raffleManagerContractAddress()
+const giveawayManagerContractAddress = env.giveawayManagerContractAddress()
 const linkTokenContractAddress = env.linkTokenContractAddress()
 const keeperRegistryContractAddress = env.keeperRegistryContractAddress()
 
-export const createRaffle = async (params: contracts.CreateRaffleParams) => {
+export const createGiveaway = async (
+  params: contracts.CreateGiveawayParams
+) => {
   try {
-    const encodedRaffleParams = ethers.utils.defaultAbiCoder.encode(
+    const encodedGiveawayParams = ethers.utils.defaultAbiCoder.encode(
       [
         'tuple(string prizeName, uint256 timeLength, uint256 fee, string name, address feeToken, bytes32 merkleRoot, bool automation, bytes32[] participants, uint8 totalWinners, uint8 entriesPerUser)'
       ],
@@ -42,38 +44,44 @@ export const createRaffle = async (params: contracts.CreateRaffleParams) => {
       address: linkTokenContractAddress,
       abi: linkTokenABI,
       functionName: 'transferAndCall',
-      args: [raffleManagerContractAddress, params.value, encodedRaffleParams]
+      args: [
+        giveawayManagerContractAddress,
+        params.value,
+        encodedGiveawayParams
+      ]
     })
     const data = await writeContract(config)
     return data
   } catch (error: any) {
-    throw new Error(`Error creating raffle: ${error.message}`)
+    throw new Error(`Error creating giveaway: ${error.message}`)
   }
 }
 
-export const cancelRaffle = async (params: contracts.CancelRaffleParams) => {
+export const cancelGiveaway = async (
+  params: contracts.CancelGiveawayParams
+) => {
   try {
     const { id } = params
     const config = await prepareWriteContract({
-      address: raffleManagerContractAddress,
-      abi: raffleManagerABI,
-      functionName: 'cancelRaffle',
+      address: giveawayManagerContractAddress,
+      abi: giveawayManagerABI,
+      functionName: 'cancelGiveaway',
       args: [id]
     })
     const data = await writeContract(config)
     return data
   } catch (error: any) {
-    throw new Error(`Error cancelling raffle: ${error.message}`)
+    throw new Error(`Error cancelling giveaway: ${error.message}`)
   }
 }
 
-export const enterRaffle = async (params: contracts.EnterRaffleParams) => {
+export const enterGiveaway = async (params: contracts.EnterGiveawayParams) => {
   try {
     const { id, proof, fee } = params
     const config = await prepareWriteContract({
-      address: raffleManagerContractAddress,
-      abi: raffleManagerABI,
-      functionName: 'enterRaffle',
+      address: giveawayManagerContractAddress,
+      abi: giveawayManagerABI,
+      functionName: 'enterGiveaway',
       overrides: {
         value: ethers.utils.parseEther(fee)
       },
@@ -82,7 +90,7 @@ export const enterRaffle = async (params: contracts.EnterRaffleParams) => {
     const data = await writeContract(config)
     return data
   } catch (error: any) {
-    throw new Error(`Error entering raffle: ${error.message}`)
+    throw new Error(`Error entering giveaway: ${error.message}`)
   }
 }
 
@@ -90,8 +98,8 @@ export const claimPrize = async (params: contracts.ClaimPrizeParams) => {
   try {
     const { id } = params
     const config = await prepareWriteContract({
-      address: raffleManagerContractAddress,
-      abi: raffleManagerABI,
+      address: giveawayManagerContractAddress,
+      abi: giveawayManagerABI,
       functionName: 'claimPrize',
       args: [id]
     })
@@ -102,7 +110,9 @@ export const claimPrize = async (params: contracts.ClaimPrizeParams) => {
   }
 }
 
-export const resolveRaffle = async (params: contracts.ResolveRaffleParams) => {
+export const resolveGiveaway = async (
+  params: contracts.ResolveGiveawayParams
+) => {
   try {
     const { value, id } = params
 
@@ -114,7 +124,7 @@ export const resolveRaffle = async (params: contracts.ResolveRaffleParams) => {
         gasLimit: BigNumber.from(`500000`) // 500k gas limit
       },
       args: [
-        raffleManagerContractAddress,
+        giveawayManagerContractAddress,
         value,
         ethers.utils.solidityPack(['uint256'], [id])
       ]
@@ -123,7 +133,7 @@ export const resolveRaffle = async (params: contracts.ResolveRaffleParams) => {
     const data = await writeContract(config)
     return data
   } catch (error: any) {
-    throw new Error(`Error resolving raffle: ${error.message}`)
+    throw new Error(`Error resolving giveaway: ${error.message}`)
   }
 }
 
@@ -131,8 +141,8 @@ export const withdrawLink = async (params: contracts.WithdrawLinkParams) => {
   try {
     const { id } = params
     const config = await prepareWriteContract({
-      address: raffleManagerContractAddress,
-      abi: raffleManagerABI,
+      address: giveawayManagerContractAddress,
+      abi: giveawayManagerABI,
       functionName: 'withdrawLink',
       args: [id]
     })

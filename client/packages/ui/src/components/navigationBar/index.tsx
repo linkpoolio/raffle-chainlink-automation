@@ -3,7 +3,6 @@ import { Link as RouterLink } from 'react-router-dom'
 import { useAccount } from 'wagmi'
 import { Heading, Box, Container, Flex, Link, Button } from '@chakra-ui/react'
 
-import { FairChance } from '@ui/components'
 import { Routes } from '@ui/Routes'
 import { Wallet } from '@ui/features/wallet'
 
@@ -16,14 +15,13 @@ export const NavigationBar = () => {
         <Flex as="nav" height={10} alignItems="center" gap="8">
           <Link
             as={RouterLink}
-            to={Routes.RaffleList}
+            to={Routes.GiveawayList}
             _hover={{
               textTransform: 'none'
             }}
             display="flex"
             alignItems="center"
             gap="3">
-            <FairChance width="32px" height="32px" />
             <Heading
               display={{ base: 'none', md: 'inline' }}
               as="h1"
@@ -31,14 +29,14 @@ export const NavigationBar = () => {
               color="brand.primary"
               fontSize="lg"
               fontWeight="800">
-              Fair Chance
+              Giveaway
             </Heading>
           </Link>
           <Flex alignItems="center" justifyContent="space-between" flex="1">
             <Flex gap="6">
               <Link
                 as={RouterLink}
-                to={Routes.RaffleList}
+                to={Routes.GiveawayList}
                 fontSize="sm"
                 color="brand.gray_70"
                 fontWeight={600}
@@ -47,7 +45,7 @@ export const NavigationBar = () => {
                   color: 'brand.primary'
                 }}
                 display={{ base: 'none', md: 'inline-flex' }}
-                href={Routes.RaffleList}>
+                href={Routes.GiveawayList}>
                 Home
               </Link>
               <Link
@@ -81,10 +79,10 @@ export const NavigationBar = () => {
               {address && (
                 <Button
                   as={RouterLink}
-                  to={Routes.RaffleCreate}
-                  href={Routes.RaffleCreate}
+                  to={Routes.GiveawayCreate}
+                  href={Routes.GiveawayCreate}
                   variant="cta">
-                  Create Raffle
+                  Create Giveaway
                 </Button>
               )}
               <Wallet />

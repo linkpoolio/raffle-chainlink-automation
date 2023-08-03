@@ -2,9 +2,9 @@ import React from 'react'
 import { Switch, Route, Redirect } from 'react-router-dom'
 
 import { Routes } from '@ui/Routes'
-import { RaffleList } from '@ui/features/raffleList'
-import { RaffleDetail } from '@ui/features/raffleDetail'
-import { RaffleCreate } from '@ui/features/raffleCreate'
+import { GiveawayList } from '@ui/features/giveawayList'
+import { GiveawayDetail } from '@ui/features/giveawayDetail'
+import { GiveawayCreate } from '@ui/features/giveawayCreate'
 import { AuthenticatedRoute, Hero, FAQ, Disclaimer } from '@ui/components'
 
 export const App = () => (
@@ -12,31 +12,31 @@ export const App = () => (
     <Switch>
       <Route
         exact
-        path={Routes.RaffleList}
+        path={Routes.GiveawayList}
         render={(props) => (
           <>
             <Hero />
-            <RaffleList {...props} />
+            <GiveawayList {...props} />
           </>
         )}
       />
 
       <Route
-        path={Routes.RaffleDetail}
-        render={({ match }) => <RaffleDetail id={match.params.id} />}
+        path={Routes.GiveawayDetail}
+        render={({ match }) => <GiveawayDetail id={match.params.id} />}
       />
 
       <Route path={Routes.FAQ} render={FAQ} />
 
       <Route path={Routes.Disclaimer} render={Disclaimer} />
 
-      <Route exact path={Routes.RaffleCreate}>
+      <Route exact path={Routes.GiveawayCreate}>
         <AuthenticatedRoute connected={true}>
-          <RaffleCreate />
+          <GiveawayCreate />
         </AuthenticatedRoute>
       </Route>
 
-      <Redirect to={Routes.RaffleList} />
+      <Redirect to={Routes.GiveawayList} />
     </Switch>
   </>
 )

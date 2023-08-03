@@ -19,7 +19,7 @@ async function setEnvVars() {
 
   const prefix = 'UI'
   const envVarKeys = [
-    `${prefix}_RAFFLE_MANAGER_CONTRACT_ADDRESS`,
+    `${prefix}_GIVEAWAY_MANAGER_CONTRACT_ADDRESS`,
     `${prefix}_LINK_TOKEN_CONTRACT_ADDRESS`,
     `${prefix}_KEEPER_REGISTRY_CONTRACT_ADDRESS`
   ]

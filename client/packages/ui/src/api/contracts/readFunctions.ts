@@ -3,61 +3,61 @@ import { useEffect } from 'react'
 import { useContractRead } from 'wagmi'
 import { env } from '@ui/config'
 import {
-  transformRaffleItem,
-  transformRaffleList,
+  transformGiveawayItem,
+  transformGiveawayList,
   transformClaimable,
-  RaffleInstance
+  GiveawayInstance
 } from '@ui/models'
-import abi from './abi/RaffleManager.json'
+import abi from './abi/GiveawayManager.json'
 
-const raffleManagerContractAddress = env.raffleManagerContractAddress()
+const giveawayManagerContractAddress = env.giveawayManagerContractAddress()
 const linkTokenContractAddress = env.linkTokenContractAddress()
 const defaultOptions = { abi, watch: true }
 
-export const getAllRaffles = async (): Promise<RaffleInstance[]> => {
+export const getAllGiveaways = async (): Promise<GiveawayInstance[]> => {
   try {
     const data = await readContract({
       ...defaultOptions,
-      address: raffleManagerContractAddress,
-      functionName: 'getAllRaffles'
+      address: giveawayManagerContractAddress,
+      functionName: 'getAllGiveaways'
     })
-    return transformRaffleList(data)
+    return transformGiveawayList(data)
   } catch (error: any) {
     throw new Error(
-      `Error fetching raffles list from contract: ${error.message}`
+      `Error fetching giveaways list from contract: ${error.message}`
     )
   }
 }
 
-export const getRaffle = async (id: number): Promise<RaffleInstance> => {
+export const getGiveaway = async (id: number): Promise<GiveawayInstance> => {
   try {
     const data = await readContract({
       ...defaultOptions,
-      address: raffleManagerContractAddress,
-      functionName: 'getRaffle',
+      address: giveawayManagerContractAddress,
+      functionName: 'getGiveaway',
       args: [id]
     })
-    return transformRaffleItem(data)
+    return transformGiveawayItem(data)
   } catch (error: any) {
-    throw new Error(`Error fetching raffle from contract: ${error.message}`)
+    throw new Error(`Error fetching giveaway from contract: ${error.message}`)
   }
 }
 
-export const getRaffleHook = (store, id) => {
+export const getGiveawayHook = (store, id) => {
   const { data, isError, isLoading, isSuccess } = useContractRead({
     ...defaultOptions,
-    address: raffleManagerContractAddress,
-    functionName: 'getRaffle',
+    address: giveawayManagerContractAddress,
+    functionName: 'getGiveaway',
     args: [id]
   })
   useEffect(() => {
     if (!id || !isSuccess) return
-    const transformedData = transformRaffleItem(data)
+    const transformedData = transformGiveawayItem(data)
     if (
       data &&
-      JSON.stringify(store.state.raffle) !== JSON.stringify(transformedData)
+      JSON.stringify(store.state.giveaway) !== JSON.stringify(transformedData)
     ) {
-      store.update({ raffle: transformedData })
+      store.update({ giveaway: transformedData })
     }
   }, [data, store, id, isSuccess])
 
@@ -68,7 +68,7 @@ export const getClaimableLink = async (id: number): Promise<number> => {
   try {
     const data = await readContract({
       ...defaultOptions,
-      address: raffleManagerContractAddress,
+      address: giveawayManagerContractAddress,
       functionName: 'claimableLink',
       args: [id]
     })
@@ -82,7 +82,7 @@ export const getClaimableAutomation = async (id: number): Promise<number> => {
   try {
     const data = await readContract({
       ...defaultOptions,
-      address: raffleManagerContractAddress,
+      address: giveawayManagerContractAddress,
       functionName: 'claimableAutomation',
       args: [id]
     })
