@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
@@ -8,7 +8,7 @@ import "@src/GiveawayManager.sol";
 import {ERC20Mock} from "@src/mock/ERC20Mock.sol";
 import {ERC677Mock} from "@src/mock/ERC677Mock.sol";
 import {VRFV2WrapperMock} from "@src/mock/VRFV2WrapperMock.sol";
-import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
+import {IERC677} from "@chainlink/contracts/src/v0.8/shared/token/ERC677/IERC677.sol";
 import {IKeeperRegistry} from "@src/interfaces/IKeeperRegistry.sol";
 
 contract GiveawayManagerNetworkForkTest is Test {
@@ -26,28 +26,12 @@ contract GiveawayManagerNetworkForkTest is Test {
     Config config;
 
     event GiveawayCreated(
-        string prizeName,
-        uint256 indexed time,
-        uint256 indexed fee,
-        address feeToken,
-        bool permissioned
+        string prizeName, uint256 indexed time, uint256 indexed fee, address feeToken, bool permissioned
     );
-    event GiveawayJoined(
-        uint256 indexed giveawayId,
-        bytes32 indexed player,
-        uint256 entries
-    );
-    event GiveawayOwnerUpdated(
-        uint256 indexed giveawayId,
-        address oldOwner,
-        address newOwner
-    );
+    event GiveawayJoined(uint256 indexed giveawayId, bytes32 indexed player, uint256 entries);
+    event GiveawayOwnerUpdated(uint256 indexed giveawayId, address oldOwner, address newOwner);
     event GiveawayWon(uint256 indexed giveawayId, bytes32[] indexed winners);
-    event GiveawayPrizeClaimed(
-        uint256 indexed giveawayId,
-        address indexed winner,
-        uint256 value
-    );
+    event GiveawayPrizeClaimed(uint256 indexed giveawayId, address indexed winner, uint256 value);
 
     struct Config {
         uint32 automationCallbackGas;
@@ -61,18 +45,11 @@ contract GiveawayManagerNetworkForkTest is Test {
         address wrapperAddress;
     }
 
-    function configureNetwork(
-        string memory input
-    ) internal view returns (Config memory) {
-        string memory inputDir = string.concat(
-            vm.projectRoot(),
-            "/script/input/"
-        );
+    function configureNetwork(string memory input) internal view returns (Config memory) {
+        string memory inputDir = string.concat(vm.projectRoot(), "/script/input/");
         string memory chainDir = string.concat(vm.toString(block.chainid), "/");
         string memory file = string.concat(input, ".json");
-        string memory data = vm.readFile(
-            string.concat(inputDir, chainDir, file)
-        );
+        string memory data = vm.readFile(string.concat(inputDir, chainDir, file));
         bytes memory rawConfig = data.parseRaw("");
         return abi.decode(rawConfig, (Config));
     }
@@ -100,39 +77,29 @@ contract GiveawayManagerNetworkForkTest is Test {
         vm.selectFork(network);
         bytes32[] memory participants = new bytes32[](1);
         participants[0] = keccak256(abi.encodePacked(email));
-        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager
-            .CreateGiveawayParams({
-                prizeName: "BigMac",
-                timeLength: 0,
-                fee: 0,
-                name: "Big Mac Contest",
-                feeToken: address(0),
-                merkleRoot: bytes32(""),
-                automation: false,
-                participants: participants,
-                totalWinners: 1,
-                entriesPerUser: 1
-            });
+        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager.CreateGiveawayParams({
+            prizeName: "BigMac",
+            timeLength: 0,
+            fee: 0,
+            name: "Big Mac Contest",
+            feeToken: address(0),
+            merkleRoot: bytes32(""),
+            automation: false,
+            participants: participants,
+            totalWinners: 1,
+            entriesPerUser: 1
+        });
         vm.prank(config.whaleAddress);
-        LinkTokenInterface(config.linkAddress).transfer(
-            giveawayAdmin,
-            50 ether
-        );
+        IERC677(config.linkAddress).transfer(giveawayAdmin, 50 ether);
         vm.expectEmit(true, true, true, true);
         emit GiveawayCreated("BigMac", 0, 0, address(0), false);
         vm.prank(giveawayAdmin);
-        LinkTokenInterface(config.linkAddress).transferAndCall(
-            address(giveawayManager),
-            5 ether,
-            bytes(abi.encode(_params))
-        );
+        IERC677(config.linkAddress).transferAndCall(address(giveawayManager), 5 ether, bytes(abi.encode(_params)));
     }
 
     function testFork_onTokenTransfer_CreateGiveawayAndCreateUpkeep() public {
         forkGiveawayFixture();
-        GiveawayManager.GiveawayInstance memory r = giveawayManager.getGiveaway(
-            0
-        );
+        GiveawayManager.GiveawayInstance memory r = giveawayManager.getGiveaway(0);
         assertTrue(r.requestStatus.upkeepId > 0);
     }
 
@@ -140,11 +107,7 @@ contract GiveawayManagerNetworkForkTest is Test {
         forkGiveawayFixture();
 
         vm.prank(giveawayAdmin);
-        LinkTokenInterface(config.linkAddress).transferAndCall(
-            address(giveawayManager),
-            1 ether,
-            bytes(abi.encode(0))
-        );
+        IERC677(config.linkAddress).transferAndCall(address(giveawayManager), 1 ether, bytes(abi.encode(0)));
     }
 
     function testFork_withdrawAutomation() public {
@@ -155,8 +118,7 @@ contract GiveawayManagerNetworkForkTest is Test {
     }
 
     function testFork_maxPaymentForGas() public view {
-        uint96 payment = IKeeperRegistry(config.keepersRegistry)
-            .getMaxPaymentForGas(5_000_000);
+        uint96 payment = IKeeperRegistry(config.keepersRegistry).getMaxPaymentForGas(5_000_000);
         console.log("Max payment for gas: ", payment);
     }
 }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
@@ -38,28 +38,12 @@ contract GiveawayManagerTest is Test {
     string email;
 
     event GiveawayCreated(
-        string prizeName,
-        uint256 indexed time,
-        uint256 indexed fee,
-        address feeToken,
-        bool permissioned
+        string prizeName, uint256 indexed time, uint256 indexed fee, address feeToken, bool permissioned
     );
-    event GiveawayJoined(
-        uint256 indexed giveawayId,
-        bytes32 indexed player,
-        uint256 entries
-    );
-    event GiveawayOwnerUpdated(
-        uint256 indexed giveawayId,
-        address oldOwner,
-        address newOwner
-    );
+    event GiveawayJoined(uint256 indexed giveawayId, bytes32 indexed player, uint256 entries);
+    event GiveawayOwnerUpdated(uint256 indexed giveawayId, address oldOwner, address newOwner);
     event GiveawayWon(uint256 indexed giveawayId, bytes32[] indexed winners);
-    event GiveawayPrizeClaimed(
-        uint256 indexed giveawayId,
-        address indexed winner,
-        uint256 value
-    );
+    event GiveawayPrizeClaimed(uint256 indexed giveawayId, address indexed winner, uint256 value);
 
     function setUp() public {
         admin = makeAddr("admin");
@@ -77,18 +61,10 @@ contract GiveawayManagerTest is Test {
         linkAddress = address(0x3);
         registrarAddress = address(0x4);
         merkleRoot = 0x344510bd0c324c3912b13373e89df42d1b50450e9764a454b2aa6e2968a4578a;
-        proofA[
-            0
-        ] = 0xd52688a8f926c816ca1e079067caba944f158e764817b83fc43594370ca9cf62;
-        proofA[
-            1
-        ] = 0x5b70e80538acdabd6137353b0f9d8d149f4dba91e8be2e7946e409bfdbe685b9;
-        proofB[
-            0
-        ] = 0x1468288056310c82aa4c01a7e12a10f8111a0560e72b700555479031b86c357d;
-        proofB[
-            1
-        ] = 0x5b70e80538acdabd6137353b0f9d8d149f4dba91e8be2e7946e409bfdbe685b9;
+        proofA[0] = 0xd52688a8f926c816ca1e079067caba944f158e764817b83fc43594370ca9cf62;
+        proofA[1] = 0x5b70e80538acdabd6137353b0f9d8d149f4dba91e8be2e7946e409bfdbe685b9;
+        proofB[0] = 0x1468288056310c82aa4c01a7e12a10f8111a0560e72b700555479031b86c357d;
+        proofB[1] = 0x5b70e80538acdabd6137353b0f9d8d149f4dba91e8be2e7946e409bfdbe685b9;
         email = "test@test.com";
         vm.startPrank(admin);
         customLINK = new ERC677Mock("Chainlink", "LINK", 1000000 ether);
@@ -107,235 +83,202 @@ contract GiveawayManagerTest is Test {
     }
 
     function successFixture() public {
-        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager
-            .CreateGiveawayParams({
-                prizeName: "BigMac",
-                timeLength: 30,
-                fee: 0,
-                name: "Big Mac Contest",
-                feeToken: address(0),
-                merkleRoot: bytes32(""),
-                automation: false,
-                participants: new bytes32[](0),
-                totalWinners: 1,
-                entriesPerUser: 1
-            });
+        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager.CreateGiveawayParams({
+            prizeName: "BigMac",
+            timeLength: 30,
+            fee: 0,
+            name: "Big Mac Contest",
+            feeToken: address(0),
+            merkleRoot: bytes32(""),
+            automation: false,
+            participants: new bytes32[](0),
+            totalWinners: 1,
+            entriesPerUser: 1
+        });
         vm.expectEmit(true, true, true, true);
         emit GiveawayCreated("BigMac", 30, 0, address(0), false);
         vm.prank(giveawayAdmin);
         LinkTokenInterface(address(customLINK)).transferAndCall(
-            address(giveawayManager),
-            5 ether,
-            bytes(abi.encode(_params))
+            address(giveawayManager), 5 ether, bytes(abi.encode(_params))
         );
     }
 
     function successFixtureWithETH() public {
-        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager
-            .CreateGiveawayParams({
-                prizeName: "BigMac",
-                timeLength: 0,
-                fee: 1 ether,
-                name: "Big Mac Contest",
-                feeToken: address(0),
-                merkleRoot: bytes32(""),
-                automation: false,
-                participants: new bytes32[](0),
-                totalWinners: 1,
-                entriesPerUser: 1
-            });
+        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager.CreateGiveawayParams({
+            prizeName: "BigMac",
+            timeLength: 0,
+            fee: 1 ether,
+            name: "Big Mac Contest",
+            feeToken: address(0),
+            merkleRoot: bytes32(""),
+            automation: false,
+            participants: new bytes32[](0),
+            totalWinners: 1,
+            entriesPerUser: 1
+        });
         vm.expectEmit(true, true, true, true);
         emit GiveawayCreated("BigMac", 0, 1 ether, address(0), false);
         vm.prank(giveawayAdmin);
         LinkTokenInterface(address(customLINK)).transferAndCall(
-            address(giveawayManager),
-            5 ether,
-            bytes(abi.encode(_params))
+            address(giveawayManager), 5 ether, bytes(abi.encode(_params))
         );
     }
 
     function successFixtureWithCustomToken() public {
         vm.prank(admin);
         customToken = new ERC20Mock("Custom Token", "CT");
-        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager
-            .CreateGiveawayParams({
-                prizeName: "BigMac",
-                timeLength: 0,
-                fee: 1 ether,
-                name: "Big Mac Contest",
-                feeToken: address(customToken),
-                merkleRoot: bytes32(""),
-                automation: false,
-                participants: new bytes32[](0),
-                totalWinners: 1,
-                entriesPerUser: 1
-            });
+        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager.CreateGiveawayParams({
+            prizeName: "BigMac",
+            timeLength: 0,
+            fee: 1 ether,
+            name: "Big Mac Contest",
+            feeToken: address(customToken),
+            merkleRoot: bytes32(""),
+            automation: false,
+            participants: new bytes32[](0),
+            totalWinners: 1,
+            entriesPerUser: 1
+        });
 
         vm.expectEmit(true, true, true, true);
         emit GiveawayCreated("BigMac", 0, 1 ether, address(customToken), false);
         vm.prank(giveawayAdmin);
         LinkTokenInterface(address(customLINK)).transferAndCall(
-            address(giveawayManager),
-            5 ether,
-            bytes(abi.encode(_params))
+            address(giveawayManager), 5 ether, bytes(abi.encode(_params))
         );
     }
 
     function successFixtureWithCustomTokenMultipleWinners() public {
         vm.prank(admin);
         customToken = new ERC20Mock("Custom Token", "CT");
-        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager
-            .CreateGiveawayParams({
-                prizeName: "BigMac",
-                timeLength: 0,
-                fee: 1 ether,
-                name: "Big Mac Contest",
-                feeToken: address(customToken),
-                merkleRoot: bytes32(""),
-                automation: false,
-                participants: new bytes32[](0),
-                totalWinners: 3,
-                entriesPerUser: 1
-            });
+        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager.CreateGiveawayParams({
+            prizeName: "BigMac",
+            timeLength: 0,
+            fee: 1 ether,
+            name: "Big Mac Contest",
+            feeToken: address(customToken),
+            merkleRoot: bytes32(""),
+            automation: false,
+            participants: new bytes32[](0),
+            totalWinners: 3,
+            entriesPerUser: 1
+        });
 
         vm.expectEmit(true, true, true, true);
         emit GiveawayCreated("BigMac", 0, 1 ether, address(customToken), false);
         vm.prank(giveawayAdmin);
         LinkTokenInterface(address(customLINK)).transferAndCall(
-            address(giveawayManager),
-            5 ether,
-            bytes(abi.encode(_params))
+            address(giveawayManager), 5 ether, bytes(abi.encode(_params))
         );
     }
 
     function successFixtureMultipleWinners(uint8 winners, bool _fee) public {
-        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager
-            .CreateGiveawayParams({
-                prizeName: "BigMac",
-                timeLength: 30,
-                fee: _fee ? 1 ether : 0,
-                name: "Big Mac Contest",
-                feeToken: address(0),
-                merkleRoot: bytes32(""),
-                automation: false,
-                participants: new bytes32[](0),
-                totalWinners: winners,
-                entriesPerUser: 1
-            });
+        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager.CreateGiveawayParams({
+            prizeName: "BigMac",
+            timeLength: 30,
+            fee: _fee ? 1 ether : 0,
+            name: "Big Mac Contest",
+            feeToken: address(0),
+            merkleRoot: bytes32(""),
+            automation: false,
+            participants: new bytes32[](0),
+            totalWinners: winners,
+            entriesPerUser: 1
+        });
         vm.prank(giveawayAdmin);
         LinkTokenInterface(address(customLINK)).transferAndCall(
-            address(giveawayManager),
-            5 ether,
-            bytes(abi.encode(_params))
+            address(giveawayManager), 5 ether, bytes(abi.encode(_params))
         );
     }
 
     function merkleFixture() public {
-        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager
-            .CreateGiveawayParams({
-                prizeName: "BigMac",
-                timeLength: 30,
-                fee: 0,
-                name: "Big Mac Contest",
-                feeToken: address(0),
-                merkleRoot: merkleRoot,
-                automation: false,
-                participants: new bytes32[](0),
-                totalWinners: 1,
-                entriesPerUser: 1
-            });
+        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager.CreateGiveawayParams({
+            prizeName: "BigMac",
+            timeLength: 30,
+            fee: 0,
+            name: "Big Mac Contest",
+            feeToken: address(0),
+            merkleRoot: merkleRoot,
+            automation: false,
+            participants: new bytes32[](0),
+            totalWinners: 1,
+            entriesPerUser: 1
+        });
         vm.expectEmit(true, true, true, true);
         emit GiveawayCreated("BigMac", 30, 0, address(0), true);
         vm.prank(giveawayAdmin);
         LinkTokenInterface(address(customLINK)).transferAndCall(
-            address(giveawayManager),
-            5 ether,
-            bytes(abi.encode(_params))
+            address(giveawayManager), 5 ether, bytes(abi.encode(_params))
         );
     }
 
     function staticGiveawayFixture() public {
         bytes32[] memory participants = new bytes32[](1);
         participants[0] = keccak256(abi.encodePacked(email));
-        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager
-            .CreateGiveawayParams({
-                prizeName: "BigMac",
-                timeLength: 30,
-                fee: 0,
-                name: "Big Mac Contest",
-                feeToken: address(0),
-                merkleRoot: bytes32(""),
-                automation: false,
-                participants: participants,
-                totalWinners: 1,
-                entriesPerUser: 1
-            });
+        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager.CreateGiveawayParams({
+            prizeName: "BigMac",
+            timeLength: 30,
+            fee: 0,
+            name: "Big Mac Contest",
+            feeToken: address(0),
+            merkleRoot: bytes32(""),
+            automation: false,
+            participants: participants,
+            totalWinners: 1,
+            entriesPerUser: 1
+        });
 
         vm.expectEmit(true, true, true, true);
         emit GiveawayCreated("BigMac", 30, 0, address(0), false);
         vm.prank(giveawayAdmin);
         LinkTokenInterface(address(customLINK)).transferAndCall(
-            address(giveawayManager),
-            5 ether,
-            bytes(abi.encode(_params))
+            address(giveawayManager), 5 ether, bytes(abi.encode(_params))
         );
     }
 
     function customTokenGiveawayFixture() public {
         vm.startPrank(admin);
         customToken = new ERC20Mock("Custom Token", "CT");
-        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager
-            .CreateGiveawayParams({
-                prizeName: "BigMac",
-                timeLength: 30,
-                fee: 1 ether,
-                name: "Big Mac Contest",
-                feeToken: address(customToken),
-                merkleRoot: bytes32(""),
-                automation: false,
-                participants: new bytes32[](0),
-                totalWinners: 1,
-                entriesPerUser: 1
-            });
+        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager.CreateGiveawayParams({
+            prizeName: "BigMac",
+            timeLength: 30,
+            fee: 1 ether,
+            name: "Big Mac Contest",
+            feeToken: address(customToken),
+            merkleRoot: bytes32(""),
+            automation: false,
+            participants: new bytes32[](0),
+            totalWinners: 1,
+            entriesPerUser: 1
+        });
 
         vm.stopPrank();
         vm.expectEmit(true, true, true, true);
-        emit GiveawayCreated(
-            "BigMac",
-            30,
-            1 ether,
-            address(customToken),
-            false
-        );
+        emit GiveawayCreated("BigMac", 30, 1 ether, address(customToken), false);
         vm.prank(giveawayAdmin);
         LinkTokenInterface(address(customLINK)).transferAndCall(
-            address(giveawayManager),
-            5 ether,
-            bytes(abi.encode(_params))
+            address(giveawayManager), 5 ether, bytes(abi.encode(_params))
         );
     }
 
     function gasTokenGiveawayFixture() public {
-        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager
-            .CreateGiveawayParams({
-                prizeName: "BigMac",
-                timeLength: 30,
-                fee: 1 ether,
-                name: "Big Mac Contest",
-                feeToken: address(customToken),
-                merkleRoot: bytes32(""),
-                automation: false,
-                participants: new bytes32[](0),
-                totalWinners: 1,
-                entriesPerUser: 100
-            });
+        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager.CreateGiveawayParams({
+            prizeName: "BigMac",
+            timeLength: 30,
+            fee: 1 ether,
+            name: "Big Mac Contest",
+            feeToken: address(customToken),
+            merkleRoot: bytes32(""),
+            automation: false,
+            participants: new bytes32[](0),
+            totalWinners: 1,
+            entriesPerUser: 100
+        });
         vm.expectEmit(true, true, true, true);
         emit GiveawayCreated("BigMac", 30, 1 ether, address(0), false);
         vm.prank(giveawayAdmin);
         LinkTokenInterface(address(customLINK)).transferAndCall(
-            address(giveawayManager),
-            5 ether,
-            bytes(abi.encode(_params))
+            address(giveawayManager), 5 ether, bytes(abi.encode(_params))
         );
     }
 
@@ -343,90 +286,64 @@ contract GiveawayManagerTest is Test {
         successFixture();
     }
 
-    function test_createGiveaway_CheckVariableSetup_Dynamic_NoPermissions_NoFeeToken()
-        public
-    {
+    function test_createGiveaway_CheckVariableSetup_Dynamic_NoPermissions_NoFeeToken() public {
         successFixture();
-        GiveawayManager.GiveawayInstance memory giveaway = giveawayManager
-            .getGiveaway(0);
+        GiveawayManager.GiveawayInstance memory giveaway = giveawayManager.getGiveaway(0);
         assertFalse(giveaway.base.permissioned);
-        assertEq(
-            uint8(giveaway.base.giveawayType),
-            uint8(GiveawayManager.GiveawayType.DYNAMIC)
-        );
+        assertEq(uint8(giveaway.base.giveawayType), uint8(GiveawayManager.GiveawayType.DYNAMIC));
         assertFalse(giveaway.base.feeToken);
     }
 
-    function test_createGiveaway_CheckVariableSetup_Dynamic_NoPermissions_FeeToken()
-        public
-    {
-        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager
-            .CreateGiveawayParams({
-                prizeName: "BigMac",
-                timeLength: 30,
-                fee: 1 ether,
-                name: "Big Mac Contest",
-                feeToken: makeAddr("doge"),
-                merkleRoot: bytes32(""),
-                automation: false,
-                participants: new bytes32[](0),
-                totalWinners: 1,
-                entriesPerUser: 1
-            });
+    function test_createGiveaway_CheckVariableSetup_Dynamic_NoPermissions_FeeToken() public {
+        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager.CreateGiveawayParams({
+            prizeName: "BigMac",
+            timeLength: 30,
+            fee: 1 ether,
+            name: "Big Mac Contest",
+            feeToken: makeAddr("doge"),
+            merkleRoot: bytes32(""),
+            automation: false,
+            participants: new bytes32[](0),
+            totalWinners: 1,
+            entriesPerUser: 1
+        });
         vm.prank(admin);
         customLINK.transfer(giveawayAdmin, 20 ether);
         vm.prank(giveawayAdmin);
         LinkTokenInterface(address(customLINK)).transferAndCall(
-            address(giveawayManager),
-            5 ether,
-            bytes(abi.encode(_params))
+            address(giveawayManager), 5 ether, bytes(abi.encode(_params))
         );
 
-        GiveawayManager.GiveawayInstance memory giveaway = giveawayManager
-            .getGiveaway(0);
+        GiveawayManager.GiveawayInstance memory giveaway = giveawayManager.getGiveaway(0);
         assertFalse(giveaway.base.permissioned);
-        assertEq(
-            uint8(giveaway.base.giveawayType),
-            uint8(GiveawayManager.GiveawayType.DYNAMIC)
-        );
+        assertEq(uint8(giveaway.base.giveawayType), uint8(GiveawayManager.GiveawayType.DYNAMIC));
         assert(giveaway.base.feeToken);
     }
 
-    function test_createGiveaway_CheckVariableSetup_Dynamic_Permissions()
-        public
-    {
-        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager
-            .CreateGiveawayParams({
-                prizeName: "BigMac",
-                timeLength: 30,
-                fee: 1 ether,
-                name: "Big Mac Contest",
-                feeToken: makeAddr("doge"),
-                merkleRoot: bytes32("merkleRoot"),
-                automation: false,
-                participants: new bytes32[](0),
-                totalWinners: 1,
-                entriesPerUser: 1
-            });
+    function test_createGiveaway_CheckVariableSetup_Dynamic_Permissions() public {
+        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager.CreateGiveawayParams({
+            prizeName: "BigMac",
+            timeLength: 30,
+            fee: 1 ether,
+            name: "Big Mac Contest",
+            feeToken: makeAddr("doge"),
+            merkleRoot: bytes32("merkleRoot"),
+            automation: false,
+            participants: new bytes32[](0),
+            totalWinners: 1,
+            entriesPerUser: 1
+        });
         vm.prank(giveawayAdmin);
         LinkTokenInterface(address(customLINK)).transferAndCall(
-            address(giveawayManager),
-            5 ether,
-            bytes(abi.encode(_params))
+            address(giveawayManager), 5 ether, bytes(abi.encode(_params))
         );
-        GiveawayManager.GiveawayInstance memory giveaway = giveawayManager
-            .getGiveaway(0);
+        GiveawayManager.GiveawayInstance memory giveaway = giveawayManager.getGiveaway(0);
         assert(giveaway.base.permissioned);
-        assertEq(
-            uint8(giveaway.base.giveawayType),
-            uint8(GiveawayManager.GiveawayType.DYNAMIC)
-        );
+        assertEq(uint8(giveaway.base.giveawayType), uint8(GiveawayManager.GiveawayType.DYNAMIC));
         assert(giveaway.base.feeToken);
     }
 
-    function test_enterGiveaway_CanEnterDynamicPermissionlessGiveawayWithAddress()
-        public
-    {
+    function test_enterGiveaway_CanEnterDynamicPermissionlessGiveawayWithAddress() public {
         successFixture();
         vm.expectEmit(true, true, true, true);
         emit GiveawayJoined(0, keccak256(abi.encodePacked(user1)), 1);
@@ -505,11 +422,7 @@ contract GiveawayManagerTest is Test {
         gasTokenGiveawayFixture();
         vm.deal(user1, 100 ether);
         vm.startPrank(user1);
-        giveawayManager.enterGiveaway{value: 100 ether}(
-            0,
-            100,
-            new bytes32[](0)
-        );
+        giveawayManager.enterGiveaway{value: 100 ether}(0, 100, new bytes32[](0));
         vm.stopPrank();
     }
 
@@ -528,11 +441,7 @@ contract GiveawayManagerTest is Test {
         staticGiveawayFixture();
         vm.startPrank(user1);
         vm.expectRevert("Only owner can pick winner");
-        customLINK.transferAndCall(
-            address(giveawayManager),
-            1 ether,
-            bytes(abi.encode(0))
-        );
+        customLINK.transferAndCall(address(giveawayManager), 1 ether, bytes(abi.encode(0)));
         vm.stopPrank();
     }
 
@@ -565,14 +474,8 @@ contract GiveawayManagerTest is Test {
     function test_requestRandomWords_createsRequestStatusForGiveaway() public {
         staticGiveawayFixture();
         vm.prank(giveawayAdmin);
-        customLINK.transferAndCall(
-            address(giveawayManager),
-            1 ether,
-            bytes(abi.encode(0))
-        );
-        GiveawayManager.GiveawayInstance memory r = giveawayManager.getGiveaway(
-            0
-        );
+        customLINK.transferAndCall(address(giveawayManager), 1 ether, bytes(abi.encode(0)));
+        GiveawayManager.GiveawayInstance memory r = giveawayManager.getGiveaway(0);
         assertEq(r.requestStatus.paid, 0.1 ether);
     }
 
@@ -587,51 +490,32 @@ contract GiveawayManagerTest is Test {
         vrfMock.fulfillRandomWords(1, address(giveawayManager));
     }
 
-    function test_fulfillRandomWords_fuzzWinnersContestants(
-        uint8 winners,
-        uint16 contestants
-    ) public {
+    function test_fulfillRandomWords_fuzzWinnersContestants(uint8 winners, uint16 contestants) public {
         vm.assume(winners > 20 && winners <= 200);
-        vm.assume(
-            contestants > 0 && contestants >= winners && contestants <= 2000
-        );
+        vm.assume(contestants > 0 && contestants >= winners && contestants <= 2000);
         successFixtureMultipleWinners(winners, true);
 
         for (uint256 i = 0; i < contestants; i++) {
             address user = makeAddr(string(abi.encodePacked(i)));
             vm.deal(user, 1 ether);
             vm.prank(user);
-            giveawayManager.enterGiveaway{value: 1 ether}(
-                0,
-                1,
-                new bytes32[](0)
-            );
+            giveawayManager.enterGiveaway{value: 1 ether}(0, 1, new bytes32[](0));
         }
 
         vm.prank(admin);
         customLINK.transfer(address(giveawayAdmin), 1 ether);
 
         vm.prank(giveawayAdmin);
-        customLINK.transferAndCall(
-            address(giveawayManager),
-            0.1 ether,
-            bytes(abi.encode(0))
-        );
+        customLINK.transferAndCall(address(giveawayManager), 0.1 ether, bytes(abi.encode(0)));
         vrfMock.fulfillRandomWords(1, address(giveawayManager));
-        GiveawayManager.GiveawayInstance memory r = giveawayManager.getGiveaway(
-            0
-        );
+        GiveawayManager.GiveawayInstance memory r = giveawayManager.getGiveaway(0);
 
         assertEq(uint8(r.giveawayState), uint8(3));
 
         vm.prank(giveawayAdmin);
-        (bool upkeepNeeded, bytes memory performData) = giveawayManager
-            .checkUpkeep(abi.encode(0));
+        (bool upkeepNeeded, bytes memory performData) = giveawayManager.checkUpkeep(abi.encode(0));
         assertEq(upkeepNeeded, true);
-        (uint256 id, bytes32[] memory users) = abi.decode(
-            performData,
-            (uint256, bytes32[])
-        );
+        (uint256 id, bytes32[] memory users) = abi.decode(performData, (uint256, bytes32[]));
         assertEq(id, 0);
 
         vm.prank(address(keeperAddress));
@@ -657,22 +541,14 @@ contract GiveawayManagerTest is Test {
         giveawayManager.enterGiveaway{value: 1 ether}(0, 1, new bytes32[](0));
 
         vm.startPrank(giveawayAdmin);
-        customLINK.transferAndCall(
-            address(giveawayManager),
-            2 ether,
-            bytes(abi.encode(0))
-        );
+        customLINK.transferAndCall(address(giveawayManager), 2 ether, bytes(abi.encode(0)));
         vrfMock.fulfillRandomWords(1, address(giveawayManager));
         vm.stopPrank();
 
         vm.prank(giveawayAdmin);
-        (bool upkeepNeeded, bytes memory performData) = giveawayManager
-            .checkUpkeep(abi.encode(0));
+        (bool upkeepNeeded, bytes memory performData) = giveawayManager.checkUpkeep(abi.encode(0));
         assertEq(upkeepNeeded, true);
-        (uint256 id, bytes32[] memory users) = abi.decode(
-            performData,
-            (uint256, bytes32[])
-        );
+        (uint256 id, bytes32[] memory users) = abi.decode(performData, (uint256, bytes32[]));
         assertEq(id, 0);
 
         vm.prank(address(keeperAddress));
@@ -698,22 +574,14 @@ contract GiveawayManagerTest is Test {
         vm.prank(admin);
         customLINK.transfer(address(giveawayAdmin), 5 ether);
         vm.startPrank(giveawayAdmin);
-        customLINK.transferAndCall(
-            address(giveawayManager),
-            2 ether,
-            bytes(abi.encode(0))
-        );
+        customLINK.transferAndCall(address(giveawayManager), 2 ether, bytes(abi.encode(0)));
         vrfMock.fulfillRandomWords(1, address(giveawayManager));
         vm.stopPrank();
 
         vm.prank(giveawayAdmin);
-        (bool upkeepNeeded, bytes memory performData) = giveawayManager
-            .checkUpkeep(abi.encode(0));
+        (bool upkeepNeeded, bytes memory performData) = giveawayManager.checkUpkeep(abi.encode(0));
         assertEq(upkeepNeeded, true);
-        (uint256 id, bytes32[] memory users) = abi.decode(
-            performData,
-            (uint256, bytes32[])
-        );
+        (uint256 id, bytes32[] memory users) = abi.decode(performData, (uint256, bytes32[]));
         assertEq(id, 0);
 
         vm.prank(address(keeperAddress));
@@ -742,11 +610,7 @@ contract GiveawayManagerTest is Test {
         customLINK.transfer(address(giveawayAdmin), 1 ether);
         vm.startPrank(giveawayAdmin);
         vm.expectRevert("Not enough contestants to pick winner");
-        customLINK.transferAndCall(
-            address(giveawayManager),
-            0.1 ether,
-            bytes(abi.encode(0))
-        );
+        customLINK.transferAndCall(address(giveawayManager), 0.1 ether, bytes(abi.encode(0)));
         vm.stopPrank();
     }
 
@@ -760,22 +624,14 @@ contract GiveawayManagerTest is Test {
         vm.stopPrank();
 
         vm.startPrank(giveawayAdmin);
-        customLINK.transferAndCall(
-            address(giveawayManager),
-            2 ether,
-            bytes(abi.encode(0))
-        );
+        customLINK.transferAndCall(address(giveawayManager), 2 ether, bytes(abi.encode(0)));
         vrfMock.fulfillRandomWords(1, address(giveawayManager));
         vm.stopPrank();
 
         vm.prank(giveawayAdmin);
-        (bool upkeepNeeded, bytes memory performData) = giveawayManager
-            .checkUpkeep(abi.encode(0));
+        (bool upkeepNeeded, bytes memory performData) = giveawayManager.checkUpkeep(abi.encode(0));
         assertEq(upkeepNeeded, true);
-        (uint256 id, bytes32[] memory users) = abi.decode(
-            performData,
-            (uint256, bytes32[])
-        );
+        (uint256 id, bytes32[] memory users) = abi.decode(performData, (uint256, bytes32[]));
         assertEq(id, 0);
 
         vm.prank(address(keeperAddress));
@@ -798,22 +654,14 @@ contract GiveawayManagerTest is Test {
         giveawayManager.enterGiveaway{value: 1 ether}(0, 1, new bytes32[](0));
 
         vm.startPrank(giveawayAdmin);
-        customLINK.transferAndCall(
-            address(giveawayManager),
-            2 ether,
-            bytes(abi.encode(0))
-        );
+        customLINK.transferAndCall(address(giveawayManager), 2 ether, bytes(abi.encode(0)));
         vrfMock.fulfillRandomWords(1, address(giveawayManager));
         vm.stopPrank();
 
         vm.prank(giveawayAdmin);
-        (bool upkeepNeeded, bytes memory performData) = giveawayManager
-            .checkUpkeep(abi.encode(0));
+        (bool upkeepNeeded, bytes memory performData) = giveawayManager.checkUpkeep(abi.encode(0));
         assertEq(upkeepNeeded, true);
-        (uint256 id, bytes32[] memory users) = abi.decode(
-            performData,
-            (uint256, bytes32[])
-        );
+        (uint256 id, bytes32[] memory users) = abi.decode(performData, (uint256, bytes32[]));
         assertEq(id, 0);
 
         vm.prank(address(keeperAddress));
@@ -836,22 +684,14 @@ contract GiveawayManagerTest is Test {
         giveawayManager.enterGiveaway{value: 1 ether}(0, 1, new bytes32[](0));
 
         vm.startPrank(giveawayAdmin);
-        customLINK.transferAndCall(
-            address(giveawayManager),
-            2 ether,
-            bytes(abi.encode(0))
-        );
+        customLINK.transferAndCall(address(giveawayManager), 2 ether, bytes(abi.encode(0)));
         vrfMock.fulfillRandomWords(1, address(giveawayManager));
         vm.stopPrank();
 
         vm.prank(giveawayAdmin);
-        (bool upkeepNeeded, bytes memory performData) = giveawayManager
-            .checkUpkeep(abi.encode(0));
+        (bool upkeepNeeded, bytes memory performData) = giveawayManager.checkUpkeep(abi.encode(0));
         assertEq(upkeepNeeded, true);
-        (uint256 id, bytes32[] memory users) = abi.decode(
-            performData,
-            (uint256, bytes32[])
-        );
+        (uint256 id, bytes32[] memory users) = abi.decode(performData, (uint256, bytes32[]));
         assertEq(id, 0);
 
         vm.prank(address(keeperAddress));
@@ -868,9 +708,7 @@ contract GiveawayManagerTest is Test {
         staticGiveawayFixture();
         vm.prank(giveawayAdmin);
         vrfMock.fulfillRandomWords(1, address(giveawayManager));
-        GiveawayManager.GiveawayInstance memory r = giveawayManager.getGiveaway(
-            0
-        );
+        GiveawayManager.GiveawayInstance memory r = giveawayManager.getGiveaway(0);
         for (uint256 i = 0; i < r.winners.length; i++) {
             assertEq(r.winners[i], keccak256(abi.encodePacked(email)));
         }
@@ -881,11 +719,7 @@ contract GiveawayManagerTest is Test {
         customLINK.transfer(address(giveawayAdmin), 5 ether);
         staticGiveawayFixture();
         vm.startPrank(giveawayAdmin);
-        customLINK.transferAndCall(
-            address(giveawayManager),
-            2 ether,
-            bytes(abi.encode(0))
-        );
+        customLINK.transferAndCall(address(giveawayManager), 2 ether, bytes(abi.encode(0)));
         vrfMock.fulfillRandomWords(1, address(giveawayManager));
         giveawayManager.withdrawLink(0);
     }
@@ -895,11 +729,7 @@ contract GiveawayManagerTest is Test {
         customLINK.transfer(address(giveawayAdmin), 5 ether);
         staticGiveawayFixture();
         vm.startPrank(giveawayAdmin);
-        customLINK.transferAndCall(
-            address(giveawayManager),
-            2 ether,
-            bytes(abi.encode(0))
-        );
+        customLINK.transferAndCall(address(giveawayManager), 2 ether, bytes(abi.encode(0)));
         vrfMock.fulfillRandomWords(1, address(giveawayManager));
         giveawayManager.withdrawLink(0);
 
@@ -912,30 +742,20 @@ contract GiveawayManagerTest is Test {
         customLINK.transfer(address(giveawayAdmin), 5 ether);
         staticGiveawayFixture();
         vm.startPrank(giveawayAdmin);
-        customLINK.transferAndCall(
-            address(giveawayManager),
-            0.1 ether,
-            bytes(abi.encode(0))
-        );
+        customLINK.transferAndCall(address(giveawayManager), 0.1 ether, bytes(abi.encode(0)));
         vrfMock.fulfillRandomWords(1, address(giveawayManager));
 
         vm.expectRevert("Nothing to claim");
         giveawayManager.withdrawLink(0);
     }
 
-    function testRevert_withdrawLink_notOwnerOfGiveaway(
-        address notOwner
-    ) public {
+    function testRevert_withdrawLink_notOwnerOfGiveaway(address notOwner) public {
         vm.assume(notOwner != giveawayAdmin);
         vm.prank(admin);
         customLINK.transfer(address(giveawayAdmin), 5 ether);
         staticGiveawayFixture();
         vm.startPrank(giveawayAdmin);
-        customLINK.transferAndCall(
-            address(giveawayManager),
-            0.1 ether,
-            bytes(abi.encode(0))
-        );
+        customLINK.transferAndCall(address(giveawayManager), 0.1 ether, bytes(abi.encode(0)));
         vrfMock.fulfillRandomWords(1, address(giveawayManager));
         vm.stopPrank();
 
@@ -949,22 +769,14 @@ contract GiveawayManagerTest is Test {
         vm.prank(admin);
         customLINK.transfer(address(giveawayAdmin), 5 ether);
         vm.startPrank(giveawayAdmin);
-        customLINK.transferAndCall(
-            address(giveawayManager),
-            2 ether,
-            bytes(abi.encode(0))
-        );
+        customLINK.transferAndCall(address(giveawayManager), 2 ether, bytes(abi.encode(0)));
         vrfMock.fulfillRandomWords(1, address(giveawayManager));
         vm.stopPrank();
 
         vm.prank(giveawayAdmin);
-        (bool upkeepNeeded, bytes memory performData) = giveawayManager
-            .checkUpkeep(abi.encode(0));
+        (bool upkeepNeeded, bytes memory performData) = giveawayManager.checkUpkeep(abi.encode(0));
         assertEq(upkeepNeeded, true);
-        (uint256 id, bytes32[] memory users) = abi.decode(
-            performData,
-            (uint256, bytes32[])
-        );
+        (uint256 id, bytes32[] memory users) = abi.decode(performData, (uint256, bytes32[]));
         assertEq(id, 0);
         assertEq(users.length, 1);
     }
@@ -974,22 +786,14 @@ contract GiveawayManagerTest is Test {
         vm.prank(admin);
         customLINK.transfer(address(giveawayAdmin), 5 ether);
         vm.startPrank(giveawayAdmin);
-        customLINK.transferAndCall(
-            address(giveawayManager),
-            2 ether,
-            bytes(abi.encode(0))
-        );
+        customLINK.transferAndCall(address(giveawayManager), 2 ether, bytes(abi.encode(0)));
         vrfMock.fulfillRandomWords(1, address(giveawayManager));
         vm.stopPrank();
 
         vm.prank(giveawayAdmin);
-        (bool upkeepNeeded, bytes memory performData) = giveawayManager
-            .checkUpkeep(abi.encode(0));
+        (bool upkeepNeeded, bytes memory performData) = giveawayManager.checkUpkeep(abi.encode(0));
         assertEq(upkeepNeeded, true);
-        (uint256 id, bytes32[] memory users) = abi.decode(
-            performData,
-            (uint256, bytes32[])
-        );
+        (uint256 id, bytes32[] memory users) = abi.decode(performData, (uint256, bytes32[]));
         assertEq(id, 0);
         assertEq(users.length, 1);
 
@@ -999,10 +803,7 @@ contract GiveawayManagerTest is Test {
         giveawayManager.performUpkeep(performData);
     }
 
-    function test_integrationTest_picksWinners(
-        uint256 winners,
-        uint256 contestants
-    ) public {
+    function test_integrationTest_picksWinners(uint256 winners, uint256 contestants) public {
         winners = bound(winners, 1, 5);
         contestants = bound(contestants, 10, 50);
         successFixtureMultipleWinners(uint8(winners), true);
@@ -1010,31 +811,19 @@ contract GiveawayManagerTest is Test {
             address user = makeAddr(string(abi.encodePacked(i)));
             vm.deal(user, 1 ether);
             vm.prank(user);
-            giveawayManager.enterGiveaway{value: 1 ether}(
-                0,
-                1,
-                new bytes32[](0)
-            );
+            giveawayManager.enterGiveaway{value: 1 ether}(0, 1, new bytes32[](0));
         }
         vm.prank(admin);
         customLINK.transfer(address(giveawayAdmin), 5 ether);
         vm.startPrank(giveawayAdmin);
-        customLINK.transferAndCall(
-            address(giveawayManager),
-            2 ether,
-            bytes(abi.encode(0))
-        );
+        customLINK.transferAndCall(address(giveawayManager), 2 ether, bytes(abi.encode(0)));
         vrfMock.fulfillRandomWords(1, address(giveawayManager));
         vm.stopPrank();
 
         vm.prank(giveawayAdmin);
-        (bool upkeepNeeded, bytes memory performData) = giveawayManager
-            .checkUpkeep(abi.encode(0));
+        (bool upkeepNeeded, bytes memory performData) = giveawayManager.checkUpkeep(abi.encode(0));
         assertEq(upkeepNeeded, true);
-        (uint256 id, bytes32[] memory users) = abi.decode(
-            performData,
-            (uint256, bytes32[])
-        );
+        (uint256 id, bytes32[] memory users) = abi.decode(performData, (uint256, bytes32[]));
         assertEq(id, 0);
         assertEq(users.length, winners);
 
@@ -1046,11 +835,7 @@ contract GiveawayManagerTest is Test {
         uint256 totalClaimed = 0;
         for (uint256 i = 0; i < contestants; i++) {
             for (uint256 j = 0; j < winners; j++) {
-                if (
-                    keccak256(
-                        abi.encodePacked(makeAddr(string(abi.encodePacked(i))))
-                    ) == users[j]
-                ) {
+                if (keccak256(abi.encodePacked(makeAddr(string(abi.encodePacked(i))))) == users[j]) {
                     vm.prank(makeAddr(string(abi.encodePacked(i))));
                     giveawayManager.claimPrize(0);
                     totalClaimed++;
@@ -1068,37 +853,23 @@ contract GiveawayManagerTest is Test {
             address user = makeAddr(string(abi.encodePacked(i)));
             vm.deal(user, 1 ether);
             vm.prank(user);
-            giveawayManager.enterGiveaway{value: 1 ether}(
-                0,
-                1,
-                new bytes32[](0)
-            );
+            giveawayManager.enterGiveaway{value: 1 ether}(0, 1, new bytes32[](0));
         }
 
         vm.prank(admin);
         customLINK.transfer(address(giveawayAdmin), 1 ether);
 
         vm.prank(giveawayAdmin);
-        customLINK.transferAndCall(
-            address(giveawayManager),
-            0.1 ether,
-            bytes(abi.encode(0))
-        );
+        customLINK.transferAndCall(address(giveawayManager), 0.1 ether, bytes(abi.encode(0)));
         vrfMock.fulfillRandomWords(1, address(giveawayManager));
-        GiveawayManager.GiveawayInstance memory r = giveawayManager.getGiveaway(
-            0
-        );
+        GiveawayManager.GiveawayInstance memory r = giveawayManager.getGiveaway(0);
 
         assertEq(uint8(r.giveawayState), uint8(3));
 
         vm.prank(giveawayAdmin);
-        (bool upkeepNeeded, bytes memory performData) = giveawayManager
-            .checkUpkeep(abi.encode(0));
+        (bool upkeepNeeded, bytes memory performData) = giveawayManager.checkUpkeep(abi.encode(0));
         assertEq(upkeepNeeded, true);
-        (uint256 id, bytes32[] memory users) = abi.decode(
-            performData,
-            (uint256, bytes32[])
-        );
+        (uint256 id, bytes32[] memory users) = abi.decode(performData, (uint256, bytes32[]));
         assertEq(id, 0);
 
         vm.prank(address(keeperAddress));
@@ -1123,22 +894,14 @@ contract GiveawayManagerTest is Test {
         vm.prank(admin);
         customLINK.transfer(address(giveawayAdmin), 5 ether);
         vm.startPrank(giveawayAdmin);
-        customLINK.transferAndCall(
-            address(giveawayManager),
-            2 ether,
-            bytes(abi.encode(0))
-        );
+        customLINK.transferAndCall(address(giveawayManager), 2 ether, bytes(abi.encode(0)));
         vrfMock.fulfillRandomWords(1, address(giveawayManager));
         vm.stopPrank();
 
         vm.prank(giveawayAdmin);
-        (bool upkeepNeeded, bytes memory performData) = giveawayManager
-            .checkUpkeep(abi.encode(0));
+        (bool upkeepNeeded, bytes memory performData) = giveawayManager.checkUpkeep(abi.encode(0));
         assertEq(upkeepNeeded, true);
-        (uint256 id, bytes32[] memory users) = abi.decode(
-            performData,
-            (uint256, bytes32[])
-        );
+        (uint256 id, bytes32[] memory users) = abi.decode(performData, (uint256, bytes32[]));
         assertEq(id, 0);
         assertEq(users.length, 1);
 
@@ -1146,8 +909,6 @@ contract GiveawayManagerTest is Test {
         vm.expectEmit(true, true, true, true);
         emit GiveawayWon(0, users);
         giveawayManager.performUpkeep(performData);
-        GiveawayManager.GiveawayInstance memory r = giveawayManager.getGiveaway(
-            0
-        );
+        GiveawayManager.GiveawayInstance memory r = giveawayManager.getGiveaway(0);
     }
 }

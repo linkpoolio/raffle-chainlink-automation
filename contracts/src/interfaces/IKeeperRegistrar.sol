@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 interface IKeeperRegistrar {
     function register(
@@ -9,8 +9,8 @@ interface IKeeperRegistrar {
         uint32 gasLimit,
         address adminAddress,
         bytes calldata checkData,
+        bytes calldata offchainConfig,
         uint96 amount,
-        uint8 source,
         address sender
     ) external;
 }

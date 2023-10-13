@@ -1,21 +1,23 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
-import {AutomationCompatibleInterface} from "@chainlink/contracts/src/v0.8/interfaces/automation/AutomationCompatibleInterface.sol";
-import {AutomationRegistryInterface, State, Config} from "@chainlink/contracts/src/v0.8/interfaces/automation/1_2/AutomationRegistryInterface1_2.sol";
-import {VRFV2WrapperConsumerBase} from "@chainlink/contracts/src/v0.8/VRFV2WrapperConsumerBase.sol";
+import {AutomationCompatibleInterface} from
+    "@chainlink/contracts/src/v0.8/automation/interfaces/AutomationCompatibleInterface.sol";
+import {AutomationRegistryInterface} from
+    "@chainlink/contracts/src/v0.8/automation/interfaces/2_0/AutomationRegistryInterface2_0.sol";
+import {RegistrationParams} from "@chainlink/contracts/src/v0.8/automation/2_0/KeeperRegistrar2_0.sol";
+import {VRFV2WrapperConsumerBase} from "@chainlink/contracts/src/v0.8/vrf/VRFV2WrapperConsumerBase.sol";
 import {VRFCoordinatorV2Interface} from "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
-import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
-import {ERC677ReceiverInterface} from "@chainlink/contracts/src/v0.8/interfaces/ERC677ReceiverInterface.sol";
+import {IERC677} from "@chainlink/contracts/src/v0.8/shared/token/ERC677/IERC677.sol";
+import {IERC677Receiver} from "@chainlink/contracts/src/v0.8/shared/token/ERC677/IERC677Receiver.sol";
 import {VRFV2WrapperInterface} from "@chainlink/contracts/src/v0.8/interfaces/VRFV2WrapperInterface.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import {IGiveawayManager} from "@src/interfaces/IGiveawayManager.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 import {UD60x18, ud, intoUint256} from "@prb/math/UD60x18.sol";
 import {IKeeperRegistrar} from "@src/interfaces/IKeeperRegistrar.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
@@ -28,16 +30,15 @@ contract GiveawayManager is
     IGiveawayManager,
     VRFV2WrapperConsumerBase,
     AutomationCompatibleInterface,
-    ERC677ReceiverInterface,
+    IERC677Receiver,
     Pausable,
     ReentrancyGuard
 {
     using SafeERC20 for IERC20;
-    using Counters for Counters.Counter;
     using EnumerableSet for EnumerableSet.UintSet;
     using MerkleProof for bytes32[];
 
-    Counters.Counter public giveawayCounter;
+    uint256 public giveawayCounter;
     RequestConfig public requestConfig;
     VRFV2WrapperInterface public vrfWrapper;
     AutomationRegistryInterface public immutable i_registry;
@@ -130,32 +131,14 @@ contract GiveawayManager is
     }
 
     //------------------------------ EVENTS ----------------------------------
-    event GiveawayCreated(
-        string prize,
-        uint256 indexed time,
-        uint256 indexed fee,
-        address feeToken,
-        bool permissioned
-    );
-    event GiveawayJoined(
-        uint256 indexed giveawayId,
-        bytes32 indexed player,
-        uint256 entries
-    );
+    event GiveawayCreated(string prize, uint256 indexed time, uint256 indexed fee, address feeToken, bool permissioned);
+    event GiveawayJoined(uint256 indexed giveawayId, bytes32 indexed player, uint256 entries);
     event GiveawayClosed(uint256 indexed giveawayId, bytes32[] participants);
     event GiveawayStaged(uint256 indexed giveawayId);
     event GiveawayCancelled(uint256 indexed giveawayId);
     event GiveawayWon(uint256 indexed giveawayId, bytes32[] indexed winners);
-    event GiveawayPrizeClaimed(
-        uint256 indexed giveawayId,
-        address indexed winner,
-        uint256 value
-    );
-    event GiveawayOwnerUpdated(
-        uint256 indexed giveawayId,
-        address oldOwner,
-        address newOwner
-    );
+    event GiveawayPrizeClaimed(uint256 indexed giveawayId, address indexed winner, uint256 value);
+    event GiveawayOwnerUpdated(uint256 indexed giveawayId, address oldOwner, address newOwner);
 
     modifier onlyOwner() {
         require(msg.sender == owner);
@@ -178,10 +161,7 @@ contract GiveawayManager is
     ) VRFV2WrapperConsumerBase(linkAddress, wrapperAddress) {
         require(linkAddress != address(0), "Link Token address cannot be 0x0");
         require(wrapperAddress != address(0), "Wrapper address cannot be 0x0");
-        require(
-            registrarAddress != address(0),
-            "Registrar address cannot be 0x0"
-        );
+        require(registrarAddress != address(0), "Registrar address cannot be 0x0");
         owner = msg.sender;
         vrfWrapper = VRFV2WrapperInterface(wrapperAddress);
         linkTokenAddress = linkAddress;
@@ -224,15 +204,10 @@ contract GiveawayManager is
         uint8 totalWinners,
         uint8 entriesPerUser
     ) internal whenNotPaused returns (uint256) {
-        require(
-            totalWinners <= 200,
-            "Max total winners must not be greater than 200"
-        );
+        require(totalWinners <= 200, "Max total winners must not be greater than 200");
         GiveawayInstance memory newGiveaway = GiveawayInstance({
             base: GiveawayBase({
-                giveawayType: participants.length > 0
-                    ? GiveawayType.STATIC
-                    : GiveawayType.DYNAMIC,
+                giveawayType: participants.length > 0 ? GiveawayType.STATIC : GiveawayType.DYNAMIC,
                 id: giveawayCounter.current(),
                 automation: automation,
                 feeToken: feeToken != address(0) ? true : false,
@@ -245,18 +220,13 @@ contract GiveawayManager is
             }),
             owner: sender,
             giveawayName: name,
-            contestants: participants.length > 0
-                ? participants
-                : new bytes32[](0),
+            contestants: participants.length > 0 ? participants : new bytes32[](0),
             winners: new bytes32[](0),
             prizeWorth: ud(0),
             timeLength: timeLength,
             fee: fee,
             giveawayState: GiveawayState.LIVE,
-            prize: Prize({
-                prizeName: prizeName,
-                claimedPrizes: new bytes32[](0)
-            }),
+            prize: Prize({prizeName: prizeName, claimedPrizes: new bytes32[](0)}),
             paymentNeeded: fee == 0 ? false : true,
             merkleRoot: merkleRoot,
             requestStatus: RequestStatus({
@@ -272,13 +242,7 @@ contract GiveawayManager is
         giveaways[giveawayCounter.current()] = newGiveaway;
         liveGiveaways.add(giveawayCounter.current());
         giveawayCounter.increment();
-        emit GiveawayCreated(
-            prizeName,
-            timeLength,
-            fee,
-            feeToken,
-            merkleRoot != bytes32(0) ? true : false
-        );
+        emit GiveawayCreated(prizeName, timeLength, fee, feeToken, merkleRoot != bytes32(0) ? true : false);
 
         return giveawayCounter.current() - 1;
     }
@@ -289,13 +253,8 @@ contract GiveawayManager is
      * @dev requires that giveaway is live
      *
      */
-    function cancelGiveaway(
-        uint256 giveawayId
-    ) external onlyGiveawayOwner(giveawayId) {
-        require(
-            giveaways[giveawayId].giveawayState == GiveawayState.LIVE,
-            "Giveaway is not live"
-        );
+    function cancelGiveaway(uint256 giveawayId) external onlyGiveawayOwner(giveawayId) {
+        require(giveaways[giveawayId].giveawayState == GiveawayState.LIVE, "Giveaway is not live");
         giveaways[giveawayId].giveawayState = GiveawayState.CANCELLED;
         liveGiveaways.remove(giveawayId);
         emit GiveawayCancelled(giveawayId);
@@ -310,55 +269,27 @@ contract GiveawayManager is
      * @dev if giveaway is permissioned, proof must be provided
      *
      */
-    function enterGiveaway(
-        uint256 giveawayId,
-        uint8 entries,
-        bytes32[] memory proof
-    ) external payable nonReentrant {
+    function enterGiveaway(uint256 giveawayId, uint8 entries, bytes32[] memory proof) external payable nonReentrant {
+        require(giveaways[giveawayId].giveawayState == GiveawayState.LIVE, "Giveaway is not live");
+        require(giveaways[giveawayId].base.giveawayType == GiveawayType.DYNAMIC, "Cannot enter static giveaway");
+        require(entries > 0 && entries <= giveaways[giveawayId].base.entriesPerUser, "Too many entries");
         require(
-            giveaways[giveawayId].giveawayState == GiveawayState.LIVE,
-            "Giveaway is not live"
-        );
-        require(
-            giveaways[giveawayId].base.giveawayType == GiveawayType.DYNAMIC,
-            "Cannot enter static giveaway"
-        );
-        require(
-            entries > 0 && entries <= giveaways[giveawayId].base.entriesPerUser,
-            "Too many entries"
-        );
-        require(
-            userEntries[msg.sender][giveawayId] + entries <=
-                giveaways[giveawayId].base.entriesPerUser,
+            userEntries[msg.sender][giveawayId] + entries <= giveaways[giveawayId].base.entriesPerUser,
             "Too many entries"
         );
         bytes32 _userHash = keccak256(abi.encodePacked(msg.sender));
         if (giveaways[giveawayId].base.permissioned) {
-            require(
-                proof.verify(giveaways[giveawayId].merkleRoot, _userHash),
-                "Not authorized"
-            );
+            require(proof.verify(giveaways[giveawayId].merkleRoot, _userHash), "Not authorized");
         }
-        if (
-            giveaways[giveawayId].paymentNeeded &&
-            giveaways[giveawayId].base.feeToken
-        ) {
+        if (giveaways[giveawayId].paymentNeeded && giveaways[giveawayId].base.feeToken) {
             IERC20(giveaways[giveawayId].base.feeTokenAddress).safeTransferFrom(
-                msg.sender,
-                address(this),
-                (giveaways[giveawayId].fee * entries)
+                msg.sender, address(this), (giveaways[giveawayId].fee * entries)
             );
-            giveaways[giveawayId].prizeWorth = giveaways[giveawayId]
-                .prizeWorth
-                .add(ud(giveaways[giveawayId].fee * entries));
+            giveaways[giveawayId].prizeWorth =
+                giveaways[giveawayId].prizeWorth.add(ud(giveaways[giveawayId].fee * entries));
         } else if (giveaways[giveawayId].paymentNeeded) {
-            require(
-                msg.value >= (giveaways[giveawayId].fee * entries),
-                "Not enough gas token to join giveaway"
-            );
-            giveaways[giveawayId].prizeWorth = giveaways[giveawayId]
-                .prizeWorth
-                .add(ud(msg.value));
+            require(msg.value >= (giveaways[giveawayId].fee * entries), "Not enough gas token to join giveaway");
+            giveaways[giveawayId].prizeWorth = giveaways[giveawayId].prizeWorth.add(ud(msg.value));
         }
         for (uint256 i = 0; i < entries; i++) {
             giveaways[giveawayId].contestants.push(_userHash);
@@ -373,9 +304,7 @@ contract GiveawayManager is
      * @return address of the winner
      *
      */
-    function getWinners(
-        uint256 giveawayId
-    ) external view returns (bytes32[] memory) {
+    function getWinners(uint256 giveawayId) external view returns (bytes32[] memory) {
         return giveaways[giveawayId].winners;
     }
 
@@ -386,14 +315,8 @@ contract GiveawayManager is
      *
      */
     function claimPrize(uint256 giveawayId) external nonReentrant {
-        require(
-            giveaways[giveawayId].giveawayState == GiveawayState.FINISHED,
-            "Giveaway is not finished"
-        );
-        require(
-            intoUint256(giveaways[giveawayId].prizeWorth) > 0,
-            "No prize to claim"
-        );
+        require(giveaways[giveawayId].giveawayState == GiveawayState.FINISHED, "Giveaway is not finished");
+        require(intoUint256(giveaways[giveawayId].prizeWorth) > 0, "No prize to claim");
         bytes32 _claimer = keccak256(abi.encodePacked(msg.sender));
         bool eligible = false;
         for (uint256 i = 0; i < giveaways[giveawayId].winners.length; i++) {
@@ -403,35 +326,22 @@ contract GiveawayManager is
             }
         }
         require(eligible, "You are not eligible to claim this prize");
-        for (
-            uint256 i = 0;
-            i < giveaways[giveawayId].prize.claimedPrizes.length;
-            i++
-        ) {
-            require(
-                giveaways[giveawayId].prize.claimedPrizes[i] != _claimer,
-                "Prize already claimed"
-            );
+        for (uint256 i = 0; i < giveaways[giveawayId].prize.claimedPrizes.length; i++) {
+            require(giveaways[giveawayId].prize.claimedPrizes[i] != _claimer, "Prize already claimed");
         }
         // total claimable based on total prize pool divided by total winners using fixed point math
-        uint256 _total = intoUint256(
-            giveaways[giveawayId].prizeWorth.div(
-                ud(giveaways[giveawayId].base.totalWinners * 1e18)
-            )
-        );
+        uint256 _total =
+            intoUint256(giveaways[giveawayId].prizeWorth.div(ud(giveaways[giveawayId].base.totalWinners * 1e18)));
         if (giveaways[giveawayId].base.feeToken) {
             // custom token transfer
             giveaways[giveawayId].prize.claimedPrizes.push(_claimer);
             emit GiveawayPrizeClaimed(giveawayId, msg.sender, _total);
-            IERC20(giveaways[giveawayId].base.feeTokenAddress).safeTransfer(
-                msg.sender,
-                _total
-            );
+            IERC20(giveaways[giveawayId].base.feeTokenAddress).safeTransfer(msg.sender, _total);
         } else if (giveaways[giveawayId].fee > 0) {
             // gas token transfer
             giveaways[giveawayId].prize.claimedPrizes.push(_claimer);
             emit GiveawayPrizeClaimed(giveawayId, msg.sender, _total);
-            (bool success, ) = msg.sender.call{value: _total}("");
+            (bool success,) = msg.sender.call{value: _total}("");
             require(success, "Transfer failed.");
         }
     }
@@ -441,35 +351,16 @@ contract GiveawayManager is
      * @dev Uses Chainlink VRF direct funding to generate random number paid by giveaway owner.
      *
      */
-    function onTokenTransfer(
-        address sender,
-        uint256 value,
-        bytes calldata data
-    ) external {
-        require(
-            msg.sender == address(linkTokenAddress),
-            "Sender must be LINK address"
-        );
+    function onTokenTransfer(address sender, uint256 value, bytes calldata data) external {
+        require(msg.sender == address(linkTokenAddress), "Sender must be LINK address");
         if (data.length == 32) {
             uint256 _giveaway = abi.decode(data, (uint256));
-            require(
-                giveaways[_giveaway].owner == sender,
-                "Only owner can pick winner"
-            );
-            require(
-                _eligableToEnd(_giveaway),
-                "Not enough contestants to pick winner"
-            );
-            require(
-                giveaways[_giveaway].giveawayState != GiveawayState.FINISHED,
-                "Giveaway is already finished"
-            );
+            require(giveaways[_giveaway].owner == sender, "Only owner can pick winner");
+            require(_eligableToEnd(_giveaway), "Not enough contestants to pick winner");
+            require(giveaways[_giveaway].giveawayState != GiveawayState.FINISHED, "Giveaway is already finished");
             _pickWinner(_giveaway, value);
         } else {
-            CreateGiveawayParams memory _params = abi.decode(
-                data,
-                (CreateGiveawayParams)
-            );
+            CreateGiveawayParams memory _params = abi.decode(data, (CreateGiveawayParams));
 
             uint256 _id = _createGiveaway(
                 sender,
@@ -484,16 +375,8 @@ contract GiveawayManager is
                 _params.totalWinners,
                 _params.entriesPerUser
             );
-            string memory name = string(
-                abi.encodePacked("Giveaway ", Strings.toString(_id))
-            );
-            _registerAutomation(
-                name,
-                requestConfig.automationGasLimit,
-                abi.encode(_id),
-                uint96(value),
-                0
-            );
+            string memory name = string(abi.encodePacked("Giveaway ", Strings.toString(_id)));
+            _registerAutomation(name, requestConfig.automationGasLimit, abi.encode(_id), uint96(value), 0);
         }
     }
 
@@ -530,9 +413,7 @@ contract GiveawayManager is
      * @return giveaway instance
      *
      */
-    function getGiveaway(
-        uint256 giveawayId
-    ) external view returns (GiveawayInstance memory) {
+    function getGiveaway(uint256 giveawayId) external view returns (GiveawayInstance memory) {
         return giveaways[giveawayId];
     }
 
@@ -541,11 +422,7 @@ contract GiveawayManager is
      * @return GiveawayInstance[] of all giveaways
      *
      */
-    function getAllGiveaways()
-        external
-        view
-        returns (GiveawayInstance[] memory)
-    {
+    function getAllGiveaways() external view returns (GiveawayInstance[] memory) {
         GiveawayInstance[] memory _giveaways = new GiveawayInstance[](
             giveawayCounter.current()
         );
@@ -561,9 +438,7 @@ contract GiveawayManager is
      * @return GiveawayInstance[] of all owner giveaways
      *
      */
-    function getOwnerGiveaways(
-        address giveawayOwner
-    ) external view returns (GiveawayInstance[] memory) {
+    function getOwnerGiveaways(address giveawayOwner) external view returns (GiveawayInstance[] memory) {
         uint256 _index = 0;
         for (uint256 i = 0; i < giveawayCounter.current(); i++) {
             if (giveaways[i].owner == giveawayOwner) {
@@ -588,10 +463,7 @@ contract GiveawayManager is
      * @return uint256 amount of entries
      *
      */
-    function getUserEntries(
-        uint256 giveawayId,
-        address user
-    ) external view returns (uint256) {
+    function getUserEntries(uint256 giveawayId, address user) external view returns (uint256) {
         return userEntries[user][giveawayId];
     }
 
@@ -601,10 +473,7 @@ contract GiveawayManager is
      * @param newAdmin address of the new admin
      *
      */
-    function updateGiveawayOwner(
-        uint256 giveawayId,
-        address newAdmin
-    ) external onlyGiveawayOwner(giveawayId) {
+    function updateGiveawayOwner(uint256 giveawayId, address newAdmin) external onlyGiveawayOwner(giveawayId) {
         giveaways[giveawayId].owner = newAdmin;
         emit GiveawayOwnerUpdated(giveawayId, msg.sender, newAdmin);
     }
@@ -614,16 +483,10 @@ contract GiveawayManager is
      * @param giveawayId id of the giveaway
      * @dev must be owner of giveaway to withdraw LINK from giveaway instance
      */
-    function withdrawLink(
-        uint256 giveawayId
-    ) external onlyGiveawayOwner(giveawayId) nonReentrant {
-        require(
-            !giveaways[giveawayId].requestStatus.withdrawn,
-            "Already withdrawn"
-        );
+    function withdrawLink(uint256 giveawayId) external onlyGiveawayOwner(giveawayId) nonReentrant {
+        require(!giveaways[giveawayId].requestStatus.withdrawn, "Already withdrawn");
         IERC20 link = IERC20(linkTokenAddress);
-        uint256 claimable = giveaways[giveawayId].requestStatus.totalLink -
-            giveaways[giveawayId].requestStatus.paid;
+        uint256 claimable = giveaways[giveawayId].requestStatus.totalLink - giveaways[giveawayId].requestStatus.paid;
         require(claimable > 0, "Nothing to claim");
         giveaways[giveawayId].requestStatus.withdrawn = true;
         link.safeTransfer(msg.sender, claimable);
@@ -636,15 +499,11 @@ contract GiveawayManager is
      * @dev claimable LINK is the total LINK sent to the giveaway minus the amount already paid on VRF fees
      *
      */
-    function claimableLink(
-        uint256 giveawayId
-    ) external view returns (uint256 claimable) {
+    function claimableLink(uint256 giveawayId) external view returns (uint256 claimable) {
         if (giveaways[giveawayId].requestStatus.withdrawn) {
             return 0;
         }
-        claimable =
-            giveaways[giveawayId].requestStatus.totalLink -
-            giveaways[giveawayId].requestStatus.paid;
+        claimable = giveaways[giveawayId].requestStatus.totalLink - giveaways[giveawayId].requestStatus.paid;
     }
 
     /**
@@ -654,12 +513,8 @@ contract GiveawayManager is
      * @dev claimable LINK is the total LINK available to withdraw from the upkeep contract
      *
      */
-    function claimableAutomation(
-        uint256 giveawayId
-    ) external view returns (uint256 claimable) {
-        (, , , uint96 balance, , , , ) = i_registry.getUpkeep(
-            giveaways[giveawayId].requestStatus.upkeepId
-        );
+    function claimableAutomation(uint256 giveawayId) external view returns (uint256 claimable) {
+        (,,, uint96 balance,,,,) = i_registry.getUpkeep(giveaways[giveawayId].requestStatus.upkeepId);
         claimable = balance;
     }
 
@@ -671,38 +526,33 @@ contract GiveawayManager is
         uint8 source
     ) internal {
         uint256 giveawayId = abi.decode(checkData, (uint256));
-        (State memory state, Config memory _c, address[] memory _k) = i_registry
-            .getState();
-        uint256 oldNonce = state.nonce;
-        bytes memory payload = abi.encode(
-            name,
-            bytes(""),
-            address(this),
-            gasLimit,
-            giveaways[giveawayId].owner,
-            checkData,
-            amount,
-            source,
-            address(this)
-        );
-        LinkTokenInterface(linkTokenAddress).transferAndCall(
-            registrar,
-            amount,
-            bytes.concat(registerSig, payload)
-        );
-        (state, _c, _k) = i_registry.getState();
-        uint256 newNonce = state.nonce;
-        if (newNonce == oldNonce + 1) {
-            uint256 upkeepID = uint256(
-                keccak256(
-                    abi.encodePacked(
-                        blockhash(block.number - 1),
-                        address(i_registry),
-                        uint32(oldNonce)
-                    )
-                )
-            );
-
+        // bytes memory payload = abi.encode(
+        //     name,
+        //     bytes(""),
+        //     address(this),
+        //     gasLimit,
+        //     giveaways[giveawayId].owner,
+        //     checkData,
+        //     amount,
+        //     source,
+        //     address(this)
+        // );
+        // LinkTokenInterface(linkTokenAddress).transferAndCall(registrar, amount, bytes.concat(registerSig, payload));
+        RegistrationParams memory params = RegistrationParams({
+            name: name,
+            encryptedEmail: bytes(""),
+            upkeepContract: address(this),
+            gasLimit: gasLimit,
+            adminAddress: giveaways[giveawayId].owner,
+            triggerType: 0,
+            checkData: checkData,
+            triggerConfig: bytes(""),
+            offChainConfig: bytes(""),
+            amount: amount
+        });
+        LinkTokenInterface(linkTokenAddress).approve(address(i_registrar), params.amount);
+        uint256 upkeepID = i_registrar.registerUpkeep(params);
+        if (upkeepID != 0) {
             giveaways[giveawayId].requestStatus.upkeepId = upkeepID;
         } else {
             revert("auto-approve disabled");
@@ -725,15 +575,11 @@ contract GiveawayManager is
         emit GiveawayClosed(giveawayId, giveaways[giveawayId].contestants);
     }
 
-    function _shuffle(
-        bytes32[] memory array,
-        uint256 random
-    ) internal pure returns (bytes32[] memory) {
+    function _shuffle(bytes32[] memory array, uint256 random) internal pure returns (bytes32[] memory) {
         uint256 lastIndex = array.length - 1;
         bytes32 n_random = keccak256(abi.encodePacked(random));
         while (lastIndex > 0) {
-            uint256 r_index = uint256(keccak256(abi.encode(n_random))) %
-                lastIndex;
+            uint256 r_index = uint256(keccak256(abi.encode(n_random))) % lastIndex;
             bytes32 temp = array[lastIndex];
             array[lastIndex] = array[r_index];
             array[r_index] = temp;
@@ -747,14 +593,8 @@ contract GiveawayManager is
      * @param randomValue random value generated by VRF
      *
      */
-    function _pickRandom(
-        uint256 randomValue,
-        uint256 giveawayId
-    ) internal view returns (bytes32[] memory) {
-        bytes32[] memory shuffled = _shuffle(
-            giveaways[giveawayId].contestants,
-            randomValue
-        );
+    function _pickRandom(uint256 randomValue, uint256 giveawayId) internal view returns (bytes32[] memory) {
+        bytes32[] memory shuffled = _shuffle(giveaways[giveawayId].contestants, randomValue);
 
         bytes32[] memory winners = new bytes32[](
             giveaways[giveawayId].base.totalWinners
@@ -773,22 +613,15 @@ contract GiveawayManager is
         liveGiveaways.remove(_index);
     }
 
-    function _requestRandomWords(
-        uint256 giveawayId,
-        uint256 value
-    ) internal returns (uint256 requestId) {
+    function _requestRandomWords(uint256 giveawayId, uint256 value) internal returns (uint256 requestId) {
         requestId = requestRandomness(
-            requestConfig.callbackGasLimit,
-            requestConfig.requestConfirmations,
-            requestConfig.numWords
+            requestConfig.callbackGasLimit, requestConfig.requestConfirmations, requestConfig.numWords
         );
         emit GiveawayStaged(giveawayId);
         requestIdToGiveawayIndex[requestId] = giveawayId;
         giveaways[giveawayId].requestStatus = RequestStatus({
             requestId: requestId,
-            paid: vrfWrapper.calculateRequestPrice(
-                requestConfig.callbackGasLimit
-            ),
+            paid: vrfWrapper.calculateRequestPrice(requestConfig.callbackGasLimit),
             randomWords: new uint256[](0),
             fulfilled: false,
             totalLink: value,
@@ -799,16 +632,9 @@ contract GiveawayManager is
         return requestId;
     }
 
-    function fulfillRandomWords(
-        uint256 requestId,
-        uint256[] memory randomWords
-    ) internal override {
-        uint256 giveawayIndexFromRequestId = requestIdToGiveawayIndex[
-            requestId
-        ];
-        giveaways[giveawayIndexFromRequestId]
-            .requestStatus
-            .randomWords = randomWords;
+    function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal override {
+        uint256 giveawayIndexFromRequestId = requestIdToGiveawayIndex[requestId];
+        giveaways[giveawayIndexFromRequestId].requestStatus.randomWords = randomWords;
         giveaways[giveawayIndexFromRequestId].requestStatus.fulfilled = true;
         _updateLiveGiveaways(giveawayIndexFromRequestId);
     }
@@ -819,9 +645,7 @@ contract GiveawayManager is
      * @dev the performData will be the giveaway ID and the winners. Winners are passed to the performUpkeep function
      *
      */
-    function checkUpkeep(
-        bytes calldata checkData
-    )
+    function checkUpkeep(bytes calldata checkData)
         external
         view
         override
@@ -829,20 +653,12 @@ contract GiveawayManager is
     {
         uint256 giveawayId = abi.decode(checkData, (uint256));
         if (giveaways[giveawayId].giveawayState == GiveawayState.RESOLVING) {
-            bytes32[] memory winners = _pickRandom(
-                giveaways[giveawayId].requestStatus.randomWords[0],
-                giveawayId
-            );
+            bytes32[] memory winners = _pickRandom(giveaways[giveawayId].requestStatus.randomWords[0], giveawayId);
             performData = abi.encode(giveawayId, winners);
             upkeepNeeded = true;
         }
-        if (
-            giveaways[giveawayId].giveawayState == GiveawayState.LIVE &&
-            giveaways[giveawayId].base.automation
-        ) {
-            upkeepNeeded =
-                (block.timestamp - giveaways[giveawayId].base.startDate) >
-                giveaways[giveawayId].timeLength;
+        if (giveaways[giveawayId].giveawayState == GiveawayState.LIVE && giveaways[giveawayId].base.automation) {
+            upkeepNeeded = (block.timestamp - giveaways[giveawayId].base.startDate) > giveaways[giveawayId].timeLength;
             performData = abi.encode(giveawayId, new bytes32[](0));
         }
     }
@@ -854,10 +670,7 @@ contract GiveawayManager is
      *
      */
     function performUpkeep(bytes calldata performData) external override {
-        (uint256 giveawayId, bytes32[] memory winners) = abi.decode(
-            performData,
-            (uint256, bytes32[])
-        );
+        (uint256 giveawayId, bytes32[] memory winners) = abi.decode(performData, (uint256, bytes32[]));
 
         if (giveaways[giveawayId].giveawayState == GiveawayState.RESOLVING) {
             for (uint256 i = 0; i < winners.length; i++) {
@@ -866,25 +679,14 @@ contract GiveawayManager is
             giveaways[giveawayId].giveawayState = GiveawayState.FINISHED;
             emit GiveawayWon(giveawayId, giveaways[giveawayId].winners);
         } else {
-            if (
-                giveaways[giveawayId].giveawayState == GiveawayState.LIVE &&
-                giveaways[giveawayId].base.automation
-            ) {
-                if (
-                    (block.timestamp - giveaways[giveawayId].base.startDate) >
-                    giveaways[giveawayId].timeLength
-                ) {
+            if (giveaways[giveawayId].giveawayState == GiveawayState.LIVE && giveaways[giveawayId].base.automation) {
+                if ((block.timestamp - giveaways[giveawayId].base.startDate) > giveaways[giveawayId].timeLength) {
                     // Check if the number of participants is less than the number of winners
-                    if (
-                        giveaways[giveawayId].contestants.length <
-                        giveaways[giveawayId].base.totalWinners
-                    ) {
-                        giveaways[giveawayId].giveawayState = GiveawayState
-                            .CANCELLED;
+                    if (giveaways[giveawayId].contestants.length < giveaways[giveawayId].base.totalWinners) {
+                        giveaways[giveawayId].giveawayState = GiveawayState.CANCELLED;
                         emit GiveawayCancelled(giveawayId);
                     } else {
-                        giveaways[giveawayId].giveawayState = GiveawayState
-                            .STAGED;
+                        giveaways[giveawayId].giveawayState = GiveawayState.STAGED;
                         emit GiveawayStaged(giveawayId);
                     }
                 }
@@ -901,21 +703,16 @@ contract GiveawayManager is
      *
      */
     function _eligableToEnd(uint256 giveawayId) internal view returns (bool) {
-        return
-            giveaways[giveawayId].contestants.length >=
-            giveaways[giveawayId].base.totalWinners;
+        return giveaways[giveawayId].contestants.length >= giveaways[giveawayId].base.totalWinners;
     }
 
     // ------------------- OWNER FUNCTIONS -------------------
 
-    function setProvenanceHash(
-        uint256 giveawayId,
-        bytes memory provenanceHash
-    ) external onlyGiveawayOwner(giveawayId) {
-        require(
-            giveaways[giveawayId].base.provenanceHash.length == 0,
-            "provenance hash already set"
-        );
+    function setProvenanceHash(uint256 giveawayId, bytes memory provenanceHash)
+        external
+        onlyGiveawayOwner(giveawayId)
+    {
+        require(giveaways[giveawayId].base.provenanceHash.length == 0, "provenance hash already set");
 
         giveaways[giveawayId].base.provenanceHash = provenanceHash;
     }
@@ -934,9 +731,7 @@ contract GiveawayManager is
      * @param newGasLimit new gas limit
      * @dev this is used to update the gas limit of Automation registration
      */
-    function updateAutomationCallBackGasLimit(
-        uint32 newGasLimit
-    ) external onlyOwner {
+    function updateAutomationCallBackGasLimit(uint32 newGasLimit) external onlyOwner {
         requestConfig.automationGasLimit = newGasLimit;
     }
 }

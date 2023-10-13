@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
@@ -57,18 +57,10 @@ contract GiveawayManagerInvariants is Test {
         linkAddress = address(0x3);
         registrarAddress = address(0x4);
         merkleRoot = 0x344510bd0c324c3912b13373e89df42d1b50450e9764a454b2aa6e2968a4578a;
-        proofA[
-            0
-        ] = 0xd52688a8f926c816ca1e079067caba944f158e764817b83fc43594370ca9cf62;
-        proofA[
-            1
-        ] = 0x5b70e80538acdabd6137353b0f9d8d149f4dba91e8be2e7946e409bfdbe685b9;
-        proofB[
-            0
-        ] = 0x1468288056310c82aa4c01a7e12a10f8111a0560e72b700555479031b86c357d;
-        proofB[
-            1
-        ] = 0x5b70e80538acdabd6137353b0f9d8d149f4dba91e8be2e7946e409bfdbe685b9;
+        proofA[0] = 0xd52688a8f926c816ca1e079067caba944f158e764817b83fc43594370ca9cf62;
+        proofA[1] = 0x5b70e80538acdabd6137353b0f9d8d149f4dba91e8be2e7946e409bfdbe685b9;
+        proofB[0] = 0x1468288056310c82aa4c01a7e12a10f8111a0560e72b700555479031b86c357d;
+        proofB[1] = 0x5b70e80538acdabd6137353b0f9d8d149f4dba91e8be2e7946e409bfdbe685b9;
         email = "test@test.com";
         vm.startPrank(admin);
         customLINK = new ERC677Mock("Chainlink", "LINK", 1000000 ether);
@@ -91,76 +83,55 @@ contract GiveawayManagerInvariants is Test {
         selectors[1] = Handler.createGiveaway.selector;
         selectors[2] = Handler.transferAndCall.selector;
 
-        targetSelector(
-            FuzzSelector({addr: address(handler), selectors: selectors})
-        );
+        targetSelector(FuzzSelector({addr: address(handler), selectors: selectors}));
         targetContract(address(handler));
 
         vm.stopPrank();
     }
 
     function successFixtureWithETH() public {
-        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager
-            .CreateGiveawayParams({
-                prizeName: "BigMac",
-                timeLength: 0,
-                fee: 1 ether,
-                name: "Big Mac Contest",
-                feeToken: address(0),
-                merkleRoot: bytes32(""),
-                automation: false,
-                participants: new bytes32[](0),
-                totalWinners: 1,
-                entriesPerUser: 5
-            });
+        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager.CreateGiveawayParams({
+            prizeName: "BigMac",
+            timeLength: 0,
+            fee: 1 ether,
+            name: "Big Mac Contest",
+            feeToken: address(0),
+            merkleRoot: bytes32(""),
+            automation: false,
+            participants: new bytes32[](0),
+            totalWinners: 1,
+            entriesPerUser: 5
+        });
         vm.prank(giveawayAdmin);
-        customLINK.transferAndCall(
-            address(giveawayManager),
-            1 ether,
-            bytes(abi.encode(_params))
-        );
+        customLINK.transferAndCall(address(giveawayManager), 1 ether, bytes(abi.encode(_params)));
     }
 
     function successFixture() public {
-        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager
-            .CreateGiveawayParams({
-                prizeName: "BigMac",
-                timeLength: 30,
-                fee: 0,
-                name: "Big Mac Contest",
-                feeToken: address(0),
-                merkleRoot: bytes32(""),
-                automation: false,
-                participants: new bytes32[](0),
-                totalWinners: 1,
-                entriesPerUser: 100
-            });
+        GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager.CreateGiveawayParams({
+            prizeName: "BigMac",
+            timeLength: 30,
+            fee: 0,
+            name: "Big Mac Contest",
+            feeToken: address(0),
+            merkleRoot: bytes32(""),
+            automation: false,
+            participants: new bytes32[](0),
+            totalWinners: 1,
+            entriesPerUser: 100
+        });
         vm.prank(giveawayAdmin);
-        customLINK.transferAndCall(
-            address(giveawayManager),
-            1 ether,
-            bytes(abi.encode(_params))
-        );
+        customLINK.transferAndCall(address(giveawayManager), 1 ether, bytes(abi.encode(_params)));
     }
 
     function invariant_enterGiveaway_checkEthToEntries() public {
         for (uint256 i = 0; i < handler.ghost_totalGiveaways(); i++) {
-            assertEq(
-                intoUint256(giveawayManager.getGiveaway(i).prizeWorth),
-                (handler.totalEntries(i) * 1 ether)
-            );
+            assertEq(intoUint256(giveawayManager.getGiveaway(i).prizeWorth), (handler.totalEntries(i) * 1 ether));
         }
     }
 
     function invariant_transferAndCall_checkLINKBalanceMatches() public {
         for (uint256 i = 0; i < handler.ghost_totalLinkTransfered(); i++) {
-            assertEq(
-                giveawayManager
-                    .getGiveaway(handler.linkArray(i))
-                    .requestStatus
-                    .totalLink,
-                1 ether
-            );
+            assertEq(giveawayManager.getGiveaway(handler.linkArray(i)).requestStatus.totalLink, 1 ether);
         }
     }
 

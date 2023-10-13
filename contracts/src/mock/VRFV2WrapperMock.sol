@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 // A mock for testing code that relies on VRFCoordinatorV2.
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.20;
 
-import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
+import {IERC677} from "@chainlink/contracts/src/v0.8/shared/token/ERC677/IERC677.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
-import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+import "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
 import "forge-std/console.sol";
 
 contract VRFV2WrapperMock is VRFCoordinatorV2Interface {
@@ -164,7 +164,7 @@ contract VRFV2WrapperMock is VRFCoordinatorV2Interface {
 
         emit RandomWordsRequested(
             _keyHash, requestId, preSeed, _subId, _minimumRequestConfirmations, _callbackGasLimit, _numWords, msg.sender
-            );
+        );
         return requestId;
     }
 

@@ -9,7 +9,7 @@ import {ERC677Mock} from "@src/mock/ERC677Mock.sol";
 import {VRFV2WrapperMock} from "@src/mock/VRFV2WrapperMock.sol";
 import {console} from "forge-std/console.sol";
 import {AddressSet, LibAddressSet} from "../helpers/AddressSet.sol";
-import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
+import {IERC677} from "@chainlink/contracts/src/v0.8/shared/token/ERC677/IERC677.sol";
 
 contract Handler is Test {
     using LibAddressSet for AddressSet;
@@ -47,7 +47,7 @@ contract Handler is Test {
 
     modifier createGiveawayAdmin() {
         vm.prank(admin);
-        LinkTokenInterface(linkAddress).transfer(msg.sender, 10 ether);
+        IERC677(linkAddress).transfer(msg.sender, 10 ether);
         currentGiveawayAdmin = msg.sender;
         _giveawayAdmins.add(msg.sender);
         _;
@@ -64,60 +64,44 @@ contract Handler is Test {
         linkAddress = _linkAddress;
     }
 
-    function enterGiveaway(
-        uint256 seed
-    ) public createActor countCall("enterGiveaway") {
+    function enterGiveaway(uint256 seed) public createActor countCall("enterGiveaway") {
         // used to check if the actor has already called this function to not cause a revert
-        if (
-            _actors.called[currentActor] == 1 &&
-            giveawayManager.giveawayCounter() > 0
-        ) {
+        if (_actors.called[currentActor] == 1 && giveawayManager.giveawayCounter() > 0) {
             seed = bound(seed, 1, type(uint256).max);
             uint256 _count = giveawayManager.giveawayCounter();
             uint256 id = (seed % _count);
             uint8 entries = giveawayManager.getGiveaway(id).base.entriesPerUser;
             vm.deal(currentActor, entries * 1e18);
             vm.prank(currentActor);
-            giveawayManager.enterGiveaway{value: entries * 1e18}(
-                id,
-                entries,
-                new bytes32[](0)
-            );
+            giveawayManager.enterGiveaway{value: entries * 1e18}(id, entries, new bytes32[](0));
             totalEntries[id] += entries;
         }
     }
 
-    function createGiveaway(
-        uint8 totalWinners,
-        uint256 _entries
-    ) public createGiveawayAdmin countCall("createGiveaway") {
+    function createGiveaway(uint8 totalWinners, uint256 _entries)
+        public
+        createGiveawayAdmin
+        countCall("createGiveaway")
+    {
         _entries = bound(_entries, 1, 5);
         vm.startPrank(currentGiveawayAdmin);
         if (!giveaways[currentGiveawayAdmin].live) {
-            GiveawayManager.CreateGiveawayParams
-                memory _params = GiveawayManager.CreateGiveawayParams({
-                    prizeName: "BigMac",
-                    timeLength: 30,
-                    fee: 1 ether,
-                    name: "Big Mac Contest",
-                    feeToken: address(0),
-                    merkleRoot: bytes32(""),
-                    automation: false,
-                    participants: new bytes32[](0),
-                    totalWinners: totalWinners,
-                    entriesPerUser: uint8(_entries)
-                });
+            GiveawayManager.CreateGiveawayParams memory _params = GiveawayManager.CreateGiveawayParams({
+                prizeName: "BigMac",
+                timeLength: 30,
+                fee: 1 ether,
+                name: "Big Mac Contest",
+                feeToken: address(0),
+                merkleRoot: bytes32(""),
+                automation: false,
+                participants: new bytes32[](0),
+                totalWinners: totalWinners,
+                entriesPerUser: uint8(_entries)
+            });
 
-            LinkTokenInterface(linkAddress).transferAndCall(
-                address(giveawayManager),
-                5 ether,
-                bytes(abi.encode(_params))
-            );
+            IERC677(linkAddress).transferAndCall(address(giveawayManager), 5 ether, bytes(abi.encode(_params)));
 
-            giveaways[currentGiveawayAdmin] = Giveaway(
-                giveawayManager.giveawayCounter() - 1,
-                true
-            );
+            giveaways[currentGiveawayAdmin] = Giveaway(giveawayManager.giveawayCounter() - 1, true);
             ghost_totalGiveaways++;
         }
         vm.stopPrank();
@@ -126,20 +110,14 @@ contract Handler is Test {
     function transferAndCall(uint256 seed) public countCall("transferLINK") {
         address caller = _giveawayAdmins.rand(seed);
         if (
-            giveawayManager
-                .getGiveaway(giveaways[caller].id)
-                .contestants
-                .length >
-            0 &&
-            !_giveawayAdmins.depositLink[caller]
+            giveawayManager.getGiveaway(giveaways[caller].id).contestants.length > 0
+                && !_giveawayAdmins.depositLink[caller]
         ) {
             vm.prank(admin);
-            LinkTokenInterface(linkAddress).transfer(caller, 1 ether);
+            IERC677(linkAddress).transfer(caller, 1 ether);
             vm.prank(caller);
-            LinkTokenInterface(linkAddress).transferAndCall(
-                address(giveawayManager),
-                1 ether,
-                bytes(abi.encode(giveaways[caller].id))
+            IERC677(linkAddress).transferAndCall(
+                address(giveawayManager), 1 ether, bytes(abi.encode(giveaways[caller].id))
             );
             totalLink[giveaways[caller].id] += 1 ether;
             _giveawayAdmins.depositLink[caller] = true;

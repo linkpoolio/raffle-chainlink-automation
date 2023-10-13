@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.20;
 
 import "forge-std/Script.sol";
 import "forge-std/StdJson.sol";
 import {GiveawayManager} from "@src/GiveawayManager.sol";
-import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
+import {IERC677} from "@chainlink/contracts/src/v0.8/shared/token/ERC677/IERC677.sol";
 
 contract GiveawayManagerScript is Script {
     using stdJson for string;
@@ -25,18 +25,11 @@ contract GiveawayManagerScript is Script {
         address wrapperAddress;
     }
 
-    function configureNetwork(
-        string memory input
-    ) internal view returns (Config memory) {
-        string memory inputDir = string.concat(
-            vm.projectRoot(),
-            "/script/input/"
-        );
+    function configureNetwork(string memory input) internal view returns (Config memory) {
+        string memory inputDir = string.concat(vm.projectRoot(), "/script/input/");
         string memory chainDir = string.concat(vm.toString(block.chainid), "/");
         string memory file = string.concat(input, ".json");
-        string memory data = vm.readFile(
-            string.concat(inputDir, chainDir, file)
-        );
+        string memory data = vm.readFile(string.concat(inputDir, chainDir, file));
         bytes memory rawConfig = data.parseRaw("");
         return abi.decode(rawConfig, (Config));
     }
