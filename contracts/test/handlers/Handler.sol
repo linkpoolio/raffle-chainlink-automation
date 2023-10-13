@@ -47,7 +47,7 @@ contract Handler is Test {
 
     modifier createGiveawayAdmin() {
         vm.prank(admin);
-        IERC677(linkAddress).transfer(msg.sender, 10 ether);
+        ERC20Mock(linkAddress).transfer(msg.sender, 10 ether);
         currentGiveawayAdmin = msg.sender;
         _giveawayAdmins.add(msg.sender);
         _;
@@ -114,7 +114,7 @@ contract Handler is Test {
                 && !_giveawayAdmins.depositLink[caller]
         ) {
             vm.prank(admin);
-            IERC677(linkAddress).transfer(caller, 1 ether);
+            ERC20Mock(linkAddress).transfer(caller, 1 ether);
             vm.prank(caller);
             IERC677(linkAddress).transferAndCall(
                 address(giveawayManager), 1 ether, bytes(abi.encode(giveaways[caller].id))

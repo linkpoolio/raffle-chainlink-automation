@@ -90,7 +90,7 @@ contract GiveawayManagerNetworkForkTest is Test {
             entriesPerUser: 1
         });
         vm.prank(config.whaleAddress);
-        IERC677(config.linkAddress).transfer(giveawayAdmin, 50 ether);
+        ERC20Mock(config.linkAddress).transfer(giveawayAdmin, 50 ether);
         vm.expectEmit(true, true, true, true);
         emit GiveawayCreated("BigMac", 0, 0, address(0), false);
         vm.prank(giveawayAdmin);

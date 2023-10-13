@@ -3,9 +3,10 @@ pragma solidity ^0.8.20;
 
 import {AutomationCompatibleInterface} from
     "@chainlink/contracts/src/v0.8/automation/interfaces/AutomationCompatibleInterface.sol";
-import {AutomationRegistryInterface} from
-    "@chainlink/contracts/src/v0.8/automation/interfaces/2_0/AutomationRegistryInterface2_0.sol";
-import {RegistrationParams} from "@chainlink/contracts/src/v0.8/automation/2_0/KeeperRegistrar2_0.sol";
+import {
+    AutomationRegistryInterface,
+    UpkeepInfo
+} from "@chainlink/contracts/src/v0.8/automation/interfaces/2_0/AutomationRegistryInterface2_0.sol";
 import {VRFV2WrapperConsumerBase} from "@chainlink/contracts/src/v0.8/vrf/VRFV2WrapperConsumerBase.sol";
 import {VRFCoordinatorV2Interface} from "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
@@ -19,7 +20,7 @@ import {IGiveawayManager} from "@src/interfaces/IGiveawayManager.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 import {UD60x18, ud, intoUint256} from "@prb/math/UD60x18.sol";
-import {IKeeperRegistrar} from "@src/interfaces/IKeeperRegistrar.sol";
+import {IAutomationRegistrar} from "@src/interfaces/IAutomationRegistrar.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 /**
@@ -50,8 +51,6 @@ contract GiveawayManager is
     mapping(uint256 => GiveawayInstance) public giveaways;
     mapping(uint256 => uint256) public requestIdToGiveawayIndex;
     mapping(address => mapping(uint256 => uint8)) internal userEntries;
-
-    bytes4 registerSig = IKeeperRegistrar.register.selector;
 
     // ------------------- STRUCTS -------------------
     enum GiveawayState {
@@ -208,7 +207,7 @@ contract GiveawayManager is
         GiveawayInstance memory newGiveaway = GiveawayInstance({
             base: GiveawayBase({
                 giveawayType: participants.length > 0 ? GiveawayType.STATIC : GiveawayType.DYNAMIC,
-                id: giveawayCounter.current(),
+                id: giveawayCounter,
                 automation: automation,
                 feeToken: feeToken != address(0) ? true : false,
                 feeTokenAddress: feeToken,
@@ -239,12 +238,12 @@ contract GiveawayManager is
                 upkeepId: 0
             })
         });
-        giveaways[giveawayCounter.current()] = newGiveaway;
-        liveGiveaways.add(giveawayCounter.current());
-        giveawayCounter.increment();
+        giveaways[giveawayCounter] = newGiveaway;
+        liveGiveaways.add(giveawayCounter);
+        giveawayCounter++;
         emit GiveawayCreated(prizeName, timeLength, fee, feeToken, merkleRoot != bytes32(0) ? true : false);
 
-        return giveawayCounter.current() - 1;
+        return giveawayCounter - 1;
     }
 
     /**
@@ -376,7 +375,7 @@ contract GiveawayManager is
                 _params.entriesPerUser
             );
             string memory name = string(abi.encodePacked("Giveaway ", Strings.toString(_id)));
-            _registerAutomation(name, requestConfig.automationGasLimit, abi.encode(_id), uint96(value), 0);
+            _registerAutomation(name, requestConfig.automationGasLimit, abi.encode(_id), uint96(value));
         }
     }
 
@@ -424,9 +423,9 @@ contract GiveawayManager is
      */
     function getAllGiveaways() external view returns (GiveawayInstance[] memory) {
         GiveawayInstance[] memory _giveaways = new GiveawayInstance[](
-            giveawayCounter.current()
+            giveawayCounter
         );
-        for (uint256 i = 0; i < giveawayCounter.current(); i++) {
+        for (uint256 i = 0; i < giveawayCounter; i++) {
             _giveaways[i] = giveaways[i];
         }
         return _giveaways;
@@ -440,14 +439,14 @@ contract GiveawayManager is
      */
     function getOwnerGiveaways(address giveawayOwner) external view returns (GiveawayInstance[] memory) {
         uint256 _index = 0;
-        for (uint256 i = 0; i < giveawayCounter.current(); i++) {
+        for (uint256 i = 0; i < giveawayCounter; i++) {
             if (giveaways[i].owner == giveawayOwner) {
                 _index++;
             }
         }
         GiveawayInstance[] memory _giveaways = new GiveawayInstance[](_index);
         uint256 _index2 = 0;
-        for (uint256 i = 0; i < giveawayCounter.current(); i++) {
+        for (uint256 i = 0; i < giveawayCounter; i++) {
             if (giveaways[i].owner == giveawayOwner) {
                 _giveaways[_index2] = giveaways[i];
                 _index2++;
@@ -514,44 +513,24 @@ contract GiveawayManager is
      *
      */
     function claimableAutomation(uint256 giveawayId) external view returns (uint256 claimable) {
-        (,,, uint96 balance,,,,) = i_registry.getUpkeep(giveaways[giveawayId].requestStatus.upkeepId);
-        claimable = balance;
+        (UpkeepInfo memory _info) = i_registry.getUpkeep(giveaways[giveawayId].requestStatus.upkeepId);
+        claimable = _info.balance;
     }
 
-    function _registerAutomation(
-        string memory name,
-        uint32 gasLimit,
-        bytes memory checkData,
-        uint96 amount,
-        uint8 source
-    ) internal {
+    function _registerAutomation(string memory name, uint32 gasLimit, bytes memory checkData, uint96 amount) internal {
         uint256 giveawayId = abi.decode(checkData, (uint256));
-        // bytes memory payload = abi.encode(
-        //     name,
-        //     bytes(""),
-        //     address(this),
-        //     gasLimit,
-        //     giveaways[giveawayId].owner,
-        //     checkData,
-        //     amount,
-        //     source,
-        //     address(this)
-        // );
-        // LinkTokenInterface(linkTokenAddress).transferAndCall(registrar, amount, bytes.concat(registerSig, payload));
-        RegistrationParams memory params = RegistrationParams({
+        IAutomationRegistrar.RegistrationParams memory params = IAutomationRegistrar.RegistrationParams({
             name: name,
             encryptedEmail: bytes(""),
             upkeepContract: address(this),
             gasLimit: gasLimit,
             adminAddress: giveaways[giveawayId].owner,
-            triggerType: 0,
             checkData: checkData,
-            triggerConfig: bytes(""),
-            offChainConfig: bytes(""),
+            offchainConfig: bytes(""),
             amount: amount
         });
-        LinkTokenInterface(linkTokenAddress).approve(address(i_registrar), params.amount);
-        uint256 upkeepID = i_registrar.registerUpkeep(params);
+        IERC20(linkTokenAddress).approve(address(registrar), params.amount);
+        uint256 upkeepID = IAutomationRegistrar(registrar).registerUpkeep(params);
         if (upkeepID != 0) {
             giveaways[giveawayId].requestStatus.upkeepId = upkeepID;
         } else {

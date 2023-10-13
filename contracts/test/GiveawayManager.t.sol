@@ -8,6 +8,7 @@ import {ERC20Mock} from "@src/mock/ERC20Mock.sol";
 import {ERC677Mock} from "@src/mock/ERC677Mock.sol";
 import {VRFV2WrapperMock} from "@src/mock/VRFV2WrapperMock.sol";
 import {AutomationMock} from "@src/mock/AutomationMock.sol";
+import {IERC677} from "@chainlink/contracts/src/v0.8/shared/token/ERC677/IERC677.sol";
 
 contract GiveawayManagerTest is Test {
     GiveawayManager giveawayManager;
@@ -98,9 +99,7 @@ contract GiveawayManagerTest is Test {
         vm.expectEmit(true, true, true, true);
         emit GiveawayCreated("BigMac", 30, 0, address(0), false);
         vm.prank(giveawayAdmin);
-        LinkTokenInterface(address(customLINK)).transferAndCall(
-            address(giveawayManager), 5 ether, bytes(abi.encode(_params))
-        );
+        IERC677(address(customLINK)).transferAndCall(address(giveawayManager), 5 ether, bytes(abi.encode(_params)));
     }
 
     function successFixtureWithETH() public {
@@ -119,9 +118,7 @@ contract GiveawayManagerTest is Test {
         vm.expectEmit(true, true, true, true);
         emit GiveawayCreated("BigMac", 0, 1 ether, address(0), false);
         vm.prank(giveawayAdmin);
-        LinkTokenInterface(address(customLINK)).transferAndCall(
-            address(giveawayManager), 5 ether, bytes(abi.encode(_params))
-        );
+        IERC677(address(customLINK)).transferAndCall(address(giveawayManager), 5 ether, bytes(abi.encode(_params)));
     }
 
     function successFixtureWithCustomToken() public {
@@ -143,9 +140,7 @@ contract GiveawayManagerTest is Test {
         vm.expectEmit(true, true, true, true);
         emit GiveawayCreated("BigMac", 0, 1 ether, address(customToken), false);
         vm.prank(giveawayAdmin);
-        LinkTokenInterface(address(customLINK)).transferAndCall(
-            address(giveawayManager), 5 ether, bytes(abi.encode(_params))
-        );
+        IERC677(address(customLINK)).transferAndCall(address(giveawayManager), 5 ether, bytes(abi.encode(_params)));
     }
 
     function successFixtureWithCustomTokenMultipleWinners() public {
@@ -167,9 +162,7 @@ contract GiveawayManagerTest is Test {
         vm.expectEmit(true, true, true, true);
         emit GiveawayCreated("BigMac", 0, 1 ether, address(customToken), false);
         vm.prank(giveawayAdmin);
-        LinkTokenInterface(address(customLINK)).transferAndCall(
-            address(giveawayManager), 5 ether, bytes(abi.encode(_params))
-        );
+        IERC677(address(customLINK)).transferAndCall(address(giveawayManager), 5 ether, bytes(abi.encode(_params)));
     }
 
     function successFixtureMultipleWinners(uint8 winners, bool _fee) public {
@@ -186,9 +179,7 @@ contract GiveawayManagerTest is Test {
             entriesPerUser: 1
         });
         vm.prank(giveawayAdmin);
-        LinkTokenInterface(address(customLINK)).transferAndCall(
-            address(giveawayManager), 5 ether, bytes(abi.encode(_params))
-        );
+        IERC677(address(customLINK)).transferAndCall(address(giveawayManager), 5 ether, bytes(abi.encode(_params)));
     }
 
     function merkleFixture() public {
@@ -207,9 +198,7 @@ contract GiveawayManagerTest is Test {
         vm.expectEmit(true, true, true, true);
         emit GiveawayCreated("BigMac", 30, 0, address(0), true);
         vm.prank(giveawayAdmin);
-        LinkTokenInterface(address(customLINK)).transferAndCall(
-            address(giveawayManager), 5 ether, bytes(abi.encode(_params))
-        );
+        IERC677(address(customLINK)).transferAndCall(address(giveawayManager), 5 ether, bytes(abi.encode(_params)));
     }
 
     function staticGiveawayFixture() public {
@@ -231,9 +220,7 @@ contract GiveawayManagerTest is Test {
         vm.expectEmit(true, true, true, true);
         emit GiveawayCreated("BigMac", 30, 0, address(0), false);
         vm.prank(giveawayAdmin);
-        LinkTokenInterface(address(customLINK)).transferAndCall(
-            address(giveawayManager), 5 ether, bytes(abi.encode(_params))
-        );
+        IERC677(address(customLINK)).transferAndCall(address(giveawayManager), 5 ether, bytes(abi.encode(_params)));
     }
 
     function customTokenGiveawayFixture() public {
@@ -256,9 +243,7 @@ contract GiveawayManagerTest is Test {
         vm.expectEmit(true, true, true, true);
         emit GiveawayCreated("BigMac", 30, 1 ether, address(customToken), false);
         vm.prank(giveawayAdmin);
-        LinkTokenInterface(address(customLINK)).transferAndCall(
-            address(giveawayManager), 5 ether, bytes(abi.encode(_params))
-        );
+        IERC677(address(customLINK)).transferAndCall(address(giveawayManager), 5 ether, bytes(abi.encode(_params)));
     }
 
     function gasTokenGiveawayFixture() public {
@@ -277,9 +262,7 @@ contract GiveawayManagerTest is Test {
         vm.expectEmit(true, true, true, true);
         emit GiveawayCreated("BigMac", 30, 1 ether, address(0), false);
         vm.prank(giveawayAdmin);
-        LinkTokenInterface(address(customLINK)).transferAndCall(
-            address(giveawayManager), 5 ether, bytes(abi.encode(_params))
-        );
+        IERC677(address(customLINK)).transferAndCall(address(giveawayManager), 5 ether, bytes(abi.encode(_params)));
     }
 
     function test_createGiveaway_Success() public {
@@ -310,9 +293,7 @@ contract GiveawayManagerTest is Test {
         vm.prank(admin);
         customLINK.transfer(giveawayAdmin, 20 ether);
         vm.prank(giveawayAdmin);
-        LinkTokenInterface(address(customLINK)).transferAndCall(
-            address(giveawayManager), 5 ether, bytes(abi.encode(_params))
-        );
+        IERC677(address(customLINK)).transferAndCall(address(giveawayManager), 5 ether, bytes(abi.encode(_params)));
 
         GiveawayManager.GiveawayInstance memory giveaway = giveawayManager.getGiveaway(0);
         assertFalse(giveaway.base.permissioned);
@@ -334,9 +315,7 @@ contract GiveawayManagerTest is Test {
             entriesPerUser: 1
         });
         vm.prank(giveawayAdmin);
-        LinkTokenInterface(address(customLINK)).transferAndCall(
-            address(giveawayManager), 5 ether, bytes(abi.encode(_params))
-        );
+        IERC677(address(customLINK)).transferAndCall(address(giveawayManager), 5 ether, bytes(abi.encode(_params)));
         GiveawayManager.GiveawayInstance memory giveaway = giveawayManager.getGiveaway(0);
         assert(giveaway.base.permissioned);
         assertEq(uint8(giveaway.base.giveawayType), uint8(GiveawayManager.GiveawayType.DYNAMIC));
