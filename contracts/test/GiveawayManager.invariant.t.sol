@@ -10,6 +10,7 @@ import {VRFV2WrapperMock} from "@src/mock/VRFV2WrapperMock.sol";
 import {Handler} from "./handlers/Handler.sol";
 import {UD60x18, ud, intoUint256} from "@prb/math/UD60x18.sol";
 import {AutomationMock} from "@src/mock/AutomationMock.sol";
+import {RegistrarMock} from "@src/mock/RegistrarMock.sol";
 
 contract GiveawayManagerInvariants is Test {
     GiveawayManager giveawayManager;
@@ -21,7 +22,7 @@ contract GiveawayManagerInvariants is Test {
     uint32 callbackGasLimit;
     AutomationMock keeperAddress;
     address linkAddress;
-    address registrarAddress;
+    RegistrarMock registrarAddress;
     ERC677Mock customLINK;
     address admin;
     address giveawayAdmin;
@@ -55,7 +56,7 @@ contract GiveawayManagerInvariants is Test {
         automationCallbackGas = 500_000;
         keeperAddress = new AutomationMock();
         linkAddress = address(0x3);
-        registrarAddress = address(0x4);
+        registrarAddress = new RegistrarMock();
         merkleRoot = 0x344510bd0c324c3912b13373e89df42d1b50450e9764a454b2aa6e2968a4578a;
         proofA[0] = 0xd52688a8f926c816ca1e079067caba944f158e764817b83fc43594370ca9cf62;
         proofA[1] = 0x5b70e80538acdabd6137353b0f9d8d149f4dba91e8be2e7946e409bfdbe685b9;
@@ -71,7 +72,7 @@ contract GiveawayManagerInvariants is Test {
             callbackGasLimit,
             address(keeperAddress),
             address(customLINK),
-            registrarAddress,
+            address(registrarAddress),
             automationCallbackGas
         );
         customLINK.transfer(giveawayAdmin, 1000000 ether);
